@@ -23,10 +23,10 @@ for v in all_vars:
     #m.addConstr(v >= 0)
 
 
-m.addConstr(p5_action_Quit + p5_action_ReSubmit <= 1)
-m.addConstr(p2_action_Application + p2_action_Quit <= 1)
-m.addConstr(p1_action_Application + p1_action_Quit <= 1)
-m.addConstr(p0_action_Application + p0_action_Consult <= 1)
+m.addConstr(p5_action_Quit + p5_action_ReSubmit == 1)
+m.addConstr(p2_action_Application + p2_action_Quit == 1)
+m.addConstr(p1_action_Application + p1_action_Quit == 1)
+m.addConstr(p0_action_Application + p0_action_Consult == 1)
 
 m.addConstr(places[8] == 1) # unreachable end receives 0
 #m.addConstr(places[7] == 0) # state itself receives 1
@@ -38,29 +38,27 @@ m.addConstr(places[2] >= p2_action_Quit * places[8] + p2_action_Application * pl
 m.addConstr(places[1] >= p1_action_Quit * places[8] + p1_action_Application * places[2])
 m.addConstr(places[0] >= p0_action_Application * 0.95 * places[3] + p0_action_Application * 0.05 * places[1] + p0_action_Consult * places[2])
 
-m.addConstr(places[0] <= 0.4)
+m.addConstr(0.35 >= places[0])
 
 e = m.addVar(name='epsilon', lb = 0, ub=1)
 
-# # strict proximal
-# m.addConstr(e >= 1 - p0_action_Application)
-# m.addConstr(e >= p0_action_Consult)
-# m.addConstr(e >= (0.8 - p1_action_Quit))
-# m.addConstr(-e <= 0.8 - p1_action_Quit)
-# m.addConstr(e >= (0.2 - p1_action_Application))
-# m.addConstr(-e <= (0.2 - p1_action_Application))
-# m.addConstr(e >= 1 - p2_action_Quit)
-# m.addConstr(-e <= 1 - p2_action_Quit)
-# m.addConstr(e >= p2_action_Application)
-# m.addConstr(-e <= p2_action_Application)
-# m.addConstr(e >= (0.7 - p5_action_Quit))
-# m.addConstr(-e <= (0.7 - p5_action_Quit))
-# m.addConstr(e >= (0.3 - p5_action_ReSubmit))
-# m.addConstr(-e <= (0.3 - p5_action_ReSubmit))
+# strict proximal
+
+def add_abs(var, prob, constr):
+    m.addConstr(prob - var <= constr)
+    m.addConstr(-constr <= prob - var)
+add_abs(e, 1, p0_action_Application)
+add_abs(e, 0, p0_action_Consult)
+add_abs(e, 0.8, p1_action_Quit)
+add_abs(e, 0.2, p1_action_Application)
+add_abs(e, 1, p2_action_Quit)
+add_abs(e, 0, p2_action_Application)
+add_abs(e, 0.7, p5_action_Quit)
+add_abs(e, 0.3, p5_action_ReSubmit)
 
 # Set objective
 obj = e
-m.setObjective(sum([v for v in all_vars]), sense = GRB.MAXIMIZE)
+m.setObjective(e, sense = GRB.MINIMIZE)
 
 m.optimize()
 
