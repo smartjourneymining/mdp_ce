@@ -1,0 +1,3 @@
+[submodule "journepy"]
+	path = journepy
+	url = git@github.com:smartjourneymining/journepy.git
