@@ -167,6 +167,11 @@ class SpotifyParser(LogParser):
     def preprocessing(self):
         return preprocessed_log_spotify(self.log_path)
     
+    number_samples = 0
+    def __init__(self, log_path, activities_path, number_samples):
+        super().__init__(log_path, activities_path)
+        self.number_samples = number_samples
+    
     def event_to_actor_file(self, event):
         if 'played' in event:
             return 'played'
@@ -186,6 +191,6 @@ class SpotifyParser(LogParser):
     #     return 'company'
     
     def automata_learning(self):
-        model = run_Alergia(self.data_environment[:4000], automaton_type='mdp', eps=0.9, print_info=True)
+        model = run_Alergia(self.data_environment[:self.number_samples], automaton_type='mdp', eps=0.9, print_info=True)
         #save_automaton_to_file(model, "out/model.png", file_type="png")
         return model

@@ -717,20 +717,19 @@ def plot_results(geom, qp, optimal, experiments):
         ax = plt.subplot(len(experiments), 2, 2*i+1)
         ax.set_title(experiments[i] + "-value")
         for j in range(len(geom[i])):
-            print([r.target_prob for r in geom[i][j]])
             ax.plot([r.target_prob for r in geom[i][j]], [r.value for r in geom[i][j]], c = "blue", label="GP" if j == 0 else '', linewidth = 1, marker='o')
             ax.plot([r.target_prob for r in qp[i][j]], [r.value for r in qp[i][j]], c = "orange", label="QP" if j == 0 else '', linewidth = 1, marker='*')
             ax.axvline([optimal[i][j][0]], c = 'violet', linestyle='--')
         ax.legend()
         
-    # for i in range(len(experiments)):
-    #     ax = plt.subplot(len(experiments), 2, 2*i+2)
-    #     ax.set_title(experiments[i] + "-time")
-    #     for j in range(len(geom[i])):
-    #         ax.plot([r.target_prob for r in geom[i][j]], [r.time for r in geom[i][j]], c = "blue", label="GP" if j == 0 else '', linewidth = 1, marker='o')
-    #         ax.plot([r.target_prob for r in qp[i][j]], [r.time for r in qp[i][j]], c = "orange", label="QP" if j == 0 else '', linewidth = 1, marker='*')
-    #     ax.axvline([optimal[i]], c = 'violet', linestyle='--')
-    #     ax.legend()
+    for i in range(len(experiments)):
+        ax = plt.subplot(len(experiments), 2, 2*i+2)
+        ax.set_title(experiments[i] + "-time")
+        for j in range(len(geom[i])):
+            ax.plot([r.target_prob for r in geom[i][j]], [r.time for r in geom[i][j]], c = "blue", label="GP" if j == 0 else '', linewidth = 1, marker='o')
+            ax.plot([r.target_prob for r in qp[i][j]], [r.time for r in qp[i][j]], c = "orange", label="QP" if j == 0 else '', linewidth = 1, marker='*')
+        ax.axvline([optimal[i][j][0]], c = 'violet', linestyle='--')
+        ax.legend()
         
     plt.savefig('out/plot.png', dpi = 500)
 
@@ -807,10 +806,10 @@ def generate_models(experiments):
             print("######### BPIC'17-Both ##########")
             from LogParser import BPIC17BothParser
             parser = BPIC17BothParser('data/BPI Challenge 2017.xes', 'data/activities_2017.xml')
-        elif name == 'spotify':
+        elif 'spotify' in name:
             print("######### Spotify ##########")
             from LogParser import SpotifyParser
-            parser = SpotifyParser('data/spotify/', 'data/activities_spotify.xml')
+            parser = SpotifyParser('data/spotify/', 'data/activities_spotify.xml', int(name.split('spotify')[1]))
         else:
             continue
         model = parser.build_benchmark()
@@ -896,8 +895,8 @@ if __name__ == '__main__':
     parser.add_argument('-c', '--cores', help = "Cores to use to parallelize experiments", type=int, default = 1)
     parser.add_argument('-slack', '--strategy_slack', help = "Allowed deviation until geometric programming strategy is discarded", type=float, default = 0.1)
     parser.add_argument('-e', '--experiments', help = "Start profile to filter on", nargs='+', type=str, default = ['greps', 'bpic12', 'bpic17-before', 'bpic17-after', 'bpic17-both', 'spotify'])
-    parser.add_argument('-rm', '--rebuild_models', help = "Rebuild models, implies rebuilding models", type=bool, default = False)
-    parser.add_argument('-rs', '--rebuild_strategies', help = "Rebuild strategies", type=bool, default = False)
+    parser.add_argument('-rm', '--rebuild_models', help = "Rebuild models, implies rebuilding models", action = 'store_true')
+    parser.add_argument('-rs', '--rebuild_strategies', help = "Rebuild strategies", action = 'store_true')
     args = parser.parse_args()
     
     STRATEGY_SLACK = args.strategy_slack
@@ -905,6 +904,8 @@ if __name__ == '__main__':
     geom_results = []
     qp_results = []
     optimal_reachability = []
+    
+    print(args.rebuild_models)
     
     if args.rebuild_models:
         generate_models(args.experiments)
@@ -1034,5 +1035,4 @@ if __name__ == '__main__':
 # Improving:
 # - Repairing strategies
 # - Iterative approach 
-# TODO write generation file and multicore processing
 # TODO write comments
