@@ -20,7 +20,8 @@ import json
 
 import networkx as nx
 
-import subprocess
+import subprocess 
+import multiprocessing
 
 import matplotlib.pyplot as plt
 
@@ -43,6 +44,10 @@ REGENERATE = False
 STRATEGY_SLACK = 0.1 
 
 import LogParser
+
+import itertools
+import time
+from pathlib import Path
 
 from networkx.drawing.nx_agraph import to_agraph
 
@@ -347,7 +352,7 @@ def quadratic_program(model : nx.DiGraph, target_prob : float, user_strategy : d
     
     m.write("out/gurobi.lp")
     
-    m.setObjective(d_1 + d_inf, sense = GRB.MINIMIZE)
+    m.setObjective(d_0 + d_1 + d_inf, sense = GRB.MINIMIZE)
     m.optimize()
     
     if m.status == GRB.INFEASIBLE:
@@ -356,6 +361,7 @@ def quadratic_program(model : nx.DiGraph, target_prob : float, user_strategy : d
     print("Distances")
     print("d_inf", d_inf.X)
     print("d_1", d_1.X)
+    print("d_0", d_0.X)
     if debug:
         for v in m.getVars():
             print(f"{v.VarName} {v.X:g}")
@@ -376,9 +382,181 @@ def strategy_slack(strategy):
         total += 1 - sum(strategy[s][a] for a in strategy[s])
     return total
 
+def geometric_program_bnb(model : nx.DiGraph, target_prob : float, user_strategy : dict, changeable_states : list, optimal_strat, timeout = 60*60, debug = False):
+    assert 'MOSEK'  in cp.installed_solvers()
+    constraints = []
+    
+    p = {s : cp.Variable(pos=True, name=s) for s in model.nodes}
+    
+    negative_state = [s for s in model.nodes if "negative" in s]
+    assert len(negative_state) == 1
+    negative_state = negative_state[0]
+    unreaching = [s for s in model.nodes if not nx.has_path(model, s, negative_state)]
+
+    increasing_sa = {} # does not contain pos or negative state, and only controllable states
+    for s in optimal_strat:
+        increasing_sa[s] = {}
+        for a in optimal_strat[s]:
+            if user_strategy[s][a] < optimal_strat[s][a] and s in changeable_states:
+                increasing_sa[s][a] = True
+            else:
+                increasing_sa[s][a] = False
+    
+    # encode actions
+    p_sa = {}
+    for s in model.nodes:
+        if s in unreaching:
+            # can't have 0 constraint, have to replace variable with 0
+            # m.addConstr(p[s] == 0)
+            continue
+        if 'negative' in s:
+            constraints.append(p[s] == 1)
+            continue
+        enabled_actions = set([model.edges[e]['action'] for e in model.edges(s)])
+        if 'customer' not in s:
+            assert len(enabled_actions) <= 1, f'More than one action for non-user state {s} : {enabled_actions}' 
+        p_sa[s] = {a : cp.Variable(pos=True, name=s+'_'+a) for a in enabled_actions}
+        if len(p_sa[s]) > 1 and s not in changeable_states:
+            for a in enabled_actions:
+                constraints.append(p_sa[s][a] == user_strategy[s][a])
+        else: 
+            for a in enabled_actions:
+                assert not(s in increasing_sa) or a in increasing_sa[s], f'Action {a} not contained under state {s}'
+                if s in increasing_sa and increasing_sa[s][a]:
+                    p_sa[s][a] = p_sa[s][a] + user_strategy[s][a]
+                    if debug:
+                        print("increase", p_sa[s][a])
+                constraints.append(p_sa[s][a] <= 1)
+            constraints.append(sum(list(p_sa[s].values())) <= 1) # scheduler sums up to one
+        # dont allow slack in fixed variables
+        if len(p_sa[s]) == 1: # if only one decision, it must receive prob. 1
+            assert isinstance(list(p_sa[s].values())[0], type(list(p_sa[s][a].variables())[0])) 
+            constraints.append(list(p_sa[s].values())[0] == 1)
+            
+    # encode model
+    for s in p_sa:
+        enabled_actions = set([model.edges[e]['action'] for e in model.edges(s)])
+        assert len(enabled_actions) >= 1, f'State{s} has no enabled action'
+        assert not all([e[1] in unreaching for e in model.edges(s)]), f'{s} should NOT be contained'
+        # insert states leading to 0 as they are replaced by the 0
+        s_sum = sum([p_sa[s][model.edges[e]['action']] * float(model.edges[e]['prob_weight']) * p[e[1]] for e in model.edges(s) if e[1] not in unreaching])
+        constraints.append(p[s] >= s_sum)
+    
+    # encode reachability constraint
+    start_state = [s for s in model.nodes if 'q0: start' in s]
+    assert len(start_state) == 1, start_state
+    start_state = start_state[0]
+    constraints.append(p[start_state] <= target_prob)
+    
+    d_0 = cp.Variable(pos=True, name='d0')
+    d_1 = cp.Variable(pos=True, name='d1')
+    d_inf = cp.Variable(pos=True, name='d_inf')
+
+    def get_var(s, a):
+        assert s in p_sa, f'{s} not in p_sa'
+        assert a in p_sa[s], f'{a} not in p_sa[s] {p_sa[s]}'
+        assert len(set(p_sa[s][a].variables())) == 1, f'Found variables {set(p_sa[s][a].variables())}'
+        return list(p_sa[s][a].variables())[0]
+    
+    # strict proximal
+    for s in increasing_sa:
+        if s in unreaching: # does not have a variable
+            continue
+        increasing = [get_var(s,a) for a in p_sa[s] if increasing_sa[s][a]]
+        if increasing:
+            constraints.append(d_inf >= sum(increasing))
+    
+    # relaxed proximal
+    increasing = [get_var(s,a) for s in increasing_sa if s not in unreaching for a in increasing_sa[s] if increasing_sa[s][a]]
+    if increasing:
+        constraints.append(d_1 >= sum(increasing) / len(user_strategy))
+    
+    # ensure well-formedness
+    for constraint in constraints:
+        assert constraint.is_dgp(), constraint
+        
+    
+    problem = cp.Problem(cp.Minimize(sum([1/get_var(s,a) for s in p_sa if s in increasing_sa for a in p_sa[s]]) + d_inf + d_1), constraints)
+    # problem = cp.Problem(cp.Minimize(sum([1/get_var(s,a) for s in p_sa for a in p_sa[s]]) + d_inf + d_1), constraints)
+    
+    if debug:
+        print(problem)
+        print("Is this problem DGP?", problem.is_dgp())
+    assert problem.is_dgp(), "Problem is not DGP"
+
+    problem.solve(gp=True, solver="MOSEK", verbose = debug)
+    
+    if problem.status != 'optimal':
+        print(f'Solution is {problem.status}')
+        return Result(problem.solver_stats.solve_time, -0.2, target_prob, {})
+    print("sol", problem.value, "in sec.", problem.solver_stats.solve_time)
+    
+    if debug:
+        for s in p_sa:
+            print(p[s].value)
+            for a in p_sa[s]:
+                print(f'state {s} action {a}', p_sa[s][a].value)
+            
+    print("Distances")
+    print("d_inf", d_inf.value)
+    print("d_1", d_1.value)
+    print("d_0", len(changeable_states))
+    
+    strategy = construct_strategy_from_solution(model, p_sa, mosek_access, user_strategy)
+    
+    if debug:
+        print('Constructed solution')
+        print(strategy)
+    
+        strategy_diff(user_strategy, strategy)
+    
+    if strategy_slack(strategy) > STRATEGY_SLACK:
+        print(f'Discarded solution due to slack {strategy_slack(strategy)}')
+        return Result(problem.solver_stats.solve_time, -0.5, target_prob, strategy)
+    print("Found solution")
+    print()
+    return Result(problem.solver_stats.solve_time, d_inf.value + d_1.value + len(changeable_states), target_prob, strategy)
+
 def geometric_program(model : nx.DiGraph, target_prob : float, user_strategy : dict, timeout = 60*60, debug = False):
     assert 'MOSEK'  in cp.installed_solvers()
     
+    changeable_states = [s for s in user_strategy if len(user_strategy[s]) > 1]
+    # compute which values to increase
+    val, optimal_strat = minimum_reachability(model)
+    
+    start = time.time()
+    # infeasible
+    r = geometric_program_bnb(model, target_prob, user_strategy, changeable_states, optimal_strat, timeout=timeout, debug=debug)
+    if r.value < 0:
+        return Result(time.time() - start, -0.2, target_prob, {})
+    # trivial
+    r = geometric_program_bnb(model, target_prob, user_strategy, [], optimal_strat, timeout=timeout, debug=debug)
+    r.time = time.time() - start
+    if r.value >= 0:
+        return r
+    
+    #lower = 0
+    #upper = len(changeable_states)
+    #while lower != upper:
+    for i in range(len(changeable_states)+1):
+        results = {}
+        for comb in itertools.combinations(changeable_states, i):
+            if time.time() - start > timeout:
+                if results:
+                    best_solution = min(results.items(), key=lambda x: x[1].value)[1]
+                    best_solution.time = time.time() - start
+                    return best_solution
+            print("Called with changeable states", comb, "from", len(changeable_states), "variables")
+            r = geometric_program_bnb(model, target_prob, user_strategy, comb, optimal_strat, timeout=timeout, debug=debug)
+            if r.value > 0:
+                results[comb] = r
+        if results:
+            best_solution = min(results.items(), key=lambda x: x[1].value)[1]
+            best_solution.time = time.time() - start
+            return best_solution
+    return Result(time.time() - start, -0.2, target_prob, {})
+    
+        
     constraints = []
     
     p = {s : cp.Variable(pos=True, name=s) for s in model.nodes}
@@ -464,16 +642,6 @@ def geometric_program(model : nx.DiGraph, target_prob : float, user_strategy : d
     increasing = [get_var(s,a) for s in increasing_sa if s not in unreaching for a in increasing_sa[s] if increasing_sa[s][a]]
     print("increasing", increasing)
     constraints.append(d_1 >= sum(increasing) / len(user_strategy))
-        
-    # encode sparsity
-    # decision_changed = {}
-    # dist_binary = {}
-    # for s in increasing_sa:
-    #     dist_binary[s] = m.addVar(ub=1.0, name=f'State {s} was changed', lb = 0, vtype=gp.GRB.BINARY)
-    #     decision_changed[s] = m.addVar(ub=1.0, name=f'Var dist state {s}', lb = 0) 
-    #     m.addConstr(decision_changed[s] == 0.5 * sum(d_sa[s].values()))
-    #     m.addConstr(decision_changed[s] <= 10 * dist_binary[s])
-    # constraints.append(d_0 >= sum(dist_binary.values()))
     
     # ensure well-formedness
     for constraint in constraints:
@@ -482,10 +650,10 @@ def geometric_program(model : nx.DiGraph, target_prob : float, user_strategy : d
     print(sum([1/get_var(s,a) for s in p_sa if s in increasing_sa for a in p_sa[s]]))
     problem = cp.Problem(cp.Minimize(sum([1/get_var(s,a) for s in p_sa if s in increasing_sa for a in p_sa[s]]) + d_inf + d_1), constraints)
     # problem = cp.Problem(cp.Minimize(sum([1/get_var(s,a) for s in p_sa for a in p_sa[s]]) + d_inf + d_1), constraints)
-    # problem = cp.Problem(cp.Minimize(d_inf), constraints)
     
-    # print(problem)
-    print("Is this problem DGP?", problem.is_dgp())
+    if debug:
+        print(problem)
+        print("Is this problem DGP?", problem.is_dgp())
     assert problem.is_dgp(), "Problem is not DGP"
 
     problem.solve(gp=True, solver="MOSEK", verbose = True)
@@ -540,42 +708,6 @@ def strategy_diff(strat1 : dict, strat2 : dict):
             if round(strat1[s][a], 2) != round(strat2[s][a], 2):
                 print(f'In state {s} action {a} differs, {strat1[s][a]} != {strat2[s][a]}')
 
-def run_experiment(parser : LogParser.LogParser, reach_p, timeout, name = "model", steps = 1, iterations = 1):
-    model = parser.build_benchmark()
-    if REGENERATE or False:
-        with open(f'out/model_{name}.pickle', 'wb+') as handle:
-            pickle.dump(model, handle)
-        user_strategy = construct_user_strategy(model) # NOTE strategies are not guaranteed to be equivalent as the set construction can change
-        with open(f'out/user_strategy_{name}.pickle', 'wb+') as handle:
-            pickle.dump(user_strategy, handle, protocol=pickle.HIGHEST_PROTOCOL)
-    with open(f'out/model_{name}.pickle', 'rb') as handle:
-        model = pickle.load(handle)
-    with open(f'out/user_strategy_{name}.pickle', 'rb') as handle:
-        user_strategy = pickle.load(handle)
-    r_geom = []
-    r_qp = []
-    for it in range(iterations):
-        r_geom_it = []
-        r_qp_it = []
-        user_strategy = construct_user_strategy(model)
-        o, strat = minimum_reachability(model)
-        for i in range(0, steps+1):
-            # p = 1 : trivial, p = 0 : impossible
-            # p = 1 - i * o / steps
-            p = 1/(steps)*i
-            if p == 0:
-                p = 0 + 0.0001
-            print(f'Call with reachability probability {p}')
-            r_geom_it.append(geometric_program(model, p, user_strategy, timeout=timeout))
-            assert False
-            r_qp_it.append(quadratic_program(model, p, user_strategy, timeout=timeout))
-            
-            #plot_changes(model, 'diff', r_geom[-1].strategy, user_strategy, layout='dot')
-        r_geom.append(r_geom_it)
-        r_qp.append(r_qp_it)
-    
-    return r_geom, r_qp, o
-
 def plot_results(geom, qp, optimal, experiments):
     assert len(geom) == len(qp)
     
@@ -585,19 +717,20 @@ def plot_results(geom, qp, optimal, experiments):
         ax = plt.subplot(len(experiments), 2, 2*i+1)
         ax.set_title(experiments[i] + "-value")
         for j in range(len(geom[i])):
+            print([r.target_prob for r in geom[i][j]])
             ax.plot([r.target_prob for r in geom[i][j]], [r.value for r in geom[i][j]], c = "blue", label="GP" if j == 0 else '', linewidth = 1, marker='o')
             ax.plot([r.target_prob for r in qp[i][j]], [r.value for r in qp[i][j]], c = "orange", label="QP" if j == 0 else '', linewidth = 1, marker='*')
-            ax.axvline([optimal], c = 'violet', linestyle='--')
+            ax.axvline([optimal[i][j][0]], c = 'violet', linestyle='--')
         ax.legend()
         
-    for i in range(len(experiments)):
-        ax = plt.subplot(len(experiments), 2, 2*i+2)
-        ax.set_title(experiments[i] + "-time")
-        for j in range(len(geom[i])):
-            ax.plot([r.target_prob for r in geom[i][j]], [r.time for r in geom[i][j]], c = "blue", label="GP" if j == 0 else '', linewidth = 1, marker='o')
-            ax.plot([r.target_prob for r in qp[i][j]], [r.time for r in qp[i][j]], c = "orange", label="QP" if j == 0 else '', linewidth = 1, marker='*')
-        ax.axvline([optimal], c = 'violet', linestyle='--')
-        ax.legend()
+    # for i in range(len(experiments)):
+    #     ax = plt.subplot(len(experiments), 2, 2*i+2)
+    #     ax.set_title(experiments[i] + "-time")
+    #     for j in range(len(geom[i])):
+    #         ax.plot([r.target_prob for r in geom[i][j]], [r.time for r in geom[i][j]], c = "blue", label="GP" if j == 0 else '', linewidth = 1, marker='o')
+    #         ax.plot([r.target_prob for r in qp[i][j]], [r.time for r in qp[i][j]], c = "orange", label="QP" if j == 0 else '', linewidth = 1, marker='*')
+    #     ax.axvline([optimal[i]], c = 'violet', linestyle='--')
+    #     ax.legend()
         
     plt.savefig('out/plot.png', dpi = 500)
 
@@ -652,19 +785,119 @@ def plot_changes(model : nx.DiGraph, name : str, user_strategy, counterfactual_s
     A.draw(f'out/{name}.png')
     print("Plotted", name)
 
-def generate_models_and_strategies(parser : LogParser.LogParser):
+def generate_models(experiments):
+    for name in experiments:
+        if name == 'greps':
+            print("######### GREPS ##########")
+            from LogParser import GrepsParser
+            parser = GrepsParser('data/data.csv', 'data/activities_greps.xml')
+        elif name == 'bpic12':
+            print("######### BPIC'12 ##########")
+            from LogParser import BPIC12Parser
+            parser = BPIC12Parser('data/BPI_Challenge_2012.xes', 'data/activities_2012.xml')
+        elif name == 'bpic17-before':
+            print("######### BPIC'17-Before ##########")
+            from LogParser import BPIC17BeforeParser
+            parser = BPIC17BeforeParser('data/BPI Challenge 2017.xes', 'data/activities_2017.xml')
+        elif name == 'bpic17-after':
+            print("######### BPIC'17-After ##########")
+            from LogParser import BPIC17AfterParser
+            parser = BPIC17AfterParser('data/BPI Challenge 2017.xes', 'data/activities_2017.xml')
+        elif name == 'bpic17-both':
+            print("######### BPIC'17-Both ##########")
+            from LogParser import BPIC17BothParser
+            parser = BPIC17BothParser('data/BPI Challenge 2017.xes', 'data/activities_2017.xml')
+        elif name == 'spotify':
+            print("######### Spotify ##########")
+            from LogParser import SpotifyParser
+            parser = SpotifyParser('data/spotify/', 'data/activities_spotify.xml')
+        else:
+            continue
+        model = parser.build_benchmark()
+        
+        with open(f'out/models/model_{name}.pickle', 'wb+') as handle:
+            pickle.dump(model, handle)
+            
+def generate_user_strategies(experiments, iterations):
+    for name in experiments:
+        with open(f'out/models/model_{name}.pickle', 'rb') as handle:
+            model = pickle.load(handle)
+        for i in range(iterations):
+            user_strategy = construct_user_strategy(model) # NOTE strategies are not guaranteed to be equivalent as the set construction can change
+            with open(f'out/user_strategies/model_{name}_it_{i}.pickle', 'wb+') as handle:
+                    pickle.dump(user_strategy, handle, protocol=pickle.HIGHEST_PROTOCOL)
+
+def run_experiment(parser : LogParser.LogParser, timeout, name = "model", steps = 1, iterations = 1):
     model = parser.build_benchmark()
-    pass
+    if REGENERATE or True:
+        with open(f'out/model_{name}.pickle', 'wb+') as handle:
+            pickle.dump(model, handle)
+        user_strategy = construct_user_strategy(model) # NOTE strategies are not guaranteed to be equivalent as the set construction can change
+        with open(f'out/user_strategy_{name}.pickle', 'wb+') as handle:
+            pickle.dump(user_strategy, handle, protocol=pickle.HIGHEST_PROTOCOL)
+    with open(f'out/model_{name}.pickle', 'rb') as handle:
+        model = pickle.load(handle)
+    with open(f'out/user_strategy_{name}.pickle', 'rb') as handle:
+        user_strategy = pickle.load(handle)
+    r_geom = []
+    r_qp = []
+    for it in range(iterations):
+        r_geom_it = []
+        r_qp_it = []
+        user_strategy = construct_user_strategy(model)
+        o, strat = minimum_reachability(model)
+        print("optimal", o)
+        for i in range(0, steps+1):
+            # p = 1 : trivial, p = 0 : impossible
+            # p = 1 - i * o / steps
+            p = 1/(steps)*i
+            if p == 0:
+                p = 0.0001
+            print(f'Call with reachability probability {p}')
+            r_geom_it.append(geometric_program(model,p, user_strategy, timeout=timeout))
+            r_qp_it.append(quadratic_program(model, p, user_strategy, timeout=timeout))
+            #plot_changes(model, 'diff', r_geom[-1].strategy, user_strategy, layout='dot')
+        r_geom.append(r_geom_it)
+        r_qp.append(r_qp_it)
+    
+    return r_geom, r_qp, o
+
+def run_experiment(param):
+    print(param)
+    path = param[0]
+    p = param[1]
+    if p == 0:
+        p = 0.0001
+    timeout = param[2]
+    
+    print(str(path))
+    name = str(path).split('model_')[1].split('_')[0]
+    print(path, name)
+    with open(f'out/models/model_{name}.pickle', 'rb') as handle:
+        model = pickle.load(handle)
+    with open(path, 'rb') as handle:
+        user_strategy = pickle.load(handle)
+        
+    print(f'Call {path} with reachability probability {p}')
+    r_geom = geometric_program(model,p, user_strategy, timeout=timeout)
+    r_gp = quadratic_program(model, p, user_strategy, timeout=timeout)
+    o, strat = minimum_reachability(model)
+    
+    return (path, p, r_geom, r_gp, o)
+
 
 if __name__ == '__main__':  
     parser = argparse.ArgumentParser(
                     prog = 'benchmarks',
                     description = "File to trigger benchmarks for CE generation in MDP's")
-    parser.add_argument('-t', '--timeout', help = "Timeout for program solution", type=int, default = 1*60) 
+    parser.add_argument('-t', '--timeout', help = "Timeout for program solution", type=int, default = 60*60) 
     parser.add_argument('-s', '--steps', help = "Number of steps for each model", type=int, default = 1)
     parser.add_argument('-i', '--iterations', help = "Iterations for each step", type=int, default = 1)
+    parser.add_argument('-c', '--cores', help = "Cores to use to parallelize experiments", type=int, default = 1)
     parser.add_argument('-slack', '--strategy_slack', help = "Allowed deviation until geometric programming strategy is discarded", type=float, default = 0.1)
     parser.add_argument('-e', '--experiments', help = "Start profile to filter on", nargs='+', type=str, default = ['greps', 'bpic12', 'bpic17-before', 'bpic17-after', 'bpic17-both', 'spotify'])
+    parser.add_argument('-rm', '--rebuild_models', help = "Rebuild models, implies rebuilding models", type=bool, default = False)
+    parser.add_argument('-rs', '--rebuild_strategies', help = "Rebuild strategies", type=bool, default = False)
     args = parser.parse_args()
     
     STRATEGY_SLACK = args.strategy_slack
@@ -673,32 +906,77 @@ if __name__ == '__main__':
     qp_results = []
     optimal_reachability = []
     
+    if args.rebuild_models:
+        generate_models(args.experiments)
+    if args.rebuild_models or args.rebuild_strategies:
+        generate_user_strategies(args.experiments, args.iterations)
+    experiment_strategies = []
+    
+    # for name in args.experiments:
+    benchmark_strategies = []
+    for name in args.experiments:
+        for i in range(args.iterations):
+            benchmark_strategies.extend(list(Path(f'out/user_strategies/').glob(f'*{name}*_it_{i}*.pickle')))
+    
+    experiments = [(p, 1/(args.steps)*s, args.timeout) for p in benchmark_strategies for s in range(args.steps+1)]
+
+    with multiprocessing.Pool(processes=args.cores) as pool:
+        result = pool.map(run_experiment, experiments)
+          
+    r_geom = []
+    r_qp = []
+    r_o = []
+    for i in range(len(args.experiments)):
+        name = args.experiments[i]
+        r_geom_name = []
+        r_qp_name = []
+        r_o_name = []
+        for j in range(args.iterations):
+            r_geom_inner = []
+            r_qp_inner = []
+            r_o_inner = []
+            for k in range(args.steps+1):
+                print(i*(args.iterations + args.steps) + j * args.steps + k)
+                r_geom_inner.append(result[i*(args.iterations + args.steps + 1) + j * (args.steps + 1) + k][2])
+                r_qp_inner.append(result[i*(args.iterations + args.steps + 1) + j * (args.steps + 1) + k][3])
+                r_o_inner.append(result[i*(args.iterations + args.steps + 1) + j * (args.steps + 1) + k][4])
+            r_geom_name.append(r_geom_inner)
+            r_qp_name.append(r_qp_inner)
+            r_o_name.append(r_o_inner)
+        r_geom.append(r_geom_name)
+        r_qp.append(r_qp_name)
+        r_o.append(r_o_name)
+    plot_results(r_geom, r_qp, r_o, args.experiments)     
+    assert(False)
+    
     for name in args.experiments:
         if name == 'greps':
             print("######### GREPS ##########")
             from LogParser import GrepsParser
             parser = GrepsParser('data/data.csv', 'data/activities_greps.xml')
-        if name == 'bpic12':
+        elif name == 'bpic12':
             print("######### BPIC'12 ##########")
             from LogParser import BPIC12Parser
             parser = BPIC12Parser('data/BPI_Challenge_2012.xes', 'data/activities_2012.xml')
-        if name == 'bpic17-before':
+        elif name == 'bpic17-before':
             print("######### BPIC'17-Before ##########")
             from LogParser import BPIC17BeforeParser
             parser = BPIC17BeforeParser('data/BPI Challenge 2017.xes', 'data/activities_2017.xml')
-        if name == 'bpic17-after':
+        elif name == 'bpic17-after':
             print("######### BPIC'17-After ##########")
             from LogParser import BPIC17AfterParser
             parser = BPIC17AfterParser('data/BPI Challenge 2017.xes', 'data/activities_2017.xml')
-        if name == 'bpic17-both':
+        elif name == 'bpic17-both':
             print("######### BPIC'17-Both ##########")
             from LogParser import BPIC17BothParser
             parser = BPIC17BothParser('data/BPI Challenge 2017.xes', 'data/activities_2017.xml')
-        if name == 'spotify':
+        elif name == 'spotify':
             print("######### Spotify ##########")
             from LogParser import SpotifyParser
             parser = SpotifyParser('data/spotify/', 'data/activities_spotify.xml')
-        r_geom, r_qp, o = run_experiment(parser, 0.7, timeout=args.timeout, steps=args.steps, iterations=args.iterations)
+        else:
+            continue
+        r_geom, r_qp, o = run_experiment(parser, timeout=args.timeout, steps=args.steps, iterations=args.iterations)
         geom_results.append(r_geom)
         qp_results.append(r_qp)
         optimal_reachability.append(o)
@@ -756,6 +1034,5 @@ if __name__ == '__main__':
 # Improving:
 # - Repairing strategies
 # - Iterative approach 
-# - Checking trivially satisfied
-# - Branch and bound on changes
 # TODO write generation file and multicore processing
+# TODO write comments
