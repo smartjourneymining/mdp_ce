@@ -970,9 +970,9 @@ if __name__ == '__main__':
     # run_experiment((path, 0.35, args.timeout))
     # assert(False)
     
-    # with multiprocessing.Pool(processes=args.cores) as pool:
-    #     result = pool.map(run_experiment, experiments)
-    result = [run_experiment(e) for e in experiments]
+    with multiprocessing.Pool(processes=args.cores) as pool:
+        result = pool.map(run_experiment, experiments)
+    # result = [run_experiment(e) for e in experiments]
           
     r_geom = []
     r_qp = []
