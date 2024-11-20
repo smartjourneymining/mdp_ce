@@ -491,7 +491,7 @@ def geometric_program_bnb(model : nx.DiGraph, target_prob : float, user_strategy
     problem.solve(gp=True, solver="MOSEK", verbose = debug)
     
     if problem.status != 'optimal':
-        print(f'Solution is {problem.status}')
+        print(f'Problem is {problem.status}')
         return Result(problem.solver_stats.solve_time, -0.2, target_prob, {})
     print("sol", problem.value, "in sec.", problem.solver_stats.solve_time)
     
@@ -524,19 +524,22 @@ def geometric_program_bnb(model : nx.DiGraph, target_prob : float, user_strategy
 def geometric_program(model : nx.DiGraph, target_prob : float, user_strategy : dict, timeout = 60*60, debug = False):
     assert 'MOSEK'  in cp.installed_solvers()
     
+    search_time = 0
+    
     changeable_states = [s for s in user_strategy if len(user_strategy[s]) > 1]
     # compute which values to increase
     val, optimal_strat = minimum_reachability(model)
     
-    start = time.time()
     # infeasible
     r = geometric_program_bnb(model, target_prob, user_strategy, changeable_states, optimal_strat, timeout=timeout, debug=debug)
+    search_time += r.time
     if r.value < 0:
-        return Result(time.time() - start, -0.2, target_prob, {})
+        return Result(search_time, -0.2, target_prob, {})
     # trivial
     r = geometric_program_bnb(model, target_prob, user_strategy, [], optimal_strat, timeout=timeout, debug=debug)
-    r.time = time.time() - start
+    search_time += r.time
     if r.value >= 0:
+        r.time = search_time
         return r
     
     #lower = 0
@@ -545,20 +548,23 @@ def geometric_program(model : nx.DiGraph, target_prob : float, user_strategy : d
     for i in range(len(changeable_states)+1):
         results = {}
         for comb in itertools.combinations(changeable_states, i):
-            if time.time() - start > timeout:
+            if search_time > timeout:
                 if results:
                     best_solution = min(results.items(), key=lambda x: x[1].value)[1]
-                    best_solution.time = time.time() - start
+                    best_solution.time = search_time
                     return best_solution
+                else:
+                    return Result(search_time, -0.2, target_prob, {})
             print("Called with changeable states", comb, "from", len(changeable_states), "variables")
             r = geometric_program_bnb(model, target_prob, user_strategy, comb, optimal_strat, timeout=timeout, debug=debug)
+            search_time += r.time
             if r.value > 0:
                 results[comb] = r
         if results:
             best_solution = min(results.items(), key=lambda x: x[1].value)[1]
-            best_solution.time = time.time() - start
+            best_solution.time = search_time
             return best_solution
-    return Result(time.time() - start, -0.2, target_prob, {})
+    return Result(search_time, -0.2, target_prob, {})
     
         
     constraints = []
@@ -865,6 +871,18 @@ def run_experiment(parser : LogParser.LogParser, timeout, name = "model", steps 
     
     return r_geom, r_qp, o
 
+def search_bounds(model, user_strategy, debug = False):
+    o, optimal_strat = minimum_reachability(model)
+    p = 1
+    while(p > o + 0.00001):
+        print("####### call with p = ", p)
+        r = quadratic_program(model, p, user_strategy, timeout = 5, debug=debug)
+        if r.value == 0:
+            # reduce p
+            p = (o + p)/2
+        else:
+            return (max(0.001, o-0.1),(p+0.1))
+
 def run_experiment(param):
     print(param)
     path = param[0]
@@ -881,11 +899,13 @@ def run_experiment(param):
     with open(path, 'rb') as handle:
         user_strategy = pickle.load(handle)
         
-    print(f'Call {path} with reachability probability {p}')
-    r_geom = geometric_program(model,p, user_strategy, timeout=timeout)
-    r_gp = quadratic_program(model, p, user_strategy, timeout=timeout)
     o, strat = minimum_reachability(model)
     
+    print(f'Call {path} with reachability probability {p}')
+    r_geom = geometric_program(model,p, user_strategy, timeout=timeout, debug=True)
+    r_gp = quadratic_program(model, p, user_strategy, timeout=timeout)
+    o, strat = minimum_reachability(model)
+
     return (path, p, r_geom, r_gp, o)
 
 
@@ -910,8 +930,12 @@ if __name__ == '__main__':
     optimal_reachability = []
     
     if args.rebuild_models:
+        filename = "out/models/test.txt"
+        os.makedirs(os.path.dirname(filename), exist_ok=True)
         generate_models(args.experiments)
     if args.rebuild_models or args.rebuild_strategies:
+        filename = "out/user_strategies/test.txt"
+        os.makedirs(os.path.dirname(filename), exist_ok=True)
         generate_user_strategies(args.experiments, args.iterations)
     experiment_strategies = []
     
@@ -921,10 +945,34 @@ if __name__ == '__main__':
         for i in range(args.iterations):
             benchmark_strategies.extend(list(Path(f'out/user_strategies/').glob(f'*{name}*_it_{i}*.pickle')))
     
-    experiments = [(p, 1/(args.steps)*s, args.timeout) for p in benchmark_strategies for s in range(args.steps+1)]
+    experiments = []
+    for e in benchmark_strategies:
+        name = str(e).split('model_')[1].split('_')[0]
+        with open(f'out/models/model_{name}.pickle', 'rb') as handle:
+            model = pickle.load(handle)
+        with open(e, 'rb') as handle:
+            user_strategy = pickle.load(handle)   
+        bounds = search_bounds(model, user_strategy)
+        experiments.extend([(e, round(bounds[0] + (bounds[1] - bounds[0]) * 1/(args.steps) * s, 4), args.timeout) for s in range(args.steps+1)])
+    # experiments = [(p, 1/(args.steps)*s, args.timeout) for p in benchmark_strategies for s in range(args.steps+1)]
 
-    with multiprocessing.Pool(processes=args.cores) as pool:
-        result = pool.map(run_experiment, experiments)
+    # # manual tests
+    # path = 'out/user_strategies/model_spotify4000_it_1.pickle'
+    # name = str(path).split('model_')[1].split('_')[0]
+    # with open(f'out/models/model_{name}.pickle', 'rb') as handle:
+    #     model = pickle.load(handle)
+    # with open(path, 'rb') as handle:
+    #     user_strategy = pickle.load(handle)   
+    # print("search_bounds", search_bounds(model, user_strategy))
+    
+    # o, strat = minimum_reachability(model)
+    # print("optimal", o)
+    # run_experiment((path, 0.35, args.timeout))
+    # assert(False)
+    
+    # with multiprocessing.Pool(processes=args.cores) as pool:
+    #     result = pool.map(run_experiment, experiments)
+    result = [run_experiment(e) for e in experiments]
           
     r_geom = []
     r_qp = []
@@ -939,7 +987,6 @@ if __name__ == '__main__':
             r_qp_inner = []
             r_o_inner = []
             for k in range(args.steps+1):
-                print(i*(args.iterations + args.steps) + j * args.steps + k)
                 r_geom_inner.append(result[i*(args.iterations * (args.steps + 1)) + j * (args.steps + 1) + k][2])
                 r_qp_inner.append(result[i*(args.iterations * (args.steps + 1)) + j * (args.steps + 1) + k][3])
                 r_o_inner.append(result[i*(args.iterations * (args.steps + 1)) + j * (args.steps + 1) + k][4])
