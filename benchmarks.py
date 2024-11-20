@@ -902,8 +902,8 @@ def run_experiment(param):
     o, strat = minimum_reachability(model)
     
     print(f'Call {path} with reachability probability {p}')
-    r_geom = geometric_program(model,p, user_strategy, timeout=timeout, debug=True)
-    r_gp = quadratic_program(model, p, user_strategy, timeout=timeout)
+    r_geom = geometric_program(model,p, user_strategy, timeout=timeout, debug=False)
+    r_gp = quadratic_program(model, p, user_strategy, timeout=timeout, debug=False)
     o, strat = minimum_reachability(model)
 
     return (path, p, r_geom, r_gp, o)
