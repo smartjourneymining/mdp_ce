@@ -46,7 +46,6 @@ STRATEGY_SLACK = 0.1
 import LogParser
 
 import itertools
-import time
 from pathlib import Path
 
 from networkx.drawing.nx_agraph import to_agraph
@@ -719,7 +718,7 @@ def strategy_diff(strat1 : dict, strat2 : dict):
                 print(f'In state {s} action {a} differs, {strat1[s][a]} != {strat2[s][a]}')
 
 def plot_results(geom, qp, optimal, experiments):
-    assert len(geom) == len(qp)
+    assert len(geom) == len(qp), f'len(geom){len(geom)} != len(qp){len(qp)}'
     
     fig = plt.figure()
     
