@@ -358,6 +358,10 @@ def quadratic_program(model : nx.DiGraph, target_prob : float, user_strategy : d
     if m.status == GRB.INFEASIBLE:
         return Result(m.Runtime, -0.2, target_prob, {})
     
+    if m.status == GRB.TIME_LIMIT:
+        return Result(m.Runtime, -0.3, target_prob, {})
+     
+    assert m.status == GRB.OPTIMAL or m.status == GRB.SUBOPTIMAL, f'Status is {m.status}'
     print("Distances")
     print("d_inf", d_inf.X)
     print("d_1", d_1.X)
@@ -694,7 +698,7 @@ def construct_user_strategy(model : nx.DiGraph):
             continue
         if not model.edges[list(model.edges(s))[0]]['controllable'] and model.edges[list(model.edges(s))[0]]['action'] != 'env':
             enabled_actions = list(set([model.edges[e]['action'] for e in model.edges(s)]))
-            distr = random.sample(range(1, 1000), len(enabled_actions))
+            distr = random.choices(range(1, 1000), k=len(enabled_actions))
             user_strategy[s] = {enabled_actions[i] : distr[i] / sum(distr) for i in range(len(enabled_actions))}
     
     return user_strategy
@@ -905,8 +909,6 @@ if __name__ == '__main__':
     qp_results = []
     optimal_reachability = []
     
-    print(args.rebuild_models)
-    
     if args.rebuild_models:
         generate_models(args.experiments)
     if args.rebuild_models or args.rebuild_strategies:
@@ -938,9 +940,9 @@ if __name__ == '__main__':
             r_o_inner = []
             for k in range(args.steps+1):
                 print(i*(args.iterations + args.steps) + j * args.steps + k)
-                r_geom_inner.append(result[i*(args.iterations + args.steps + 1) + j * (args.steps + 1) + k][2])
-                r_qp_inner.append(result[i*(args.iterations + args.steps + 1) + j * (args.steps + 1) + k][3])
-                r_o_inner.append(result[i*(args.iterations + args.steps + 1) + j * (args.steps + 1) + k][4])
+                r_geom_inner.append(result[i*(args.iterations * (args.steps + 1)) + j * (args.steps + 1) + k][2])
+                r_qp_inner.append(result[i*(args.iterations * (args.steps + 1)) + j * (args.steps + 1) + k][3])
+                r_o_inner.append(result[i*(args.iterations * (args.steps + 1)) + j * (args.steps + 1) + k][4])
             r_geom_name.append(r_geom_inner)
             r_qp_name.append(r_qp_inner)
             r_o_name.append(r_o_inner)
