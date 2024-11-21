@@ -50,6 +50,8 @@ from pathlib import Path
 
 from networkx.drawing.nx_agraph import to_agraph
 
+import mosek
+
 import pyrootutils
 path = pyrootutils.find_root(search_from=__file__, indicator=".project-root")
 pyrootutils.set_root(
@@ -451,7 +453,6 @@ def geometric_program_bnb(model : nx.DiGraph, target_prob : float, user_strategy
     start_state = start_state[0]
     constraints.append(p[start_state] <= target_prob)
     
-    d_0 = cp.Variable(pos=True, name='d0')
     d_1 = cp.Variable(pos=True, name='d1')
     d_inf = cp.Variable(pos=True, name='d_inf')
 
@@ -487,7 +488,9 @@ def geometric_program_bnb(model : nx.DiGraph, target_prob : float, user_strategy
         print("Is this problem DGP?", problem.is_dgp())
     assert problem.is_dgp(), "Problem is not DGP"
 
-    problem.solve(gp=True, solver="MOSEK", verbose = debug)
+    precision = 0.0001
+    mosek_params={mosek.dparam.intpnt_co_tol_pfeas : precision, mosek.dparam.intpnt_co_tol_pfeas : precision, mosek.dparam.intpnt_co_tol_rel_gap : precision, mosek.dparam.intpnt_co_tol_infeas : precision}
+    problem.solve(gp=True, solver="MOSEK", verbose = debug, mosek_params=mosek_params) 
     
     if problem.status != 'optimal':
         print(f'Problem is {problem.status}')
@@ -514,7 +517,9 @@ def geometric_program_bnb(model : nx.DiGraph, target_prob : float, user_strategy
         strategy_diff(user_strategy, strategy)
     
     if strategy_slack(strategy) > STRATEGY_SLACK:
+        print('max', max([1 - sum(strategy[s][a] for a in strategy[s]) for s in strategy]))
         print(f'Discarded solution due to slack {strategy_slack(strategy)}')
+        assert(False)
         return Result(problem.solver_stats.solve_time, -0.5, target_prob, strategy)
     print("Found solution")
     print()
@@ -554,7 +559,7 @@ def geometric_program(model : nx.DiGraph, target_prob : float, user_strategy : d
                     return best_solution
                 else:
                     return Result(search_time, -0.2, target_prob, {})
-            print("Called with changeable states", comb, "from", len(changeable_states), "variables")
+            print("Called with changeable states", comb, "from", len(changeable_states), "variables - search time", search_time)
             r = geometric_program_bnb(model, target_prob, user_strategy, comb, optimal_strat, timeout=timeout, debug=debug)
             search_time += r.time
             if r.value > 0:
@@ -726,7 +731,7 @@ def plot_results(geom, qp, optimal, experiments):
         ax = plt.subplot(len(experiments), 2, 2*i+1)
         ax.set_title(experiments[i] + "-value")
         for j in range(len(geom[i])):
-            ax.plot([r.target_prob for r in geom[i][j]], [r.value for r in geom[i][j]], c = "blue", label="GP" if j == 0 else '', linewidth = 1, marker='o')
+            #ax.plot([r.target_prob for r in geom[i][j]], [r.value for r in geom[i][j]], c = "blue", label="GP" if j == 0 else '', linewidth = 1, marker='o')
             ax.plot([r.target_prob for r in qp[i][j]], [r.value for r in qp[i][j]], c = "orange", label="QP" if j == 0 else '', linewidth = 1, marker='*')
             ax.axvline([optimal[i][j][0]], c = 'violet', linestyle='--')
         ax.legend()
@@ -735,7 +740,7 @@ def plot_results(geom, qp, optimal, experiments):
         ax = plt.subplot(len(experiments), 2, 2*i+2)
         ax.set_title(experiments[i] + "-time")
         for j in range(len(geom[i])):
-            ax.plot([r.target_prob for r in geom[i][j]], [r.time for r in geom[i][j]], c = "blue", label="GP" if j == 0 else '', linewidth = 1, marker='o')
+            #ax.plot([r.target_prob for r in geom[i][j]], [r.time for r in geom[i][j]], c = "blue", label="GP" if j == 0 else '', linewidth = 1, marker='o')
             ax.plot([r.target_prob for r in qp[i][j]], [r.time for r in qp[i][j]], c = "orange", label="QP" if j == 0 else '', linewidth = 1, marker='*')
         ax.axvline([optimal[i][j][0]], c = 'violet', linestyle='--')
         ax.legend()
@@ -883,7 +888,6 @@ def search_bounds(model, user_strategy, debug = False):
             return (max(0.001, o-0.1),(p+0.1))
 
 def run_experiment(param):
-    print(param)
     path = param[0]
     p = param[1]
     if p == 0:
@@ -901,11 +905,11 @@ def run_experiment(param):
     o, strat = minimum_reachability(model)
     
     print(f'Call {path} with reachability probability {p}')
-    r_geom = geometric_program(model,p, user_strategy, timeout=timeout, debug=False)
-    r_gp = quadratic_program(model, p, user_strategy, timeout=timeout, debug=False)
+    r_geom = Result(0, 0, 0, {}) # geometric_program(model,p, user_strategy, timeout=timeout, debug=True)
+    r_qp = quadratic_program(model, p, user_strategy, timeout=timeout, debug=False)
     o, strat = minimum_reachability(model)
 
-    return (path, p, r_geom, r_gp, o)
+    return (path, p, r_geom, r_qp, o)
 
 
 if __name__ == '__main__':  
@@ -942,6 +946,7 @@ if __name__ == '__main__':
     benchmark_strategies = []
     for name in args.experiments:
         for i in range(args.iterations):
+            assert list(Path(f'out/user_strategies/').glob(f'*{name}*_it_{i}*.pickle'))
             benchmark_strategies.extend(list(Path(f'out/user_strategies/').glob(f'*{name}*_it_{i}*.pickle')))
     
     experiments = []
@@ -953,10 +958,11 @@ if __name__ == '__main__':
             user_strategy = pickle.load(handle)   
         bounds = search_bounds(model, user_strategy)
         experiments.extend([(e, round(bounds[0] + (bounds[1] - bounds[0]) * 1/(args.steps) * s, 4), args.timeout) for s in range(args.steps+1)])
+        experiments.append((e, 1, args.timeout))
     # experiments = [(p, 1/(args.steps)*s, args.timeout) for p in benchmark_strategies for s in range(args.steps+1)]
 
-    # # manual tests
-    # path = 'out/user_strategies/model_spotify4000_it_1.pickle'
+    # manual tests
+    # path = 'out/user_strategies/model_spotify4000_it_0.pickle'
     # name = str(path).split('model_')[1].split('_')[0]
     # with open(f'out/models/model_{name}.pickle', 'rb') as handle:
     #     model = pickle.load(handle)
@@ -985,10 +991,10 @@ if __name__ == '__main__':
             r_geom_inner = []
             r_qp_inner = []
             r_o_inner = []
-            for k in range(args.steps+1):
-                r_geom_inner.append(result[i*(args.iterations * (args.steps + 1)) + j * (args.steps + 1) + k][2])
-                r_qp_inner.append(result[i*(args.iterations * (args.steps + 1)) + j * (args.steps + 1) + k][3])
-                r_o_inner.append(result[i*(args.iterations * (args.steps + 1)) + j * (args.steps + 1) + k][4])
+            for k in range(args.steps+2):
+                r_geom_inner.append(result[i*(args.iterations * (args.steps + 2)) + j * (args.steps + 2) + k][2])
+                r_qp_inner.append(result[i*(args.iterations * (args.steps + 2)) + j * (args.steps + 2) + k][3])
+                r_o_inner.append(result[i*(args.iterations * (args.steps + 2)) + j * (args.steps + 2) + k][4])
             r_geom_name.append(r_geom_inner)
             r_qp_name.append(r_qp_inner)
             r_o_name.append(r_o_inner)
