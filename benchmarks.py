@@ -949,6 +949,7 @@ if __name__ == '__main__':
     optimal_reachability = []
     
     if args.all_spotify:
+        args.experiments.remove('spotify')
         args.experiments.extend([f'spotify{i*100}' for i in range(1,11)])
     
     if args.rebuild_models:
