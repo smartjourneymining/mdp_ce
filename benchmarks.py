@@ -799,6 +799,7 @@ def plot_changes(model : nx.DiGraph, name : str, user_strategy, counterfactual_s
     print("Plotted", name)
 
 def generate_models(experiments, cores = 1, model_iterations = 1):
+    parser_list = []
     for name in experiments:
         if name == 'greps':
             print("######### GREPS ##########")
@@ -828,13 +829,13 @@ def generate_models(experiments, cores = 1, model_iterations = 1):
             continue
         
         if type(parser) != list:
-            parser = [(parser, i, name) for i in range(model_iterations)]
+            parser_list.extend([(parser, i, name) for i in range(model_iterations)])
         else:
-            parser = [(p, i, name) for p in parser for i in range(model_iterations)]
+            parser_list.extend([(p, i, name) for p in parser for i in range(model_iterations)])
                     
-        #[build_and_write_model(p) for p in parser]
-        with multiprocessing.Pool(processes=cores) as pool:
-            pool.map(build_and_write_model, parser)
+    #[build_and_write_model(p) for p in parser]
+    with multiprocessing.Pool(processes=cores) as pool:
+        pool.map(build_and_write_model, parser_list)
             
 def build_and_write_model(input):
     parser = input[0]
