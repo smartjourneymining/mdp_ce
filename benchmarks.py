@@ -798,7 +798,7 @@ def plot_changes(model : nx.DiGraph, name : str, user_strategy, counterfactual_s
     A.draw(f'out/{name}.png')
     print("Plotted", name)
 
-def generate_models(experiments):
+def generate_models(experiments, cores = 1, model_iterations = 1):
     for name in experiments:
         if name == 'greps':
             print("######### GREPS ##########")
@@ -826,19 +826,34 @@ def generate_models(experiments):
             parser = SpotifyParser('data/spotify/', 'data/activities_spotify.xml', int(name.split('spotify')[1]))
         else:
             continue
-        model = parser.build_benchmark()
         
-        with open(f'out/models/model_{name}.pickle', 'wb+') as handle:
-            pickle.dump(model, handle)
+        if type(parser) != list:
+            parser = [(parser, i, name) for i in range(model_iterations)]
+        else:
+            parser = [(p, i, name) for p in parser for i in range(model_iterations)]
+                    
+        #[build_and_write_model(p) for p in parser]
+        with multiprocessing.Pool(processes=cores) as pool:
+            pool.map(build_and_write_model, parser)
             
-def generate_user_strategies(experiments, iterations):
+def build_and_write_model(input):
+    parser = input[0]
+    i = input[1]
+    name = input[2]
+    model = parser.build_benchmark()
+    print(type(model))
+    with open(f'out/models/model_{name}_model-it_{i}.pickle', 'wb+') as handle:
+        pickle.dump(model, handle)
+                    
+def generate_user_strategies(experiments, model_iterations, iterations):
     for name in experiments:
-        with open(f'out/models/model_{name}.pickle', 'rb') as handle:
-            model = pickle.load(handle)
-        for i in range(iterations):
-            user_strategy = construct_user_strategy(model) # NOTE strategies are not guaranteed to be equivalent as the set construction can change
-            with open(f'out/user_strategies/model_{name}_it_{i}.pickle', 'wb+') as handle:
-                    pickle.dump(user_strategy, handle, protocol=pickle.HIGHEST_PROTOCOL)
+        for i in range(model_iterations):
+            with open(f'out/models/model_{name}_model-it_{i}.pickle', 'rb') as handle:
+                model = pickle.load(handle)
+            for j in range(iterations):
+                user_strategy = construct_user_strategy(model) # NOTE strategies are not guaranteed to be equivalent as the set construction can change
+                with open(f'out/user_strategies/model_{name}_model-it_{i}_it_{j}.pickle', 'wb+') as handle:
+                        pickle.dump(user_strategy, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
 def run_experiment(parser : LogParser.LogParser, timeout, name = "model", steps = 1, iterations = 1):
     model = parser.build_benchmark()
@@ -886,6 +901,7 @@ def search_bounds(model, user_strategy, debug = False):
             p = (o + p)/2
         else:
             return (max(0.001, o-0.1),(p+0.1))
+    return (0.001,1)
 
 def run_experiment(param):
     path = param[0]
@@ -894,17 +910,15 @@ def run_experiment(param):
         p = 0.0001
     timeout = param[2]
     
-    print(str(path))
-    name = str(path).split('model_')[1].split('_')[0]
-    print(path, name)
-    with open(f'out/models/model_{name}.pickle', 'rb') as handle:
+    model_path = str(path).split('_it_')[0].replace('user_strategies', 'models')
+    with open(f'{model_path}.pickle', 'rb') as handle:
         model = pickle.load(handle)
     with open(path, 'rb') as handle:
         user_strategy = pickle.load(handle)
         
     o, strat = minimum_reachability(model)
     
-    print(f'Call {path} with reachability probability {p}')
+    print(f'Call {model_path} with reachability probability {p} on strategy {path}')
     r_geom = Result(0, 0, 0, {}) # geometric_program(model,p, user_strategy, timeout=timeout, debug=True)
     r_qp = quadratic_program(model, p, user_strategy, timeout=timeout, debug=False)
     o, strat = minimum_reachability(model)
@@ -924,6 +938,8 @@ if __name__ == '__main__':
     parser.add_argument('-e', '--experiments', help = "Start profile to filter on", nargs='+', type=str, default = ['greps', 'bpic12', 'bpic17-before', 'bpic17-after', 'bpic17-both', 'spotify'])
     parser.add_argument('-rm', '--rebuild_models', help = "Rebuild models, implies rebuilding models", action = 'store_true')
     parser.add_argument('-rs', '--rebuild_strategies', help = "Rebuild strategies", action = 'store_true')
+    parser.add_argument('-mi', '--model_iterations', help = "Number of models to generate for each setting", type=int, default = 10)
+    parser.add_argument('-as', '--all_spotify', help = "All spotify models in steps of 100 are generated", action = 'store_true')
     args = parser.parse_args()
     
     STRATEGY_SLACK = args.strategy_slack
@@ -932,15 +948,19 @@ if __name__ == '__main__':
     qp_results = []
     optimal_reachability = []
     
+    if args.all_spotify:
+        args.experiments.extend([f'spotify{i*100}' for i in range(1,11)])
+    
     if args.rebuild_models:
         filename = "out/models/test.txt"
         os.makedirs(os.path.dirname(filename), exist_ok=True)
-        generate_models(args.experiments)
+        generate_models(args.experiments, args.cores, args.model_iterations)
     if args.rebuild_models or args.rebuild_strategies:
         filename = "out/user_strategies/test.txt"
         os.makedirs(os.path.dirname(filename), exist_ok=True)
-        generate_user_strategies(args.experiments, args.iterations)
-    experiment_strategies = []
+        generate_user_strategies(args.experiments, args.model_iterations, args.iterations)
+    
+    assert(False)
     
     # for name in args.experiments:
     benchmark_strategies = []

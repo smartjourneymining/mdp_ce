@@ -1,3 +1,5 @@
+import pandas as pd
+
 class Result:
     time = -1
     value = -1
@@ -9,3 +11,7 @@ class Result:
         self.value = value
         self.target_prob = target_prob
         self.strategy = strategy
+        
+    def df(self):
+        d = {'time' : self.time, 'value' : self.value, 'target_prob' : self.target_prob}
+        return pd.DataFrame([d])

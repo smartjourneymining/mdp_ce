@@ -10,6 +10,7 @@ from journepy.src.preprocessing.spotify import preprocessed_log as preprocessed_
 from journepy.src.alergia_utils import convert_utils
 
 import json
+import random 
 
 class LogParser:
     log_path = ""
@@ -191,6 +192,6 @@ class SpotifyParser(LogParser):
     #     return 'company'
     
     def automata_learning(self):
-        model = run_Alergia(self.data_environment[:self.number_samples], automaton_type='mdp', eps=0.9, print_info=True)
+        model = run_Alergia(random.sample(self.data_environment, min(len(self.data_environment), self.number_samples)), automaton_type='mdp', eps=0.9, print_info=True)
         #save_automaton_to_file(model, "out/model.png", file_type="png")
         return model
