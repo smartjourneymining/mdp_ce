@@ -23,7 +23,7 @@ class LogParser:
         self.log_path = log_path
         self.activities_path = activities_path
         
-    def automata_learning(self):
+    def automata_learning(self):       
         model = run_Alergia(self.data_environment, automaton_type='mdp', eps=0.1, print_info=True)
         save_automaton_to_file(model, "out/model.png", file_type="png")
         return model
@@ -194,14 +194,8 @@ class SpotifyParser(LogParser):
     #     return 'company'
     
     def automata_learning(self):
-        storage_file = f'out/spotify_{random.randint(0, 10000000000)}.txt'
-        with open(storage_file, 'w') as f:
-            for line in random.sample(self.data_environment, min(len(self.data_environment), self.number_samples)):                
-                f.write(line[0] + ',' + ','.join([e[0] + ',' + e[1] for e in line[1:]]))
-                f.write('\n')
-        os.remove(storage_file)
-        model = run_JAlergia(path_to_data_file=storage_file, automaton_type='mdp', eps=0.005,
-                     path_to_jAlergia_jar='/home/paul/Documents/jAlergia/alergia.jar')
+        model = run_JAlergia(path_to_data_file=random.sample(self.data_environment, min(len(self.data_environment), self.number_samples)), automaton_type='mdp', eps=0.9,
+                     path_to_jAlergia_jar='../jAlergia/alergia.jar')
         # model = run_Alergia(random.sample(self.data_environment, min(len(self.data_environment), self.number_samples)), automaton_type='mdp', eps=0.9, print_info=True)
         # save_automaton_to_file(model, "out/model.png", file_type="png")
         
