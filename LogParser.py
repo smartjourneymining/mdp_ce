@@ -196,7 +196,7 @@ class SpotifyParser(LogParser):
     def automata_learning(self):
         storage_file = f'out/spotify_{random.randint(0, 10000000000)}.txt'
         data = random.sample(self.data_environment, min(len(self.data_environment), self.number_samples))
-        assert len(set([d[0] for d in data])) == 1
+        assert len(set([d[0] for d in self.data_environment])) == 1, f'Found start symbols {set([d[0] for d in self.data_environment])}'
         with open(storage_file, 'w') as f:
             for line in data:                
                 f.write(line[0] + ',' + ','.join([e[0] + ',' + e[1] for e in line[1:]]))
