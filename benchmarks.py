@@ -269,6 +269,7 @@ def quadratic_program(model : nx.DiGraph, target_prob : float, user_strategy : d
     gp.setParam("Threads", threads)
     m = gp.Model("qp")
     m.setParam('TimeLimit', timeout)
+    m.setParam('SoftMemLimit', 2.5)
     p = {s : m.addVar(ub=1.0, name=s, lb = 0) for s in model.nodes}
 
     # encode actions
@@ -354,10 +355,10 @@ def quadratic_program(model : nx.DiGraph, target_prob : float, user_strategy : d
     m.optimize()
     
     if m.status == GRB.INFEASIBLE:
-        return Result(m.Runtime, -0.2, target_prob, {})
+        return Result(m.Runtime, -0.2, target_prob, {}, timeout, 0, m.status)
     
-    if m.status == GRB.TIME_LIMIT:
-        return Result(m.Runtime, -0.3, target_prob, {})
+    # if m.status == GRB.TIME_LIMIT:
+    #     return Result(m.Runtime, -0.3, target_prob, {}, timeout, m.MIPGap, m.status)
      
     assert m.status == GRB.OPTIMAL or m.status == GRB.SUBOPTIMAL, f'Status is {m.status}'
     print("Distances")
@@ -376,7 +377,7 @@ def quadratic_program(model : nx.DiGraph, target_prob : float, user_strategy : d
     
     strategy_diff(user_strategy, strategy)
     
-    return Result(m.Runtime, m.ObjVal, target_prob, strategy)
+    return Result(m.Runtime, m.ObjVal, target_prob, strategy, timeout, m.MIPGap, m.status)
 
 def strategy_slack(strategy):
     total = 0
@@ -917,13 +918,13 @@ def run_experiment(param):
     o, strat = minimum_reachability(model)
     
     print(f'Call {model_path} with reachability probability {p} on strategy {path}')
-    r_geom = Result(0, 0, 0, {}) # geometric_program(model,p, user_strategy, timeout=timeout, debug=True)
+    r_geom = Result(0, 0, 0, {}, 0, 0) # geometric_program(model,p, user_strategy, timeout=timeout, debug=True)
     r_qp = quadratic_program(model, p, user_strategy, timeout=timeout, debug=False)
     o, strat = minimum_reachability(model)
 
     return (path, p, r_geom, r_qp, o)
 
-
+    
 if __name__ == '__main__':  
     parser = argparse.ArgumentParser(
                     prog = 'benchmarks',
@@ -948,7 +949,7 @@ if __name__ == '__main__':
     
     if args.all_spotify:
         args.experiments.remove('spotify')
-        args.experiments.extend([f'spotify{i*100}' for i in range(1,11)])
+        args.experiments.extend([f'spotify{i*1000}' for i in range(1,11)])
     
     if args.rebuild_models:
         filename = "out/models/test.txt"
