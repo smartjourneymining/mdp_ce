@@ -204,7 +204,7 @@ class SpotifyParser(LogParser):
                 f.write(line[0] + ',' + ','.join([e[0] + ',' + e[1] for e in line[1:]]))
                 f.write('\n')
         model = run_JAlergia(path_to_data_file=storage_file, automaton_type='mdp', eps=0.9,
-                     path_to_jAlergia_jar='../jAlergia/alergia.jar', heap_memory='-Xmx8g')
+                     path_to_jAlergia_jar='../jAlergia/alergia.jar', heap_memory='-Xmx12g')
         assert model, f'None model for file {storage_file}'
         os.remove(storage_file)
         # model = run_JAlergia(path_to_data_file=random.sample(self.data_environment, min(len(self.data_environment), self.number_samples)), automaton_type='mdp', eps=0.9,
