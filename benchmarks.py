@@ -12,7 +12,6 @@ from IPython.display import Image
 
 
 import pandas as pd
-import matplotlib.pyplot as plt
 
 from networkx.drawing.nx_agraph import to_agraph
 
@@ -47,8 +46,6 @@ import LogParser
 
 import itertools
 from pathlib import Path
-
-from networkx.drawing.nx_agraph import to_agraph
 
 import mosek
 
