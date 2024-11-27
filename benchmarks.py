@@ -357,8 +357,8 @@ def quadratic_program(model : nx.DiGraph, target_prob : float, user_strategy : d
     if m.status == GRB.INFEASIBLE:
         return Result(m.Runtime, -0.2, target_prob, {}, timeout, 0, m.status)
     
-    # if m.status == GRB.TIME_LIMIT:
-    #     return Result(m.Runtime, -0.3, target_prob, {}, timeout, m.MIPGap, m.status)
+    if m.status == GRB.TIME_LIMIT:
+        return Result(m.Runtime, m.ObjVal, target_prob, {}, timeout, m.MIPGap, m.status)
      
     assert m.status == GRB.OPTIMAL or m.status == GRB.SUBOPTIMAL, f'Status is {m.status}'
     print("Distances")
