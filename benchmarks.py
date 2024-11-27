@@ -960,45 +960,60 @@ if __name__ == '__main__':
         os.makedirs(os.path.dirname(filename), exist_ok=True)
         generate_user_strategies(args.experiments, args.model_iterations, args.iterations)
     
-    assert(False)
     
     # for name in args.experiments:
     benchmark_strategies = []
     for name in args.experiments:
         for i in range(args.iterations):
-            assert list(Path(f'out/user_strategies/').glob(f'*{name}*_it_{i}*.pickle'))
-            benchmark_strategies.extend(list(Path(f'out/user_strategies/').glob(f'*{name}*_it_{i}*.pickle')))
+            for j in range(args.model_iterations):
+                assert list(Path(f'out/user_strategies/').glob(f'*{name}_model-it_{j}*_it_{i}*.pickle'))
+                benchmark_strategies.extend(list(Path(f'out/user_strategies/').glob(f'*{name}_model-it_{j}*_it_{i}*.pickle')))
     
     experiments = []
     for e in benchmark_strategies:
+        path = str(e).split('_it_')[0].replace('user_strategies', 'models')
         name = str(e).split('model_')[1].split('_')[0]
-        with open(f'out/models/model_{name}.pickle', 'rb') as handle:
+        with open(f'{path}.pickle', 'rb') as handle: #out/models/model_{name}
             model = pickle.load(handle)
         with open(e, 'rb') as handle:
             user_strategy = pickle.load(handle)   
-        bounds = search_bounds(model, user_strategy)
+        bounds = (0,1)#search_bounds(model, user_strategy)
+        print(bounds)
         experiments.extend([(e, round(bounds[0] + (bounds[1] - bounds[0]) * 1/(args.steps) * s, 4), args.timeout) for s in range(args.steps+1)])
         experiments.append((e, 1, args.timeout))
     # experiments = [(p, 1/(args.steps)*s, args.timeout) for p in benchmark_strategies for s in range(args.steps+1)]
 
-    # manual tests
-    # path = 'out/user_strategies/model_spotify4000_it_0.pickle'
+    # # manual tests
+    # path = 'out/models/model_spotify1000_model-it_0.pickle'
     # name = str(path).split('model_')[1].split('_')[0]
-    # with open(f'out/models/model_{name}.pickle', 'rb') as handle:
+    # with open('out/models/model_spotify3000_model-it_0.pickle', 'rb') as handle: #open(f'out/models/model_{name}.pickle', 'rb') as handle:
     #     model = pickle.load(handle)
     # with open(path, 'rb') as handle:
-    #     user_strategy = pickle.load(handle)   
+    #     user_strategy = construct_user_strategy(model)
+    #     # user_strategy = pickle.load(handle)   
     # print("search_bounds", search_bounds(model, user_strategy))
     
     # o, strat = minimum_reachability(model)
     # print("optimal", o)
-    # run_experiment((path, 0.35, args.timeout))
+    # r_qp = quadratic_program(model, 0.35, user_strategy, timeout=args.timeout, debug=False)
+    # # run_experiment((path, 0.35, args.timeout))
     # assert(False)
     
+    df_results = pd.DataFrame()
+    stored_results = []
     with multiprocessing.Pool(processes=args.cores) as pool:
-        result = pool.map(run_experiment, experiments)
+        result = pool.imap_unordered(run_experiment, experiments)
+        for r in result:
+            stored_results.append(r)
+            new_df = r[3].df()
+            new_df['path'] = [r[0]]
+            df_results = pd.concat([df_results, new_df])
+            df_results.to_csv("out/results.csv")
     # result = [run_experiment(e) for e in experiments]
-          
+    result = stored_results
+    
+    assert(False)
+    
     r_geom = []
     r_qp = []
     r_o = []
