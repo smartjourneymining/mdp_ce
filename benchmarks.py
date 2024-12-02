@@ -1073,9 +1073,9 @@ if __name__ == '__main__':
     # manual tests
     path = 'out/models/model_spotify3000_model-it_0.pickle'
     name = str(path).split('model_')[1].split('_')[0]
-    with open('out/models/model_spotify1000_model-it_0.pickle', 'rb') as handle: #open(f'out/models/model_{name}.pickle', 'rb') as handle:
+    with open('out/models/model_spotify3000_model-it_0.pickle', 'rb') as handle: #open(f'out/models/model_{name}.pickle', 'rb') as handle:
         model = pickle.load(handle)
-    with open('out/user_strategies/model_spotify1000_model-it_0_it_0.pickle', 'rb') as handle:
+    with open('out/user_strategies/model_spotify3000_model-it_0_it_0.pickle', 'rb') as handle:
         user_strategy = pickle.load(handle)
         # user_strategy = pickle.load(handle)   
     # print("search_bounds", search_bounds(model, user_strategy))
