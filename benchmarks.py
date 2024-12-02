@@ -1074,9 +1074,9 @@ if __name__ == '__main__':
         path = str(e).split('_it_')[0].replace('user_strategies', 'models')
         name = str(e).split('model_')[1].split('_')[0]
         with open(f'{path}.pickle', 'rb') as handle: #out/models/model_{name}
-            model = round_probabilities_model(pickle.load(handle), 8)
+            model = pickle.load(handle)
         with open(e, 'rb') as handle:
-            user_strategy = round_probabilities_strategy(pickle.load(handle), 8)
+            user_strategy = pickle.load(handle)
         bounds = (0,1)#search_bounds(model, user_strategy)
         print(bounds)
         experiments.extend([(e, round(bounds[0] + (bounds[1] - bounds[0]) * 1/(args.steps) * s, 4), args.timeout) for s in range(args.steps+1)])
