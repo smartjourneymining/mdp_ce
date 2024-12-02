@@ -338,8 +338,8 @@ def z3_feasible(model : nx.DiGraph, target_prob : float, user_strategy : dict, t
         solver.add(0 <= decision_changed[s])
         solver.add(decision_changed[s] == 0.5 * sum(d_sa[s].values()))
         solver.add(decision_changed[s] <= 10 * dist_binary[s])
-    solver.minimize(sum(dist_binary.values()))
-    # solver.add(sum(dist_binary.values()) == target_d_0)
+    # solver.minimize(sum(dist_binary.values()))
+    solver.add(sum(dist_binary.values()) == target_d_0)
         
     if debug or True:
         # set_option(max_args=10000000, max_lines=1000000, max_depth=10000000, max_visited=1000000)
