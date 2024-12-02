@@ -798,7 +798,7 @@ def construct_user_strategy(model : nx.DiGraph):
         if not model.edges[list(model.edges(s))[0]]['controllable'] and model.edges[list(model.edges(s))[0]]['action'] != 'env':
             enabled_actions = list(set([model.edges[e]['action'] for e in model.edges(s)]))
             distr = random.choices(range(1, 1000), k=len(enabled_actions))
-            user_strategy[s] = {enabled_actions[i] : distr[i] / sum(distr) for i in range(len(enabled_actions))}
+            user_strategy[s] = {enabled_actions[i] : round(distr[i] / sum(distr), 4) for i in range(len(enabled_actions))}
     
     return user_strategy
 
@@ -993,6 +993,13 @@ def search_bounds(model, user_strategy, debug = False):
             return (max(0.001, o-0.1),(p+0.1))
     return (0.001,1)
 
+def round_probabilities(model):
+    for s in model.nodes:
+        total_sum = sum([round(float(model.edges[e]['prob_weight']), 4) for e in model.edges(s)])
+        for e in model.edges(s):
+            model.edges[e]['prob_weight'] = round(float(model.edges[e]['prob_weight']), 4) / total_sum
+    return model
+
 def run_experiment(param):
     path = param[0]
     p = param[1]
@@ -1065,7 +1072,7 @@ if __name__ == '__main__':
         path = str(e).split('_it_')[0].replace('user_strategies', 'models')
         name = str(e).split('model_')[1].split('_')[0]
         with open(f'{path}.pickle', 'rb') as handle: #out/models/model_{name}
-            model = pickle.load(handle)
+            model = round_probabilities(pickle.load(handle))
         with open(e, 'rb') as handle:
             user_strategy = pickle.load(handle)   
         bounds = (0,1)#search_bounds(model, user_strategy)
