@@ -995,9 +995,9 @@ def search_bounds(model, user_strategy, debug = False):
 
 def round_probabilities(model):
     for s in model.nodes:
-        total_sum = sum([round(float(model.edges[e]['prob_weight']), 4) for e in model.edges(s)])
+        total_sum = sum([round(float(model.edges[e]['prob_weight']), 2) for e in model.edges(s)])
         for e in model.edges(s):
-            model.edges[e]['prob_weight'] = round(float(model.edges[e]['prob_weight']), 4) / total_sum
+            model.edges[e]['prob_weight'] = round(float(model.edges[e]['prob_weight']), 2) / total_sum
     return model
 
 def run_experiment(param):
