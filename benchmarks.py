@@ -267,9 +267,9 @@ def minimum_reachability(model : nx.DiGraph, debug = False):
     return m.ObjVal, construct_optimal_strategy_from_solution(model, p)
     
 def z3_feasible(model : nx.DiGraph, target_prob : float, user_strategy : dict, target_d_0 , timeout = 60*60, threads = 1, debug = False):
-    z3.memory_max_size = 8000
-    # solver = Solver()
-    solver = Optimize()
+    # z3.memory_max_size = 8000
+    solver = Solver()
+    # solver = Optimize()
     p = {s : Real(name=s) for s in model.nodes}
     for v in p:
         solver.add(p[v] <= 1)
@@ -1071,7 +1071,7 @@ if __name__ == '__main__':
     # experiments = [(p, 1/(args.steps)*s, args.timeout) for p in benchmark_strategies for s in range(args.steps+1)]
 
     # manual tests
-    path = 'out/models/model_spotify3000_model-it_0.pickle'
+    path = 'out/models/model_spotify1000_model-it_0.pickle'
     name = str(path).split('model_')[1].split('_')[0]
     with open('out/models/model_spotify3000_model-it_0.pickle', 'rb') as handle: #open(f'out/models/model_{name}.pickle', 'rb') as handle:
         model = pickle.load(handle)
