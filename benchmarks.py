@@ -48,6 +48,7 @@ import itertools
 from pathlib import Path
 
 import mosek
+from z3 import *
 
 import pyrootutils
 path = pyrootutils.find_root(search_from=__file__, indicator=".project-root")
@@ -265,6 +266,93 @@ def minimum_reachability(model : nx.DiGraph, debug = False):
     
     return m.ObjVal, construct_optimal_strategy_from_solution(model, p)
     
+def z3_feasible(model : nx.DiGraph, target_prob : float, user_strategy : dict, target_d_0 , timeout = 60*60, threads = 1, debug = False):
+    z3.memory_max_size = 8000
+    # solver = Solver()
+    solver = Optimize()
+    p = {s : Real(name=s) for s in model.nodes}
+    for v in p:
+        solver.add(p[v] <= 1)
+        solver.add(0 <= p[v])
+    # encode actions
+    p_sa = {}
+    for s in model.nodes:
+        if 'positive' in s:
+            solver.add(p[s] == 0)
+            continue
+        if 'negative' in s:
+            solver.add(p[s] == 1)
+            continue
+        enabled_actions = set([model.edges[e]['action'] for e in model.edges(s)])
+        if 'customer' not in s:
+            assert len(enabled_actions) <= 1, f'More than one action for non-user state {s} : {enabled_actions}' 
+        p_sa[s] = {a : Real(name=s+'_'+a) for a in enabled_actions}
+        solver.add(sum(list(p_sa[s].values())) == 1) # scheduler sums up to one
+        for a in enabled_actions:
+            solver.add(p_sa[s][a] <= 1)
+            solver.add(0 <= p_sa[s][a])
+            
+    # encode model
+    for s in p_sa:
+        enabled_actions = set([model.edges[e]['action'] for e in model.edges(s)])
+        assert len(enabled_actions) >= 1, f'State{s} has no enabled action'
+        solver.add(p[s] == sum([p_sa[s][model.edges[e]['action']] * round(float(model.edges[e]['prob_weight']), 2) * p[e[1]] for e in model.edges(s)]))
+
+    # encode reachability constraint
+    start_state = [s for s in model.nodes if 'q0: start' in s]
+    assert len(start_state) == 1, start_state
+    start_state = start_state[0]
+    solver.add(p[start_state] <= target_prob)
+    
+    def abs(x):
+        return If(x >= 0,x,-x)
+    
+    def add_abs(var, prob, constr):
+        solver.add(prob - constr <= var)
+        solver.add(constr - prob <= var)
+
+    d_sa = {}
+    for s in model.nodes:
+        if 'positive' in s or 'negative' in s:
+            continue
+        if model.edges[list(model.edges(s))[0]]['controllable'] or model.edges[list(model.edges(s))[0]]['action'] == 'env':
+            continue
+        enabled_actions = set([model.edges[e]['action'] for e in model.edges(s)])
+        if 'customer' not in s:
+            assert len(enabled_actions) == 1, f'More than one action for non-user state {s}' 
+        d_sa[s] = {a : Real(name=f'Abs dist state {s} action {a}') for a in enabled_actions}
+        for a in enabled_actions:
+            solver.add(d_sa[s][a] <= 1)
+            solver.add(0 <= d_sa[s][a])
+            add_abs(d_sa[s][a], p_sa[s][a], round(user_strategy[s][a], 2))
+            # solver.add(d_sa[s][a] == abs(p_sa[s][a] - user_strategy[s][a]))
+        # encode d_inf constraint
+    
+    # encode sparsity
+    decision_changed = {}
+    dist_binary = {}
+    for s in d_sa:
+        dist_binary[s] = Bool(name=f'State {s} was changed')
+        decision_changed[s] = Real(name=f'Var dist state {s}')
+        solver.add(decision_changed[s] <= 1)
+        solver.add(0 <= decision_changed[s])
+        solver.add(decision_changed[s] == 0.5 * sum(d_sa[s].values()))
+        solver.add(decision_changed[s] <= 10 * dist_binary[s])
+    solver.minimize(sum(dist_binary.values()))
+    # solver.add(sum(dist_binary.values()) == target_d_0)
+        
+    if debug or True:
+        # set_option(max_args=10000000, max_lines=1000000, max_depth=10000000, max_visited=1000000)
+        print(solver)
+        # print(solver)
+       
+    r = solver.check() 
+    print(r)
+    print(solver.statistics())
+    
+    if r == "sat":
+        m = solver.model()
+    
 def quadratic_program(model : nx.DiGraph, target_prob : float, user_strategy : dict, timeout = 60*60, threads = 1, debug = False):
     gp.setParam("Threads", threads)
     m = gp.Model("qp")
@@ -348,8 +436,7 @@ def quadratic_program(model : nx.DiGraph, target_prob : float, user_strategy : d
         m.addConstr(decision_changed[s] == 0.5 * sum(d_sa[s].values()))
         m.addConstr(decision_changed[s] <= 10 * dist_binary[s])
     m.addConstr(sum(dist_binary.values()) == d_0)
-    
-    m.write("out/gurobi.lp")
+
     
     m.setObjective(d_0 + d_1 + d_inf, sense = GRB.MINIMIZE)
     m.optimize()
