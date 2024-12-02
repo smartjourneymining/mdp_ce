@@ -989,14 +989,14 @@ def search_bounds(model, user_strategy, debug = False):
             return (max(0.001, o-0.1),(p+0.1))
     return (0.001,1)
 
-def round_probabilities(model, precision):
+def round_probabilities_model(model, precision):
     for s in model.nodes:
         total_sum = sum([round(float(model.edges[e]['prob_weight']), precision) for e in model.edges(s)])
         for e in model.edges(s):
             model.edges[e]['prob_weight'] = round(float(model.edges[e]['prob_weight']), precision) / total_sum
     return model
 
-def round_strategy_probabilities(strategy, precision = 2):
+def round_probabilities_strategy(strategy, precision = 2):
     for s in strategy:
         total_sum = sum(round(strategy[s][a], precision) for a in strategy[s])
         for a in strategy[s]:
@@ -1074,9 +1074,9 @@ if __name__ == '__main__':
         path = str(e).split('_it_')[0].replace('user_strategies', 'models')
         name = str(e).split('model_')[1].split('_')[0]
         with open(f'{path}.pickle', 'rb') as handle: #out/models/model_{name}
-            model = round_probabilities(pickle.load(handle), 2)
+            model = round_probabilities_model(pickle.load(handle), 2)
         with open(e, 'rb') as handle:
-            user_strategy = round_probabilities(pickle.load(handle), 2)
+            user_strategy = round_probabilities_strategy(pickle.load(handle), 2)
         bounds = (0,1)#search_bounds(model, user_strategy)
         print(bounds)
         experiments.extend([(e, round(bounds[0] + (bounds[1] - bounds[0]) * 1/(args.steps) * s, 4), args.timeout) for s in range(args.steps+1)])
