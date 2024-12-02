@@ -296,7 +296,7 @@ def z3_feasible(model : nx.DiGraph, target_prob : float, user_strategy : dict, t
     for s in p_sa:
         enabled_actions = set([model.edges[e]['action'] for e in model.edges(s)])
         assert len(enabled_actions) >= 1, f'State{s} has no enabled action'
-        solver.add(p[s] == sum([p_sa[s][model.edges[e]['action']] * round(float(model.edges[e]['prob_weight']), 2) * p[e[1]] for e in model.edges(s)]))
+        solver.add(p[s] == sum([p_sa[s][model.edges[e]['action']] * float(model.edges[e]['prob_weight']) * p[e[1]] for e in model.edges(s)]))
 
     # encode reachability constraint
     start_state = [s for s in model.nodes if 'q0: start' in s]
