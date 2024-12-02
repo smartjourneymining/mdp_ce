@@ -1070,21 +1070,23 @@ if __name__ == '__main__':
         experiments.append((e, 1, args.timeout))
     # experiments = [(p, 1/(args.steps)*s, args.timeout) for p in benchmark_strategies for s in range(args.steps+1)]
 
-    # # manual tests
-    # path = 'out/models/model_spotify1000_model-it_0.pickle'
-    # name = str(path).split('model_')[1].split('_')[0]
-    # with open('out/models/model_spotify3000_model-it_0.pickle', 'rb') as handle: #open(f'out/models/model_{name}.pickle', 'rb') as handle:
-    #     model = pickle.load(handle)
-    # with open(path, 'rb') as handle:
-    #     user_strategy = construct_user_strategy(model)
-    #     # user_strategy = pickle.load(handle)   
+    # manual tests
+    path = 'out/models/model_spotify3000_model-it_0.pickle'
+    name = str(path).split('model_')[1].split('_')[0]
+    with open('out/models/model_spotify1000_model-it_0.pickle', 'rb') as handle: #open(f'out/models/model_{name}.pickle', 'rb') as handle:
+        model = pickle.load(handle)
+    with open('out/user_strategies/model_spotify1000_model-it_0_it_0.pickle', 'rb') as handle:
+        user_strategy = pickle.load(handle)
+        # user_strategy = pickle.load(handle)   
     # print("search_bounds", search_bounds(model, user_strategy))
     
-    # o, strat = minimum_reachability(model)
-    # print("optimal", o)
-    # r_qp = quadratic_program(model, 0.35, user_strategy, timeout=args.timeout, debug=False)
-    # # run_experiment((path, 0.35, args.timeout))
-    # assert(False)
+    o, strat = minimum_reachability(model)
+    print("optimal", o)
+    r_qp = z3_feasible(model, 0.35, user_strategy, 1, timeout=args.timeout, debug=False)
+    r_qp = quadratic_program(model, 0.35, user_strategy, timeout=args.timeout, debug=False)
+    print(r_qp.df())
+    # run_experiment((path, 0.35, args.timeout))
+    assert(False)
     
     df_results = pd.DataFrame()
     stored_results = []
