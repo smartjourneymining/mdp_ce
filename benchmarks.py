@@ -324,7 +324,7 @@ def z3_feasible(model : nx.DiGraph, target_prob : float, user_strategy : dict, t
         for a in enabled_actions:
             solver.add(d_sa[s][a] <= 1)
             solver.add(0 <= d_sa[s][a])
-            add_abs(d_sa[s][a], p_sa[s][a], round(user_strategy[s][a], 2))
+            add_abs(d_sa[s][a], p_sa[s][a], user_strategy[s][a])
             # solver.add(d_sa[s][a] == abs(p_sa[s][a] - user_strategy[s][a]))
         # encode d_inf constraint
     
@@ -445,10 +445,6 @@ def quadratic_program(model : nx.DiGraph, target_prob : float, user_strategy : d
         return Result(m.Runtime, -0.2, target_prob, {}, timeout, 0, m.status)
     
     if m.status == GRB.TIME_LIMIT:
-        print("Distances")
-        print("d_inf", d_inf.X)
-        print("d_1", d_1.X)
-        print("d_0", d_0.X)
         return Result(m.Runtime, m.ObjVal, target_prob, {}, timeout, m.MIPGap, m.status)
      
     assert m.status == GRB.OPTIMAL or m.status == GRB.SUBOPTIMAL, f'Status is {m.status}'
@@ -798,7 +794,7 @@ def construct_user_strategy(model : nx.DiGraph):
         if not model.edges[list(model.edges(s))[0]]['controllable'] and model.edges[list(model.edges(s))[0]]['action'] != 'env':
             enabled_actions = list(set([model.edges[e]['action'] for e in model.edges(s)]))
             distr = random.choices(range(1, 1000), k=len(enabled_actions))
-            user_strategy[s] = {enabled_actions[i] : round(distr[i] / sum(distr), 4) for i in range(len(enabled_actions))}
+            user_strategy[s] = {enabled_actions[i] : distr[i] / sum(distr) for i in range(len(enabled_actions))}
     
     return user_strategy
 
@@ -993,12 +989,18 @@ def search_bounds(model, user_strategy, debug = False):
             return (max(0.001, o-0.1),(p+0.1))
     return (0.001,1)
 
-def round_probabilities(model):
+def round_probabilities(model, precision):
     for s in model.nodes:
-        total_sum = sum([round(float(model.edges[e]['prob_weight']), 2) for e in model.edges(s)])
+        total_sum = sum([round(float(model.edges[e]['prob_weight']), precision) for e in model.edges(s)])
         for e in model.edges(s):
-            model.edges[e]['prob_weight'] = round(float(model.edges[e]['prob_weight']), 2) / total_sum
+            model.edges[e]['prob_weight'] = round(float(model.edges[e]['prob_weight']), precision) / total_sum
     return model
+
+def round_strategy_probabilities(strategy, precision = 2):
+    for s in strategy:
+        total_sum = sum(round(strategy[s][a], precision) for a in strategy[s])
+        for a in strategy[s]:
+            strategy[s][a] = round(strategy[s][a], precision) / total_sum
 
 def run_experiment(param):
     path = param[0]
@@ -1072,32 +1074,32 @@ if __name__ == '__main__':
         path = str(e).split('_it_')[0].replace('user_strategies', 'models')
         name = str(e).split('model_')[1].split('_')[0]
         with open(f'{path}.pickle', 'rb') as handle: #out/models/model_{name}
-            model = round_probabilities(pickle.load(handle))
+            model = round_probabilities(pickle.load(handle), 2)
         with open(e, 'rb') as handle:
-            user_strategy = pickle.load(handle)   
+            user_strategy = round_probabilities(pickle.load(handle), 2)
         bounds = (0,1)#search_bounds(model, user_strategy)
         print(bounds)
         experiments.extend([(e, round(bounds[0] + (bounds[1] - bounds[0]) * 1/(args.steps) * s, 4), args.timeout) for s in range(args.steps+1)])
         experiments.append((e, 1, args.timeout))
     # experiments = [(p, 1/(args.steps)*s, args.timeout) for p in benchmark_strategies for s in range(args.steps+1)]
 
-    # manual tests
-    path = 'out/models/model_spotify1000_model-it_0.pickle'
-    name = str(path).split('model_')[1].split('_')[0]
-    with open('out/models/model_spotify3000_model-it_0.pickle', 'rb') as handle: #open(f'out/models/model_{name}.pickle', 'rb') as handle:
-        model = pickle.load(handle)
-    with open('out/user_strategies/model_spotify3000_model-it_0_it_0.pickle', 'rb') as handle:
-        user_strategy = pickle.load(handle)
-        # user_strategy = pickle.load(handle)   
-    # print("search_bounds", search_bounds(model, user_strategy))
+    # # manual tests
+    # path = 'out/models/model_spotify1000_model-it_7.pickle'
+    # name = str(path).split('model_')[1].split('_')[0]
+    # with open('out/models/model_spotify1000_model-it_7.pickle', 'rb') as handle: #open(f'out/models/model_{name}.pickle', 'rb') as handle:
+    #     model = pickle.load(handle)
+    # with open('out/user_strategies/model_spotify1000_model-it_7_it_0.pickle', 'rb') as handle:
+    #     user_strategy = pickle.load(handle)
+    #     # user_strategy = pickle.load(handle)   
+    # # print("search_bounds", search_bounds(model, user_strategy))
     
-    o, strat = minimum_reachability(model)
-    print("optimal", o)
-    r_qp = z3_feasible(model, 0.35, user_strategy, 1, timeout=args.timeout, debug=False)
-    r_qp = quadratic_program(model, 0.35, user_strategy, timeout=args.timeout, debug=False)
-    print(r_qp.df())
-    # run_experiment((path, 0.35, args.timeout))
-    assert(False)
+    # o, strat = minimum_reachability(model)
+    # print("optimal", o)
+    # # r_qp = z3_feasible(model, 0.35, user_strategy, 1, timeout=args.timeout, debug=False)
+    # r_qp = quadratic_program(model, 0.35, user_strategy, timeout=args.timeout, debug=False)
+    # print(r_qp.df())
+    # # run_experiment((path, 0.35, args.timeout))
+    # assert(False)
     
     df_results = pd.DataFrame()
     stored_results = []
