@@ -450,8 +450,8 @@ def quadratic_program(model : nx.DiGraph, target_prob : float, user_strategy : d
     assert m.status == GRB.OPTIMAL or m.status == GRB.SUBOPTIMAL, f'Status is {m.status}'
     print("Distances")
     print("d_inf", d_inf.X)
-    print("d_1", d_1.X)
-    print("d_0", d_0.X)
+    # print("d_1", d_1.X)
+    # print("d_0", d_0.X)
     if debug:
         for v in m.getVars():
             print(f"{v.VarName} {v.X:g}")
