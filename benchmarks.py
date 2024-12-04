@@ -390,8 +390,8 @@ def quadratic_program(model : nx.DiGraph, target_prob : float, user_strategy : d
     m.addConstr(p[start_state] <= target_prob)
     
     
-    d_0 = m.addVar(name='d0', lb = 0)
-    d_1 = m.addVar(name='d1', lb = 0, ub=1)
+    # d_0 = m.addVar(name='d0', lb = 0)
+    # d_1 = m.addVar(name='d1', lb = 0, ub=1)
     d_inf = m.addVar(name='d_inf', lb = 0, ub=1)
 
     # strict proximal
@@ -424,21 +424,21 @@ def quadratic_program(model : nx.DiGraph, target_prob : float, user_strategy : d
             
     # relaxed proximal
     # use d_sa to encode d_1 norm
-    m.addConstr(d_1 == sum([0.5 * sum(d_sa[s].values()) for s in d_sa]) / len(user_strategy))
+    # m.addConstr(d_1 == sum([0.5 * sum(d_sa[s].values()) for s in d_sa]) / len(user_strategy))
     #m.addConstr(d_1 == norm([0.5 * sum(d_sa[s].values()) for s in d_sa], 1.0))
     
     # encode sparsity
-    decision_changed = {}
-    dist_binary = {}
-    for s in d_sa:
-        dist_binary[s] = m.addVar(ub=1.0, name=f'State {s} was changed', lb = 0, vtype=gp.GRB.BINARY)
-        decision_changed[s] = m.addVar(ub=1.0, name=f'Var dist state {s}', lb = 0) 
-        m.addConstr(decision_changed[s] == 0.5 * sum(d_sa[s].values()))
-        m.addConstr(decision_changed[s] <= 10 * dist_binary[s])
-    m.addConstr(sum(dist_binary.values()) == d_0)
+    # decision_changed = {}
+    # dist_binary = {}
+    # for s in d_sa:
+    #     dist_binary[s] = m.addVar(ub=1.0, name=f'State {s} was changed', lb = 0, vtype=gp.GRB.BINARY)
+    #     decision_changed[s] = m.addVar(ub=1.0, name=f'Var dist state {s}', lb = 0) 
+    #     m.addConstr(decision_changed[s] == 0.5 * sum(d_sa[s].values()))
+    #     m.addConstr(decision_changed[s] <= 10 * dist_binary[s])
+    # m.addConstr(sum(dist_binary.values()) == d_0)
 
     
-    m.setObjective(d_0 + d_1 + d_inf, sense = GRB.MINIMIZE)
+    m.setObjective(d_inf, sense = GRB.MINIMIZE) # d_ 1+ d_0
     m.optimize()
     
     if m.status == GRB.INFEASIBLE:
