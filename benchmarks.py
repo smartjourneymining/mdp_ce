@@ -390,8 +390,8 @@ def quadratic_program(model : nx.DiGraph, target_prob : float, user_strategy : d
     m.addConstr(p[start_state] <= target_prob)
     
     
-    # d_0 = m.addVar(name='d0', lb = 0)
-    # d_1 = m.addVar(name='d1', lb = 0, ub=1)
+    d_0 = m.addVar(name='d0', lb = 0)
+    d_1 = m.addVar(name='d1', lb = 0, ub=1)
     d_inf = m.addVar(name='d_inf', lb = 0, ub=1)
 
     # strict proximal
@@ -424,34 +424,37 @@ def quadratic_program(model : nx.DiGraph, target_prob : float, user_strategy : d
             
     # relaxed proximal
     # use d_sa to encode d_1 norm
-    # m.addConstr(d_1 == sum([0.5 * sum(d_sa[s].values()) for s in d_sa]) / len(user_strategy))
+    m.addConstr(d_1 == sum([0.5 * sum(d_sa[s].values()) for s in d_sa]) / len(user_strategy)) 
     #m.addConstr(d_1 == norm([0.5 * sum(d_sa[s].values()) for s in d_sa], 1.0))
     
     # encode sparsity
-    # decision_changed = {}
-    # dist_binary = {}
-    # for s in d_sa:
-    #     dist_binary[s] = m.addVar(ub=1.0, name=f'State {s} was changed', lb = 0, vtype=gp.GRB.BINARY)
-    #     decision_changed[s] = m.addVar(ub=1.0, name=f'Var dist state {s}', lb = 0) 
-    #     m.addConstr(decision_changed[s] == 0.5 * sum(d_sa[s].values()))
-    #     m.addConstr(decision_changed[s] <= 10 * dist_binary[s])
-    # m.addConstr(sum(dist_binary.values()) == d_0)
+    decision_changed = {}
+    dist_binary = {}
+    for s in d_sa:
+        dist_binary[s] = m.addVar(ub=1.0, name=f'State {s} was changed', lb = 0, vtype=gp.GRB.BINARY)
+        decision_changed[s] = m.addVar(ub=1.0, name=f'Var dist state {s}', lb = 0) 
+        m.addConstr(decision_changed[s] == 0.5 * sum(d_sa[s].values()))
+        m.addConstr(decision_changed[s] <= 10 * dist_binary[s])
+    m.addConstr(sum(dist_binary.values()) == d_0)
 
     
-    m.setObjective(d_inf, sense = GRB.MINIMIZE) # d_ 1+ d_0
+    m.setObjective(d_0 + d_1 + d_inf, sense = GRB.MINIMIZE)
     m.optimize()
     
     if m.status == GRB.INFEASIBLE:
         return Result(m.Runtime, -0.2, target_prob, {}, timeout, 0, m.status)
     
     if m.status == GRB.TIME_LIMIT:
-        return Result(m.Runtime, m.ObjVal, target_prob, {}, timeout, m.MIPGap, m.status)
+        if m.SolCount == 0:
+            return Result(m.Runtime, m.ObjVal, target_prob, {}, timeout, m.MIPGap, m.status)
+        else:
+            return Result(m.Runtime, m.ObjVal, target_prob, {}, timeout, m.MIPGap, GRB.SUBOPTIMAL)
      
-    assert m.status == GRB.OPTIMAL or m.status == GRB.SUBOPTIMAL, f'Status is {m.status}'
+    assert m.status == GRB.OPTIMAL, f'Status is {m.status}'
     print("Distances")
     print("d_inf", d_inf.X)
-    # print("d_1", d_1.X)
-    # print("d_0", d_0.X)
+    print("d_1", d_1.X)
+    print("d_0", d_0.X)
     if debug:
         for v in m.getVars():
             print(f"{v.VarName} {v.X:g}")
@@ -1084,11 +1087,11 @@ if __name__ == '__main__':
     # experiments = [(p, 1/(args.steps)*s, args.timeout) for p in benchmark_strategies for s in range(args.steps+1)]
 
     # # manual tests
-    # path = 'out/models/model_spotify1000_model-it_7.pickle'
+    # path = 'out/models/model_spotify2000_model-it_4.pickle'
     # name = str(path).split('model_')[1].split('_')[0]
-    # with open('out/models/model_spotify1000_model-it_7.pickle', 'rb') as handle: #open(f'out/models/model_{name}.pickle', 'rb') as handle:
+    # with open('out/models/model_spotify2000_model-it_4.pickle', 'rb') as handle: #open(f'out/models/model_{name}.pickle', 'rb') as handle:
     #     model = pickle.load(handle)
-    # with open('out/user_strategies/model_spotify1000_model-it_7_it_0.pickle', 'rb') as handle:
+    # with open('out/user_strategies/model_spotify2000_model-it_4_it_9.pickle', 'rb') as handle:
     #     user_strategy = pickle.load(handle)
     #     # user_strategy = pickle.load(handle)   
     # # print("search_bounds", search_bounds(model, user_strategy))
