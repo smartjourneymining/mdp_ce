@@ -1080,10 +1080,10 @@ if __name__ == '__main__':
             model = pickle.load(handle)
         with open(e, 'rb') as handle:
             user_strategy = pickle.load(handle)
-        bounds = (0.15,0.5)#search_bounds(model, user_strategy)
+        bounds = (0, 1) #(0.15,0.5)#search_bounds(model, user_strategy)
         print(bounds)
         experiments.extend([(e, round(bounds[0] + (bounds[1] - bounds[0]) * 1/(args.steps) * s, 4), args.timeout) for s in range(args.steps+1)])
-        experiments.append((e, 0.5, args.timeout))
+        #experiments.append((e, 1, args.timeout))
     # experiments = [(p, 1/(args.steps)*s, args.timeout) for p in benchmark_strategies for s in range(args.steps+1)]
 
     # # manual tests
