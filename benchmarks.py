@@ -353,6 +353,39 @@ def z3_feasible(model : nx.DiGraph, target_prob : float, user_strategy : dict, t
     if r == "sat":
         m = solver.model()
     
+def evaluate_strategy(model : nx.DiGraph, user_strategy : dict, timeout = 60*60, threads = 1, debug = False):
+    gp.setParam("Threads", threads)
+    m = gp.Model("qp")
+    m.setParam('TimeLimit', timeout)
+    m.setParam('SoftMemLimit', 2.5)
+    p = {s : m.addVar(ub=1.0, name=s, lb = 0) for s in model.nodes}
+    
+    # encode model
+    for s in p:
+        if 'positive' in s:
+            m.addConstr(p[s] == 0)
+            continue
+        if 'negative' in s:
+            m.addConstr(p[s] == 1)
+            continue
+        enabled_actions = set([model.edges[e]['action'] for e in model.edges(s)])
+        assert len(enabled_actions) >= 1, f'State{s} has no enabled action'
+        if 'customer' not in s:
+            assert len(enabled_actions) == 1
+            m.addConstr(p[s] == sum([float(model.edges[e]['prob_weight']) * p[e[1]] for e in model.edges(s)]))
+        else:
+            m.addConstr(p[s] == sum([user_strategy[s][model.edges[e]['action']] * float(model.edges[e]['prob_weight']) * p[e[1]] for e in model.edges(s)]))
+    
+    # encode reachability constraint
+    start_state = [s for s in model.nodes if 'q0: start' in s]
+    assert len(start_state) == 1, start_state
+    start_state = start_state[0]
+    
+    m.setObjective(p[start_state], sense = GRB.MINIMIZE)
+    m.optimize()
+    
+    return m.ObjVal
+
 def quadratic_program(model : nx.DiGraph, target_prob : float, user_strategy : dict, timeout = 60*60, threads = 1, debug = False):
     gp.setParam("Threads", threads)
     m = gp.Model("qp")
