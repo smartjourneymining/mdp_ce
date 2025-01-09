@@ -108,6 +108,14 @@ user_strategy['error_customer'] = {'consult': 0.2, 'quit' : 0.8}
 user_strategy['consultation_customer'] = {'quit': 1, 'apply' : 0}
 user_strategy['rework_customer'] = {'submit': 0.3, 'quit' : 0.7}
 
-benchmarks.quadratic_program(model, 0.2, user_strategy)
+print("Reachability so far:")
+print(benchmarks.evaluate_strategy(model, user_strategy))
+print("#######################")
+print()
 
-benchmarks.plot_changes(model, "example", user_strategy=user_strategy, counterfactual_strategy=user_strategy, layout="dot")
+result = benchmarks.quadratic_program(model, 0.2, user_strategy)
+benchmarks.plot_changes(model, "example", user_strategy=user_strategy, counterfactual_strategy=result.strategy, layout="dot")
+print("#######################")
+print()
+
+result_div = benchmarks.diversity_program(model, 0.2, user_strategy, result)
