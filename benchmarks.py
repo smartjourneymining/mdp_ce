@@ -40,7 +40,6 @@ import argparse
 
 import pickle
 REGENERATE = False
-STRATEGY_SLACK = 0.1 
 
 import LogParser
 
@@ -1065,7 +1064,6 @@ if __name__ == '__main__':
     parser.add_argument('-s', '--steps', help = "Number of steps for each model", type=int, default = 1)
     parser.add_argument('-i', '--iterations', help = "Iterations for each step", type=int, default = 1)
     parser.add_argument('-c', '--cores', help = "Cores to use to parallelize experiments", type=int, default = 1)
-    parser.add_argument('-slack', '--strategy_slack', help = "Allowed deviation until geometric programming strategy is discarded", type=float, default = 0.1)
     parser.add_argument('-e', '--experiments', help = "Start profile to filter on", nargs='+', type=str, default = ['greps', 'bpic12', 'bpic17-before', 'bpic17-after', 'bpic17-both', 'spotify'])
     parser.add_argument('-rm', '--rebuild_models', help = "Rebuild models, implies rebuilding models", action = 'store_true')
     parser.add_argument('-rs', '--rebuild_strategies', help = "Rebuild strategies", action = 'store_true')
@@ -1074,7 +1072,6 @@ if __name__ == '__main__':
     parser.add_argument('-d', '--diversity_runs', help = "Number of diverse counterfactuals", type=int, default = 2)
     args = parser.parse_args()
     
-    STRATEGY_SLACK = args.strategy_slack
     
     geom_results = []
     qp_results = []
