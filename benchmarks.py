@@ -845,6 +845,22 @@ def strategy_diff(strat1 : dict, strat2 : dict):
             if round(strat1[s][a], 2) != round(strat2[s][a], 2):
                 print(f'In state {s} action {a} differs, {strat1[s][a]} != {strat2[s][a]}')
 
+def textual_strategy(old_strategy : dict, new_strategy : dict):
+    assert old_strategy.keys() == new_strategy.keys()
+    for s in old_strategy:
+        assert s in new_strategy
+        assert old_strategy[s].keys() == new_strategy[s].keys()
+        printed = False
+        for a in old_strategy[s]:
+            if round(old_strategy[s][a], 2) != round(new_strategy[s][a], 2) and new_strategy[s][a] != 0:
+                if not printed:
+                    print(f'In state `{s.replace("customer", "")}\' ')
+                    printed = True
+                if new_strategy[s][a] > old_strategy[s][a]:
+                    print(f'    increase probability of action `{a}\' to {round(new_strategy[s][a], 2)}')
+                else:
+                    print(f'    decrease probability of action `{a}\' to {round(new_strategy[s][a], 2)}')
+
 def plot_results(geom, qp, optimal, experiments):
     assert len(geom) == len(qp), f'len(geom){len(geom)} != len(qp){len(qp)}'
     
@@ -895,7 +911,7 @@ def plot_changes(model : nx.DiGraph, name : str, user_strategy, counterfactual_s
         #A.add_edge(e[0], e[1], penwidth = edge_weights[e]*scaling)
 
     for n in A.nodes():
-        n.attr['label'] = n.split(':')[1]
+        n.attr['label'] = n.split(':')[0]
         # n.attr['fontsize'] = 120
         # n.attr['penwidth'] = 30
         # n.attr['height'] = 3
@@ -1052,8 +1068,6 @@ def run_experiment(param):
         model = pickle.load(handle)
     with open(path, 'rb') as handle:
         user_strategy = pickle.load(handle)
-        
-    o, strat = minimum_reachability(model)
     
     print(f'Call {model_path} with reachability probability {p} on strategy {path}')
     r_geom = Result(0, 0, 0, {}, 0, 0) # geometric_program(model,p, user_strategy, timeout=timeout, debug=True)
