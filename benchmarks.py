@@ -500,7 +500,9 @@ def quadratic_program(model : nx.DiGraph, target_prob : float, user_strategy : d
     
     strategy_diff(user_strategy, strategy)
     
-    return Result(m.Runtime, m.ObjVal, target_prob, strategy, timeout, m.MIPGap, m.status)
+    return_result = Result(m.Runtime, m.ObjVal, target_prob, strategy, timeout, m.MIPGap, m.status)
+    m.dispose()
+    return return_result
 
 def strategy_slack(strategy):
     total = 0
