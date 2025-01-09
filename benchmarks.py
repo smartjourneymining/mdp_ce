@@ -1296,21 +1296,6 @@ if __name__ == '__main__':
     # result = [run_experiment_diverse(e) for e in experiments]
     result = stored_results
     
-    assert(False) 
-    
-    df_results = pd.DataFrame()
-    stored_results = []
-    with multiprocessing.Pool(processes=args.cores) as pool:
-        result = pool.imap_unordered(run_experiment, experiments)
-        for r in result:
-            stored_results.append(r)
-            new_df = r[3].df()
-            new_df['path'] = [r[0]]
-            df_results = pd.concat([df_results, new_df])
-            df_results.to_csv("out/results.csv")
-    # result = [run_experiment(e) for e in experiments]
-    result = stored_results
-    
     assert(False)
     
     r_geom = []
