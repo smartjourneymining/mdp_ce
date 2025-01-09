@@ -896,31 +896,6 @@ def textual_strategy(old_strategy : dict, new_strategy : dict):
                 else:
                     print(f'    decrease probability of action `{a}\' to {round(new_strategy[s][a], 2)}')
 
-def plot_results(geom, qp, optimal, experiments):
-    assert len(geom) == len(qp), f'len(geom){len(geom)} != len(qp){len(qp)}'
-    
-    fig = plt.figure()
-    
-    for i in range(len(experiments)):
-        ax = plt.subplot(len(experiments), 2, 2*i+1)
-        ax.set_title(experiments[i] + "-value")
-        for j in range(len(geom[i])):
-            #ax.plot([r.target_prob for r in geom[i][j]], [r.value for r in geom[i][j]], c = "blue", label="GP" if j == 0 else '', linewidth = 1, marker='o')
-            ax.plot([r.target_prob for r in qp[i][j]], [r.value for r in qp[i][j]], c = "orange", label="QP" if j == 0 else '', linewidth = 1, marker='*')
-            ax.axvline([optimal[i][j][0]], c = 'violet', linestyle='--')
-        ax.legend()
-        
-    for i in range(len(experiments)):
-        ax = plt.subplot(len(experiments), 2, 2*i+2)
-        ax.set_title(experiments[i] + "-time")
-        for j in range(len(geom[i])):
-            #ax.plot([r.target_prob for r in geom[i][j]], [r.time for r in geom[i][j]], c = "blue", label="GP" if j == 0 else '', linewidth = 1, marker='o')
-            ax.plot([r.target_prob for r in qp[i][j]], [r.time for r in qp[i][j]], c = "orange", label="QP" if j == 0 else '', linewidth = 1, marker='*')
-        ax.axvline([optimal[i][j][0]], c = 'violet', linestyle='--')
-        ax.legend()
-        
-    plt.savefig('out/plot.png', dpi = 500)
-
 def plot_changes(model : nx.DiGraph, name : str, user_strategy, counterfactual_strategy, layout = "sfdp"):
     #def draw_dfg(g, name, names={}, layout = "sfdp", color_map = [], add_greps_cluster=True):
     """
@@ -1239,32 +1214,3 @@ if __name__ == '__main__':
             df_results.to_csv("out/results_div.csv")
     # result = [run_experiment_diverse(e) for e in experiments]
     result = stored_results
-    
-    assert(False)
-    
-    r_geom = []
-    r_qp = []
-    r_o = []
-    for i in range(len(args.experiments)):
-        name = args.experiments[i]
-        r_geom_name = []
-        r_qp_name = []
-        r_o_name = []
-        for j in range(args.iterations):
-            r_geom_inner = []
-            r_qp_inner = []
-            r_o_inner = []
-            for k in range(args.steps+2):
-                r_geom_inner.append(result[i*(args.iterations * (args.steps + 2)) + j * (args.steps + 2) + k][2])
-                r_qp_inner.append(result[i*(args.iterations * (args.steps + 2)) + j * (args.steps + 2) + k][3])
-                r_o_inner.append(result[i*(args.iterations * (args.steps + 2)) + j * (args.steps + 2) + k][4])
-            r_geom_name.append(r_geom_inner)
-            r_qp_name.append(r_qp_inner)
-            r_o_name.append(r_o_inner)
-        r_geom.append(r_geom_name)
-        r_qp.append(r_qp_name)
-        r_o.append(r_o_name)
-    plot_results(r_geom, r_qp, r_o, args.experiments)     
-    assert(False)
-        
-    plot_results(geom_results, qp_results, optimal_reachability, args.experiments)
