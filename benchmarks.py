@@ -1076,6 +1076,120 @@ def run_experiment(param):
 
     return (path, p, r_geom, r_qp, o)
 
+def run_experiment_diverse(param):
+    if not args:
+        diversity_runs = 4
+    else:
+        diversity_runs = args.diversity_runs
+    
+    path = param[0]
+    p = param[1]
+    if p == 0:
+        p = 0.0001
+    timeout = param[2]
+    
+    model_path = str(path).split('_it_')[0].replace('user_strategies', 'models')
+    with open(f'{model_path}.pickle', 'rb') as handle:
+        model = pickle.load(handle)
+    with open(path, 'rb') as handle:
+        user_strategy = pickle.load(handle)
+    
+    print(f'Call {model_path} with reachability probability {p} on strategy {path}')
+    r_geom = Result(0, 0, 0, {}, 0, 0) # geometric_program(model,p, user_strategy, timeout=timeout, debug=True)
+    import solver
+    r_qp = quadratic_program(model, p, user_strategy, timeout=timeout, debug=False)
+    r_qp_new =  solver.QuadraticProblem(model, p, user_strategy, timeout=timeout, debug=False).solve()
+    assert abs(r_qp.value - r_qp_new.value) <= 0.001, f'{r_qp.value} != {r_qp_new.value}'
+    o, strat = minimum_reachability(model)
+    
+    # diversity run
+    df_results_div = r_qp.df()
+    df_results_div['id'] = 0
+    df_results_div['path'] = path
+    df_results_div['unknown_fraction'] = 1
+    
+    if r_qp.status != GRB.OPTIMAL:
+        return pd.DataFrame()
+    
+    results_div = [r_qp]
+    for i in range(diversity_runs):
+        print(f'strat {i}')
+        r_div = diversity_program_strategy(model, p, user_strategy, results_div, timeout=args.timeout, debug=False)
+        r_div_new = solver.QuadraticProblem(model, p, user_strategy, timeout=timeout, debug=False).solve_diverse(results_div)
+        assert abs(r_div.value - r_div_new.value) <= 0.01,  f'{r_div.value} != {r_div_new.value}'
+        if r_div.status != GRB.OPTIMAL:
+            continue
+        previously_chosen_actions = get_chosen_state_action(user_strategy, results_div)
+        chosen_actions = get_chosen_state_action(user_strategy, [r_div])
+        unknown_fraction = len([a for a in chosen_actions if a not in previously_chosen_actions]) / len(chosen_actions)
+        results_div.append(r_div)
+        
+        new_df = r_div.df()
+        new_df['id'] = i+1
+        new_df['path'] = path
+        new_df['unknown_fraction'] = unknown_fraction
+        df_results_div = pd.concat([df_results_div, new_df])
+
+    return df_results_div
+
+def get_chosen_state_action(user_strategy : dict, results : list):
+    chosen_actions = set()
+    for r in [r.strategy for r in results]:
+        assert user_strategy.keys() == r.keys()
+        for s in user_strategy:
+            assert s in r
+            assert user_strategy[s].keys() == r[s].keys()
+            for a in user_strategy[s]:
+                if round(user_strategy[s][a], 2) != round(r[s][a], 2):
+                    chosen_actions.add((s,a))
+    
+    return chosen_actions
+
+def manual_execution():
+    # manual tests
+    with open('out/models/model_bpic12_model-it_4.pickle', 'rb') as handle: #open(f'out/models/model_{name}.pickle', 'rb') as handle:
+        model = pickle.load(handle)
+    with open('out/user_strategies/model_bpic12_model-it_4_it_9.pickle', 'rb') as handle:
+        user_strategy = pickle.load(handle)
+        # user_strategy = pickle.load(handle)   
+    # print("search_bounds", search_bounds(model, user_strategy))
+    
+    o, strat = minimum_reachability(model)
+    print("optimal", o)
+    # r_qp = z3_feasible(model, 0.35, user_strategy, 1, timeout=args.timeout, debug=False)
+    r_qp = quadratic_program(model, 0.35, user_strategy, timeout=args.timeout, debug=False)
+    results_div = [r_qp]
+    df_results_div = r_qp.df()
+    df_results_div['id'] = 0
+    df_results_div['unknown_fraction'] = 1
+    
+    for i in range(5):
+        print(f'strat {i}')
+        r_div = diversity_program_strategy(model, 0.35, user_strategy, results_div, timeout=args.timeout, debug=False)
+        previously_chosen_actions = get_chosen_state_action(user_strategy, results_div)
+        chosen_actions = get_chosen_state_action(user_strategy, [r_div])
+        print("previsouly chosen", previously_chosen_actions)
+        print("chosen", chosen_actions)
+        unknown_fraction = len([a for a in chosen_actions if a not in previously_chosen_actions]) / len(chosen_actions)
+        results_div.append(r_div)
+        
+        new_df = r_div.df()
+        new_df['id'] = i+1
+        new_df['path'] = "path"
+        new_df['unknown_fraction'] = unknown_fraction
+        df_results_div = pd.concat([df_results_div, new_df])
+        df_results_div.to_csv("out/results_div.csv")
+    
+    print()
+    print("Opt")
+    strategy_diff(user_strategy, r_qp.strategy)
+    for r in results_div:
+        strategy_diff(user_strategy, r.strategy)
+        print()
+    
+    
+    # run_experiment((path, 0.35, args.timeout))
+    assert(False)
     
 if __name__ == '__main__':  
     parser = argparse.ArgumentParser(
@@ -1091,6 +1205,7 @@ if __name__ == '__main__':
     parser.add_argument('-rs', '--rebuild_strategies', help = "Rebuild strategies", action = 'store_true')
     parser.add_argument('-mi', '--model_iterations', help = "Number of models to generate for each setting", type=int, default = 10)
     parser.add_argument('-as', '--all_spotify', help = "All spotify models in steps of 100 are generated", action = 'store_true')
+    parser.add_argument('-d', '--diversity_runs', help = "Number of diverse counterfactuals", type=int, default = 2)
     args = parser.parse_args()
     
     STRATEGY_SLACK = args.strategy_slack
@@ -1112,6 +1227,8 @@ if __name__ == '__main__':
         os.makedirs(os.path.dirname(filename), exist_ok=True)
         generate_user_strategies(args.experiments, args.model_iterations, args.iterations)
     
+    # trigger single, manual execution
+    # manual_execution()
     
     # for name in args.experiments:
     benchmark_strategies = []
@@ -1134,24 +1251,19 @@ if __name__ == '__main__':
         experiments.extend([(e, round(bounds[0] + (bounds[1] - bounds[0]) * 1/(args.steps) * s, 4), args.timeout) for s in range(args.steps+1)])
         #experiments.append((e, 1, args.timeout))
     # experiments = [(p, 1/(args.steps)*s, args.timeout) for p in benchmark_strategies for s in range(args.steps+1)]
-
-    # # manual tests
-    # path = 'out/models/model_spotify2000_model-it_4.pickle'
-    # name = str(path).split('model_')[1].split('_')[0]
-    # with open('out/models/model_spotify2000_model-it_4.pickle', 'rb') as handle: #open(f'out/models/model_{name}.pickle', 'rb') as handle:
-    #     model = pickle.load(handle)
-    # with open('out/user_strategies/model_spotify2000_model-it_4_it_9.pickle', 'rb') as handle:
-    #     user_strategy = pickle.load(handle)
-    #     # user_strategy = pickle.load(handle)   
-    # # print("search_bounds", search_bounds(model, user_strategy))
     
-    # o, strat = minimum_reachability(model)
-    # print("optimal", o)
-    # # r_qp = z3_feasible(model, 0.35, user_strategy, 1, timeout=args.timeout, debug=False)
-    # r_qp = quadratic_program(model, 0.35, user_strategy, timeout=args.timeout, debug=False)
-    # print(r_qp.df())
-    # # run_experiment((path, 0.35, args.timeout))
-    # assert(False)
+    df_results = pd.DataFrame()
+    stored_results = []
+    with multiprocessing.Pool(processes=args.cores) as pool:
+        result = pool.imap_unordered(run_experiment_diverse, experiments)
+        for r in result:
+            stored_results.append(r)
+            df_results = pd.concat([df_results, r])
+            df_results.to_csv("out/results_div.csv")
+    # result = [run_experiment_diverse(e) for e in experiments]
+    result = stored_results
+    
+    assert(False) 
     
     df_results = pd.DataFrame()
     stored_results = []
@@ -1268,14 +1380,3 @@ if __name__ == '__main__':
     #     qp_results.append(r_qp)
 
     plot_results(geom_results, qp_results, optimal_reachability, args.experiments)
-
-# TODO test for spotify
-# - how start profile?
-# - when end? -> if early than 20 steps
-# - switch company and customer
-# TODO geom problem d_0 constraints: iterative solution? - even necessary? min sum of changes
-# TODO clear file + git commit
-# Improving:
-# - Repairing strategies
-# - Iterative approach 
-# TODO write comments
