@@ -1030,41 +1030,6 @@ def generate_user_strategies(experiments, model_iterations, iterations):
                 with open(f'out/user_strategies/model_{name}_model-it_{i}_it_{j}.pickle', 'wb+') as handle:
                         pickle.dump(user_strategy, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
-def run_experiment(parser : LogParser.LogParser, timeout, name = "model", steps = 1, iterations = 1):
-    model = parser.build_benchmark()
-    if REGENERATE or True:
-        with open(f'out/model_{name}.pickle', 'wb+') as handle:
-            pickle.dump(model, handle)
-        user_strategy = construct_user_strategy(model) # NOTE strategies are not guaranteed to be equivalent as the set construction can change
-        with open(f'out/user_strategy_{name}.pickle', 'wb+') as handle:
-            pickle.dump(user_strategy, handle, protocol=pickle.HIGHEST_PROTOCOL)
-    with open(f'out/model_{name}.pickle', 'rb') as handle:
-        model = pickle.load(handle)
-    with open(f'out/user_strategy_{name}.pickle', 'rb') as handle:
-        user_strategy = pickle.load(handle)
-    r_geom = []
-    r_qp = []
-    for it in range(iterations):
-        r_geom_it = []
-        r_qp_it = []
-        user_strategy = construct_user_strategy(model)
-        o, strat = minimum_reachability(model)
-        print("optimal", o)
-        for i in range(0, steps+1):
-            # p = 1 : trivial, p = 0 : impossible
-            # p = 1 - i * o / steps
-            p = 1/(steps)*i
-            if p == 0:
-                p = 0.0001
-            print(f'Call with reachability probability {p}')
-            r_geom_it.append(geometric_program(model,p, user_strategy, timeout=timeout))
-            r_qp_it.append(quadratic_program(model, p, user_strategy, timeout=timeout))
-            #plot_changes(model, 'diff', r_geom[-1].strategy, user_strategy, layout='dot')
-        r_geom.append(r_geom_it)
-        r_qp.append(r_qp_it)
-    
-    return r_geom, r_qp, o
-
 def search_bounds(model, user_strategy, debug = False):
     o, optimal_strat = minimum_reachability(model)
     p = 1
@@ -1092,26 +1057,6 @@ def round_probabilities_strategy(strategy, precision = 2):
             strategy[s][a] = round(strategy[s][a], precision) / total_sum
 
 def run_experiment(param):
-    path = param[0]
-    p = param[1]
-    if p == 0:
-        p = 0.0001
-    timeout = param[2]
-    
-    model_path = str(path).split('_it_')[0].replace('user_strategies', 'models')
-    with open(f'{model_path}.pickle', 'rb') as handle:
-        model = pickle.load(handle)
-    with open(path, 'rb') as handle:
-        user_strategy = pickle.load(handle)
-    
-    print(f'Call {model_path} with reachability probability {p} on strategy {path}')
-    r_geom = Result(0, 0, 0, {}, 0, 0) # geometric_program(model,p, user_strategy, timeout=timeout, debug=True)
-    r_qp = quadratic_program(model, p, user_strategy, timeout=timeout, debug=False)
-    o, strat = minimum_reachability(model)
-
-    return (path, p, r_geom, r_qp, o)
-
-def run_experiment_diverse(param):
     if not args:
         diversity_runs = 4
     else:
@@ -1130,7 +1075,6 @@ def run_experiment_diverse(param):
         user_strategy = pickle.load(handle)
     
     print(f'Call {model_path} with reachability probability {p} on strategy {path}')
-    r_geom = Result(0, 0, 0, {}, 0, 0) # geometric_program(model,p, user_strategy, timeout=timeout, debug=True)
     import solver
     r_qp = quadratic_program(model, p, user_strategy, timeout=timeout, debug=False)
     r_qp_new =  solver.QuadraticProblem(model, p, user_strategy, timeout=timeout, debug=False).solve()
@@ -1288,7 +1232,7 @@ if __name__ == '__main__':
     df_results = pd.DataFrame()
     stored_results = []
     with multiprocessing.Pool(processes=args.cores) as pool:
-        result = pool.imap_unordered(run_experiment_diverse, experiments)
+        result = pool.imap_unordered(run_experiment, experiments)
         for r in result:
             stored_results.append(r)
             df_results = pd.concat([df_results, r])
