@@ -251,11 +251,80 @@ def evaluate_strategy(model : nx.DiGraph, user_strategy : dict, timeout = 60*60,
     
     return m.ObjVal
 
-def quadratic_program(model : nx.DiGraph, target_prob : float, user_strategy : dict, timeout = 60*60, threads = 1, debug = False):
+def expected_visiting_time(model : nx.DiGraph, user_strategy : dict, timeout = 60*60, threads = 5, debug = False):
+    env = gp.Env()
+    m = gp.Model("qp", env=env)
+    m.setParam('TimeLimit', timeout)
+    m.setParam('SoftMemLimit', 2.5)
+    m.setParam('Threads', threads)
+    
+    start_state = [s for s in model.nodes if 'q0: start' in s]
+    assert len(start_state) == 1, start_state
+    start_state = start_state[0]
+    
+    transient_states = list(model.nodes)
+    
+    induced_model = induced_mc(model, user_strategy)
+    
+    visits_given = {s : m.addVar(name=f'visiting(given) {s}', lb = 0) for s in model.nodes}
+    for s in transient_states:
+        # change to quadratic_program: has to consider ingoing edges, not outgoing edges
+        if debug:
+            print("s", s)
+        for e in induced_model.in_edges(s):
+            assert s == e[1]
+            if debug:
+                print(f'{float(induced_model.edges[e]["prob_weight"])} * {e[0]} {visits_given[e[0]]} + {(1 if s == start_state else 0)}')
+        m.addConstr(visits_given[s] == sum([float(induced_model.edges[e]['prob_weight']) * visits_given[e[0]] for e in induced_model.in_edges(s)]) + (1 if s == start_state else 0))
+
+    m.setObjective(0, sense = GRB.MINIMIZE)
+    m.optimize()
+    
+    expected_visits = {s : visits_given[s].X for s in transient_states }
+    
+    m.dispose()
+    
+    return expected_visits
+
+def induced_mc(model : nx.DiGraph, user_strategy : dict):
+    model = copy.deepcopy(model)
+    for e in model.edges:
+        # For company and environment actions, there is only one action
+        if model.edges[e]['controllable'] or model.edges[e]['action'] == 'env':
+            enabled_actions = set([model.edges[e]['action'] for e in model.edges(e[0])])
+            assert len(enabled_actions) == 1
+            continue
+        else:
+            # normalize transition probabilities with strategy
+            model.edges[e]['prob_weight'] = model.edges[e]['prob_weight'] * user_strategy[e[0]][model.edges[e]['action']]
+            
+    for s in model.nodes:
+        if 'positive' in s or 'negative' in s:
+            continue
+        enabled_actions = set([model.edges[e]['action'] for e in model.edges(s)])
+        assert sum([model.edges[e]['prob_weight'] for e in model.edges(s)]), f'Sum of probabilities at {s} does not sum up to 1'
+        
+    return model 
+
+
+def diversity_program(model : nx.DiGraph, target_prob : float, user_strategy : dict, solution : Result, timeout = 60*60, threads = 1, debug = False):
+    # bound number of steps via visiting times
+    # compare expected visiting times
+    # what would be good norm for visiting times?
+    # TODO which norms have others used?
+    # TODO how multiple results? - combine for n generations?
     gp.setParam("Threads", threads)
     m = gp.Model("qp")
     m.setParam('TimeLimit', timeout)
     m.setParam('SoftMemLimit', 2.5)
+    
+    # encode reachability constraint
+    start_state = [s for s in model.nodes if 'q0: start' in s]
+    assert len(start_state) == 1, start_state
+    start_state = start_state[0]
+    
+    ##### Previous program QP
+    
     p = {s : m.addVar(ub=1.0, name=s, lb = 0) for s in model.nodes}
 
     # encode actions
@@ -282,9 +351,6 @@ def quadratic_program(model : nx.DiGraph, target_prob : float, user_strategy : d
         m.addConstr(p[s] == sum([p_sa[s][model.edges[e]['action']] * float(model.edges[e]['prob_weight']) * p[e[1]] for e in model.edges(s)]))
         
     # encode reachability constraint
-    start_state = [s for s in model.nodes if 'q0: start' in s]
-    assert len(start_state) == 1, start_state
-    start_state = start_state[0]
     m.addConstr(p[start_state] <= target_prob)
     
     
@@ -334,19 +400,440 @@ def quadratic_program(model : nx.DiGraph, target_prob : float, user_strategy : d
         m.addConstr(decision_changed[s] == 0.5 * sum(d_sa[s].values()))
         m.addConstr(decision_changed[s] <= 10 * dist_binary[s])
     m.addConstr(sum(dist_binary.values()) == d_0)
+    
+    ##############
+    
+    # TODO solve for transient states
+    transient_states = list(model.nodes)
+    
+    induced_model = induced_mc(model, solution.strategy)
+    
+    visits_given = {s : m.addVar(name=f'visiting(given) {s}', lb = 0) for s in model.nodes}
+    for s in transient_states:
+        # change to quadratic_program: has to consider ingoing edges, not outgoing edges
+        print("s", s)
+        for e in induced_model.in_edges(s):
+            assert s == e[1]
+            print(f'{float(induced_model.edges[e]["prob_weight"])} * {e[0]} {visits_given[e[0]]} + {(1 if s == start_state else 0)}')
+        m.addConstr(visits_given[s] == sum([float(induced_model.edges[e]['prob_weight']) * visits_given[e[0]] for e in induced_model.in_edges(s)]) + (1 if s == start_state else 0))
+    
+    
+    # encode second visiting constraints
+    visits = {s : m.addVar(name=f'visiting {s}', lb = 0) for s in transient_states}
+    
+    for s in transient_states:
+        # change to quadratic_program: has to consider ingoing edges, not outgoing edges
+        print("s", s)
+        for e in model.in_edges(s):
+            assert s == e[1]
+            print(e, model.edges[e])
+            print(f'{float(model.edges[e]["prob_weight"])} * {e[0]} {visits[e[0]]} + {(1 if s == start_state else 0)}')
+        ingoing_sum = 0
+        for e in model.in_edges(s):
+            if e[0] in p_sa:
+                ingoing_sum += p_sa[e[0]][model.edges[e]['action']] * float(model.edges[e]['prob_weight']) * visits[e[0]]
+            else:
+                enabled_actions = set([model.edges[e]['action'] for e in model.edges(s)])
+                if 'positive' in s or 'negative' in s:
+                    assert len(enabled_actions) == 0
+                else:
+                    assert len(enabled_actions) == 1
+                ingoing_sum += 1 * float(model.edges[e]['prob_weight']) * visits[e[0]]    
+        m.addConstr(visits[s] == ingoing_sum + (1 if s == start_state else 0))
+        
+    time_to_absorption_var = m.addVar(name='time_to_absorption_var', lb = 0.1)
+    m.addConstr(time_to_absorption_var == sum([visits[s] for s in transient_states]))
+    
+    time_to_absorption_fixed = m.addVar(name='time_to_absorption_fixed', lb = 0.1)
+    m.addConstr(time_to_absorption_fixed == sum([visits_given[s] for s in transient_states]))
+    
+    weighted_visits_given = {s : m.addVar(name=f'weighted visiting(given) {s}', lb = 0) for s in transient_states}
+    for s in weighted_visits_given:
+        m.addConstr(weighted_visits_given[s] * time_to_absorption_fixed == visits_given[s])
+        
+    weighted_visits = {s : m.addVar(name=f'weighted visiting {s}', lb = 0) for s in transient_states}
+    for s in weighted_visits:
+        m.addConstr(weighted_visits[s] * time_to_absorption_var == visits[s])
+        
+    # # d_0 constraints
+    # d_0_visits = m.addVar(name='d_0_visits', lb = 0)
+    # # encode binary changes
+    # decision_changed_visits = {}
+    # dist_binary_visits = {}
+    # for s in transient_states:
+    #     dist_binary_visits[s] = m.addVar(ub=1.0, name=f'State {s} was changed', lb = 0, vtype=gp.GRB.BINARY)
+    #     decision_changed_visits[s] = m.addVar(ub=1.0, name=f'Var dist state {s}', lb = 0) 
+    #     m.addConstr(decision_changed_visits[s] >= weighted_visits_given[s] - weighted_visits[s])
+    #     m.addConstr(decision_changed_visits[s] >= weighted_visits[s] - weighted_visits_given[s])
+    #     m.addConstr(decision_changed_visits[s] <= 10 * dist_binary_visits[s])
+    # m.addConstr(sum(dist_binary_visits.values()) == d_0_visits)
+    
+    d_1_visits = m.addVar(name='d_1_visits')
+    decision_changed_visits = {}
+    decision_changed_visits_abs = {}
+    for s in transient_states:
+        decision_changed_visits[s] = m.addVar(name=f'Var dist state {s}', lb = -float('inf'))
+        decision_changed_visits_abs[s] = m.addVar(name=f'Var dist state abs {s}', lb = 0)
+        m.addConstr(decision_changed_visits[s] == visits_given[s] - visits[s])
+        m.addConstr(decision_changed_visits_abs[s] == gp.abs_(decision_changed_visits[s]))
+    m.addConstr(sum(decision_changed_visits_abs.values()) == d_1_visits)
+    
+    # # covariance constraints
+    # # WARNING problem: covariance is always small, also if same strategy as distribution of visits is skewed
+    # # corr = m.addVar(name='correlation', lb = -1, ub = 1)
+    # mean_x = m.addVar(name='mean_x')
+    # mean_y = m.addVar(name='mean_y')
+    # m.addConstr(mean_x == sum(weighted_visits[s] for s in transient_states) / len(transient_states))
+    # m.addConstr(mean_y == sum(weighted_visits_given[s] for s in transient_states) / len(transient_states))
+    
+    # cov = m.addVar(name='covar')
+    # m.addConstr(cov == sum([(weighted_visits[s] - mean_x) * (weighted_visits_given[s] - mean_y) for s in transient_states]) / len(transient_states))
+    # # m.addConstr(cov == (sum([(visits[s])  * (visits_given[s]) for s in model.nodes])  / (len(model.nodes) * len(model.nodes))) - 
+    #             # (sum([visits[s] for s in model.nodes]) / len(model.nodes)) * (sum([visits_given[s] for s in model.nodes]) / len(model.nodes)) )
+                
+    # cov_abs = m.addVar(name='abs(covar)', lb = 0)
+    # m.addConstr(-cov_abs <= cov)
+    # m.addConstr(cov <= cov_abs)
+    
+    m.setObjective(d_0 + d_1 + d_inf - d_1_visits, sense = GRB.MINIMIZE)
+    m.optimize()
+
+    strategy = construct_strategy_from_solution(model, p_sa, gurobi_access)
+    if debug:
+        print('Constructed solution')
+        print(strategy)
+    
+    if True:
+        for v in m.getVars():
+            print(f"{v.VarName} {v.X:g}")
+    print(f"Obj: {m.ObjVal:g}")
+    
+    strategy_diff(user_strategy, strategy)
+    
+    assert False
+    
+# TODO write functions to add individual constraints, taking Gurobi model
+def diversity_program_strategy(model : nx.DiGraph, target_prob : float, user_strategy : dict, solutions : list, timeout = 60*60, threads = 1, debug = False):
+    # bound number of steps via visiting times
+    # compare expected visiting times
+    # what would be good norm for visiting times?
+    # TODO which norms have others used?
+    # TODO how multiple results? - combine for n generations?
+    # gp.setParam("Threads", threads)
+    env = gp.Env()
+    m = gp.Model("qp", env=env)
+    m.setParam('TimeLimit', timeout)
+    m.setParam('SoftMemLimit', 2.5)
+    m.setParam('Threads', threads)
+    
+    # encode reachability constraint
+    start_state = [s for s in model.nodes if 'q0: start' in s]
+    assert len(start_state) == 1, start_state
+    start_state = start_state[0]
+    
+    ##### Previous program QP
+    
+    p = {s : m.addVar(ub=1.0, name=s, lb = 0) for s in model.nodes}
+
+    # encode actions
+    p_sa = {}
+    for s in model.nodes:
+        if 'positive' in s:
+            m.addConstr(p[s] == 0)
+            continue
+        if 'negative' in s:
+            m.addConstr(p[s] == 1)
+            continue
+        enabled_actions = set([model.edges[e]['action'] for e in model.edges(s)])
+        if 'customer' not in s:
+            assert len(enabled_actions) <= 1, f'More than one action for non-user state {s} : {enabled_actions}' 
+        p_sa[s] = {a : m.addVar(ub=1.0, name=s+'_'+a, lb = 0) for a in enabled_actions}
+        m.addConstr(sum(list(p_sa[s].values())) == 1) # scheduler sums up to one
+        for a in enabled_actions:
+            m.addConstr(p_sa[s][a] <= 1)
+            
+    # encode model
+    for s in p_sa:
+        enabled_actions = set([model.edges[e]['action'] for e in model.edges(s)])
+        assert len(enabled_actions) >= 1, f'State{s} has no enabled action'
+        m.addConstr(p[s] == sum([p_sa[s][model.edges[e]['action']] * float(model.edges[e]['prob_weight']) * p[e[1]] for e in model.edges(s)]))
+        
+    # encode reachability constraint
+    m.addConstr(p[start_state] <= target_prob)
+    
+    
+    d_0 = m.addVar(name='d0', lb = 0)
+    d_1 = m.addVar(name='d1', lb = 0, ub=1)
+    d_inf = m.addVar(name='d_inf', lb = 0, ub=1)
+
+    # strict proximal
+    def add_abs(var, prob, constr):
+        m.addConstr(prob - constr <= var)
+        m.addConstr(constr - prob <= var)
+        
+    # for s in p_sa:
+    #     if model.edges[list(model.edges(s))[0]]['controllable'] or model.edges[list(model.edges(s))[0]]['action'] == 'env':
+    #         continue
+    #     assert s in user_strategy, f'{s} not in user_strategy'
+    #     for a in p_sa[s]:
+    #         assert a in user_strategy[s], f'{a} not in {user_strategy[s]}'
+    #         add_abs(d_inf, p_sa[s][a], user_strategy[s][a])
+
+    d_sa = {}
+    for s in model.nodes:
+        if 'positive' in s or 'negative' in s:
+            continue
+        if model.edges[list(model.edges(s))[0]]['controllable'] or model.edges[list(model.edges(s))[0]]['action'] == 'env':
+            continue
+        enabled_actions = set([model.edges[e]['action'] for e in model.edges(s)])
+        if 'customer' not in s:
+            assert len(enabled_actions) == 1, f'More than one action for non-user state {s}' 
+        d_sa[s] = {a : m.addVar(ub=1.0, name=f'Abs dist state {s} action {a}', lb = 0) for a in enabled_actions}
+        for a in enabled_actions:
+            add_abs(d_sa[s][a], p_sa[s][a], user_strategy[s][a])
+        # encode d_inf constraint
+        m.addConstr(0.5 * sum(d_sa[s].values()) <= d_inf) 
+            
+    # relaxed proximal
+    # use d_sa to encode d_1 norm
+    m.addConstr(d_1 == sum([0.5 * sum(d_sa[s].values()) for s in d_sa]) / len(user_strategy)) 
+    #m.addConstr(d_1 == norm([0.5 * sum(d_sa[s].values()) for s in d_sa], 1.0))
+    
+    # encode sparsity
+    decision_changed = {}
+    dist_binary = {}
+    for s in d_sa:
+        dist_binary[s] = m.addVar(ub=1.0, name=f'State {s} was changed', lb = 0, vtype=gp.GRB.BINARY)
+        decision_changed[s] = m.addVar(ub=1.0, name=f'Var dist state {s}', lb = 0) 
+        m.addConstr(decision_changed[s] == 0.5 * sum(d_sa[s].values()))
+        m.addConstr(decision_changed[s] <= 10 * dist_binary[s])
+    m.addConstr(sum(dist_binary.values()) == d_0)
+    
+    ##############
+        
+    list_of_strategies = [s.strategy for s in solutions]
+    list_of_strategies.insert(0, p_sa)
+    names_list_of_strategies = [f's{i}' for i in range(len(list_of_strategies)-1)]
+    names_list_of_strategies.insert(0, "p_sa")
+    
+    def det(A):
+        v = m.addVar(lb=-float("inf"))
+        if A.shape == (2,2):
+            m.addConstr(v == A[0,0]*A[1,1]-A[1,0]*A[0,1])
+            return v
+        expr = gp.QuadExpr()
+        cofactor = 1
+        for i in range(A.shape[1]):
+            cols = [c for c in range(A.shape[1]) if c != i]
+            expr += cofactor*A[0,i]*det(A[1:][:,cols])
+            cofactor = -cofactor
+        m.addConstr(v == expr)
+        return v
+
+    # def det(visits):
+    #     print(visits[('p_sa', 's0')])
+    #     return visits[('p_sa', 's0')]
+    
+    d_sa_strat = {}
+    d_sa_strat_abs = {}
+    d_1_visits = m.addMVar((len(list_of_strategies),len(list_of_strategies)), lb=-float("inf"))
+    for i in range(len(list_of_strategies)):
+        s1 = list_of_strategies[i]
+        n1 = names_list_of_strategies[i]
+        for j in range(len(list_of_strategies)):
+            s2 = list_of_strategies[j]
+            n2 = names_list_of_strategies[j]
+            d_sa_strat[(n1,n2)] = {}
+            d_sa_strat_abs[(n1,n2)] = {}
+            for s in model.nodes:
+                if 'positive' in s or 'negative' in s:
+                    continue
+                if model.edges[list(model.edges(s))[0]]['controllable'] or model.edges[list(model.edges(s))[0]]['action'] == 'env':
+                    continue
+                enabled_actions = set([model.edges[e]['action'] for e in model.edges(s)])
+                if 'customer' not in s:
+                    assert len(enabled_actions) == 1, f'More than one action for non-user state {s}' 
+                d_sa_strat[(n1,n2)][s] = {a : m.addVar(ub=1.0, lb = -1.0, name=f'Diversity-Dist state {s} action {a} ({n1}, {n2})') for a in enabled_actions}
+                d_sa_strat_abs[(n1,n2)][s] = {a : m.addVar(ub=1.0, name=f'Abs diversity-dist state {s} action {a} ({n1}, {n2})', lb = 0) for a in enabled_actions}
+                for a in enabled_actions:
+                    m.addConstr(d_sa_strat[(n1,n2)][s][a] == s1[s][a] - s2[s][a])
+                    m.addConstr(d_sa_strat_abs[(n1,n2)][s][a] == gp.abs_(d_sa_strat[(n1,n2)][s][a]))
+            m.addConstr(d_1_visits[i,j] * (1 + sum([0.5 * sum(d_sa_strat_abs[(n1,n2)][s].values()) for s in d_sa_strat_abs[(n1,n2)]])) == 1 )
+    
+
+    # d_sa_strat = {}
+    # d_sa_strat_abs = {}
+    # for s in model.nodes:
+    #     if 'positive' in s or 'negative' in s:
+    #         continue
+    #     if model.edges[list(model.edges(s))[0]]['controllable'] or model.edges[list(model.edges(s))[0]]['action'] == 'env':
+    #         continue
+    #     enabled_actions = set([model.edges[e]['action'] for e in model.edges(s)])
+    #     if 'customer' not in s:
+    #         assert len(enabled_actions) == 1, f'More than one action for non-user state {s}' 
+    #     d_sa_strat[s] = {a : m.addVar(ub=1.0, lb = -1.0, name=f'Diversity-Dist state {s} action {a}') for a in enabled_actions}
+    #     d_sa_strat_abs[s] = {a : m.addVar(ub=1.0, name=f'Abs diversity-dist state {s} action {a}', lb = 0) for a in enabled_actions}
+    #     for a in enabled_actions:
+    #         m.addConstr(d_sa_strat[s][a] == p_sa[s][a] - solution.strategy[s][a])
+    #         m.addConstr(d_sa_strat_abs[s][a] == gp.abs_(d_sa_strat[s][a]))
+    # m.addConstr(d_1_visits == sum([0.5 * sum(d_sa_strat_abs[s].values()) for s in d_sa_strat_abs]))
+    
+    # add small perturbation
+    for i in range(len(list_of_strategies)):
+        d_1_visits[i,i] == random.uniform(0, 0.00001)
+    
+    m.setObjective(d_0 + d_1 + d_inf - det(d_1_visits), sense = GRB.MINIMIZE)
+    m.optimize()
+
+    if m.status == GRB.TIME_LIMIT:
+        if m.SolCount == 0:
+            return_result = Result(m.Runtime, m.ObjVal, target_prob, {}, timeout, m.MIPGap, m.status)
+            m.dispose()
+            return return_result
+        else:
+            return_result = Result(m.Runtime, m.ObjVal, target_prob, {}, timeout, m.MIPGap, GRB.SUBOPTIMAL)
+            m.dispose()
+            return return_result
+        
+    assert m.status == GRB.OPTIMAL
+    
+    strategy = construct_strategy_from_solution(model, p_sa, gurobi_access)
+    
+    print("Distances strategy")
+    print("d_inf", d_inf.X)
+    print("d_1", d_1.X)
+    print("d_0", d_0.X)
+        
+    if debug:
+        print('Constructed solution')
+        print(strategy)
+    
+    if debug:
+        for v in m.getVars():
+            print(f"{v.VarName} {v.X:g}")
+    print(f"Obj: {m.ObjVal:g}")
+    
+    print("Strategy diff")
+    strategy_diff(user_strategy, strategy)
+    print("end")
+    # print('previous')
+    # strategy_diff(user_strategy, solution.strategy)
+    # print('both:')
+    # strategy_diff(strategy, solution.strategy)
+    
+    # print('visits')
+    # print(expected_visiting_time(model, strategy))
+    # print(expected_visiting_time(model, solution.strategy))
+    
+    return_result = Result(m.Runtime, d_0.X + d_1.X + d_inf.X , target_prob, strategy, timeout, m.MIPGap, m.status)
+    m.dispose()
+    return return_result
+
+def quadratic_program(model : nx.DiGraph, target_prob : float, user_strategy : dict, timeout = 60*60, threads = 1, debug = False):
+    env = gp.Env()
+    m = gp.Model("qp", env=env)
+    m.setParam('TimeLimit', timeout)
+    m.setParam('SoftMemLimit', 2.5)
+    m.setParam('Threads', threads)
+    
+    p = {s : m.addVar(ub=1.0, name=s, lb = 0) for s in model.nodes}
+
+    # encode actions
+    p_sa = {}
+    for s in model.nodes:
+        if 'positive' in s:
+            m.addConstr(p[s] == 0)
+            continue
+        if 'negative' in s:
+            m.addConstr(p[s] == 1)
+            continue
+        enabled_actions = set([model.edges[e]['action'] for e in model.edges(s)])
+        if 'customer' not in s:
+            assert len(enabled_actions) <= 1, f'More than one action for non-user state {s} : {enabled_actions}' 
+        p_sa[s] = {a : m.addVar(ub=1.0, name=s+'_'+a, lb = 0) for a in enabled_actions}
+        m.addConstr(sum(list(p_sa[s].values())) == 1) # scheduler sums up to one
+        for a in enabled_actions:
+            m.addConstr(p_sa[s][a] <= 1)
+            
+    # encode model
+    for s in p_sa:
+        enabled_actions = set([model.edges[e]['action'] for e in model.edges(s)])
+        assert len(enabled_actions) >= 1, f'State{s} has no enabled action'
+        m.addConstr(p[s] == sum([p_sa[s][model.edges[e]['action']] * float(model.edges[e]['prob_weight']) * p[e[1]] for e in model.edges(s)]))
+   
+            
+    # encode reachability constraint
+    start_state = [s for s in model.nodes if 'q0: start' in s]
+    assert len(start_state) == 1, start_state
+    start_state = start_state[0]
+    m.addConstr(p[start_state] <= target_prob)
+    
+    
+    d_0 = m.addVar(name='d0', lb = 0)
+    d_1 = m.addVar(name='d1', lb = 0, ub=1)
+    d_inf = m.addVar(name='d_inf', lb = 0, ub=1)
+
+    # strict proximal
+    def add_abs(var, prob, constr):
+        m.addConstr(prob - constr <= var)
+        m.addConstr(constr - prob <= var)
+        
+    # for s in p_sa:
+    #     if model.edges[list(model.edges(s))[0]]['controllable'] or model.edges[list(model.edges(s))[0]]['action'] == 'env':
+    #         continue
+    #     assert s in user_strategy, f'{s} not in user_strategy'
+    #     for a in p_sa[s]:
+    #         assert a in user_strategy[s], f'{a} not in {user_strategy[s]}'
+    #         add_abs(d_inf, p_sa[s][a], user_strategy[s][a])
+
+    d_sa = {}
+    for s in model.nodes:
+        if 'positive' in s or 'negative' in s:
+            continue
+        if model.edges[list(model.edges(s))[0]]['controllable'] or model.edges[list(model.edges(s))[0]]['action'] == 'env':
+            continue
+        enabled_actions = set([model.edges[e]['action'] for e in model.edges(s)])
+        if 'customer' not in s:
+            assert len(enabled_actions) == 1, f'More than one action for non-user state {s}' 
+        d_sa[s] = {a : m.addVar(ub=1.0, lb = 0, name=f'Abs dist state {s} action {a}') for a in enabled_actions}
+        for a in enabled_actions:
+            add_abs(d_sa[s][a], p_sa[s][a], user_strategy[s][a])
+        # encode d_inf constraint
+        m.addConstr(0.5 * sum(d_sa[s].values()) <= d_inf) 
+            
+    # relaxed proximal
+    # use d_sa to encode d_1 norm
+    m.addConstr(d_1 == sum([0.5 * sum(d_sa[s].values()) for s in d_sa]) / len(user_strategy)) 
+    #m.addConstr(d_1 == norm([0.5 * sum(d_sa[s].values()) for s in d_sa], 1.0))
+    
+    # encode sparsity
+    decision_changed = {}
+    dist_binary = {}
+    for s in d_sa:
+        dist_binary[s] = m.addVar(ub=1.0, name=f'State {s} was changed', lb = 0, vtype=gp.GRB.BINARY)
+        decision_changed[s] = m.addVar(ub=1.0, name=f'Var dist state {s}', lb = 0)
+        m.addConstr(decision_changed[s] == 0.5 * sum(d_sa[s].values()))
+        m.addConstr(decision_changed[s] <= 10 * dist_binary[s])
+    m.addConstr(sum(dist_binary.values()) == d_0)
 
     
     m.setObjective(d_0 + d_1 + d_inf, sense = GRB.MINIMIZE)
     m.optimize()
     
     if m.status == GRB.INFEASIBLE:
-        return Result(m.Runtime, -0.2, target_prob, {}, timeout, 0, m.status)
+        return_result = Result(m.Runtime, -0.2, target_prob, {}, timeout, 0, m.status)
+        m.dispose()
+        return return_result
     
     if m.status == GRB.TIME_LIMIT:
         if m.SolCount == 0:
-            return Result(m.Runtime, m.ObjVal, target_prob, {}, timeout, m.MIPGap, m.status)
+            return_result = Result(m.Runtime, m.ObjVal, target_prob, {}, timeout, m.MIPGap, m.status)
+            m.dispose()
+            return return_result
         else:
-            return Result(m.Runtime, m.ObjVal, target_prob, {}, timeout, m.MIPGap, GRB.SUBOPTIMAL)
+            return_result = Result(m.Runtime, m.ObjVal, target_prob, {}, timeout, m.MIPGap, GRB.SUBOPTIMAL)
+            m.dispose()
+            return return_result
      
     assert m.status == GRB.OPTIMAL, f'Status is {m.status}'
     print("Distances")
@@ -369,324 +856,7 @@ def quadratic_program(model : nx.DiGraph, target_prob : float, user_strategy : d
     m.dispose()
     return return_result
 
-def strategy_slack(strategy):
-    total = 0
-    for s in strategy:
-        total += 1 - sum(strategy[s][a] for a in strategy[s])
-    return total
 
-def geometric_program_bnb(model : nx.DiGraph, target_prob : float, user_strategy : dict, changeable_states : list, optimal_strat, timeout = 60*60, debug = False):
-    assert 'MOSEK'  in cp.installed_solvers()
-    constraints = []
-    
-    p = {s : cp.Variable(pos=True, name=s) for s in model.nodes}
-    
-    negative_state = [s for s in model.nodes if "negative" in s]
-    assert len(negative_state) == 1
-    negative_state = negative_state[0]
-    unreaching = [s for s in model.nodes if not nx.has_path(model, s, negative_state)]
-
-    increasing_sa = {} # does not contain pos or negative state, and only controllable states
-    for s in optimal_strat:
-        increasing_sa[s] = {}
-        for a in optimal_strat[s]:
-            if user_strategy[s][a] < optimal_strat[s][a] and s in changeable_states:
-                increasing_sa[s][a] = True
-            else:
-                increasing_sa[s][a] = False
-    
-    # encode actions
-    p_sa = {}
-    for s in model.nodes:
-        if s in unreaching:
-            # can't have 0 constraint, have to replace variable with 0
-            # m.addConstr(p[s] == 0)
-            continue
-        if 'negative' in s:
-            constraints.append(p[s] == 1)
-            continue
-        enabled_actions = set([model.edges[e]['action'] for e in model.edges(s)])
-        if 'customer' not in s:
-            assert len(enabled_actions) <= 1, f'More than one action for non-user state {s} : {enabled_actions}' 
-        p_sa[s] = {a : cp.Variable(pos=True, name=s+'_'+a) for a in enabled_actions}
-        if len(p_sa[s]) > 1 and s not in changeable_states:
-            for a in enabled_actions:
-                constraints.append(p_sa[s][a] == user_strategy[s][a])
-        else: 
-            for a in enabled_actions:
-                assert not(s in increasing_sa) or a in increasing_sa[s], f'Action {a} not contained under state {s}'
-                if s in increasing_sa and increasing_sa[s][a]:
-                    p_sa[s][a] = p_sa[s][a] + user_strategy[s][a]
-                    if debug:
-                        print("increase", p_sa[s][a])
-                constraints.append(p_sa[s][a] <= 1)
-            constraints.append(sum(list(p_sa[s].values())) <= 1) # scheduler sums up to one
-        # dont allow slack in fixed variables
-        if len(p_sa[s]) == 1: # if only one decision, it must receive prob. 1
-            assert isinstance(list(p_sa[s].values())[0], type(list(p_sa[s][a].variables())[0])) 
-            constraints.append(list(p_sa[s].values())[0] == 1)
-            
-    # encode model
-    for s in p_sa:
-        enabled_actions = set([model.edges[e]['action'] for e in model.edges(s)])
-        assert len(enabled_actions) >= 1, f'State{s} has no enabled action'
-        assert not all([e[1] in unreaching for e in model.edges(s)]), f'{s} should NOT be contained'
-        # insert states leading to 0 as they are replaced by the 0
-        s_sum = sum([p_sa[s][model.edges[e]['action']] * float(model.edges[e]['prob_weight']) * p[e[1]] for e in model.edges(s) if e[1] not in unreaching])
-        constraints.append(p[s] >= s_sum)
-    
-    # encode reachability constraint
-    start_state = [s for s in model.nodes if 'q0: start' in s]
-    assert len(start_state) == 1, start_state
-    start_state = start_state[0]
-    constraints.append(p[start_state] <= target_prob)
-    
-    d_1 = cp.Variable(pos=True, name='d1')
-    d_inf = cp.Variable(pos=True, name='d_inf')
-
-    def get_var(s, a):
-        assert s in p_sa, f'{s} not in p_sa'
-        assert a in p_sa[s], f'{a} not in p_sa[s] {p_sa[s]}'
-        assert len(set(p_sa[s][a].variables())) == 1, f'Found variables {set(p_sa[s][a].variables())}'
-        return list(p_sa[s][a].variables())[0]
-    
-    # strict proximal
-    for s in increasing_sa:
-        if s in unreaching: # does not have a variable
-            continue
-        increasing = [get_var(s,a) for a in p_sa[s] if increasing_sa[s][a]]
-        if increasing:
-            constraints.append(d_inf >= sum(increasing))
-    
-    # relaxed proximal
-    increasing = [get_var(s,a) for s in increasing_sa if s not in unreaching for a in increasing_sa[s] if increasing_sa[s][a]]
-    if increasing:
-        constraints.append(d_1 >= sum(increasing) / len(user_strategy))
-    
-    # ensure well-formedness
-    for constraint in constraints:
-        assert constraint.is_dgp(), constraint
-        
-    
-    problem = cp.Problem(cp.Minimize(sum([1/get_var(s,a) for s in p_sa if s in increasing_sa for a in p_sa[s]]) + d_inf + d_1), constraints)
-    # problem = cp.Problem(cp.Minimize(sum([1/get_var(s,a) for s in p_sa for a in p_sa[s]]) + d_inf + d_1), constraints)
-    
-    if debug:
-        print(problem)
-        print("Is this problem DGP?", problem.is_dgp())
-    assert problem.is_dgp(), "Problem is not DGP"
-
-    precision = 0.0001
-    mosek_params={mosek.dparam.intpnt_co_tol_pfeas : precision, mosek.dparam.intpnt_co_tol_pfeas : precision, mosek.dparam.intpnt_co_tol_rel_gap : precision, mosek.dparam.intpnt_co_tol_infeas : precision}
-    problem.solve(gp=True, solver="MOSEK", verbose = debug, mosek_params=mosek_params) 
-    
-    if problem.status != 'optimal':
-        print(f'Problem is {problem.status}')
-        return Result(problem.solver_stats.solve_time, -0.2, target_prob, {})
-    print("sol", problem.value, "in sec.", problem.solver_stats.solve_time)
-    
-    if debug:
-        for s in p_sa:
-            print(p[s].value)
-            for a in p_sa[s]:
-                print(f'state {s} action {a}', p_sa[s][a].value)
-            
-    print("Distances")
-    print("d_inf", d_inf.value)
-    print("d_1", d_1.value)
-    print("d_0", len(changeable_states))
-    
-    strategy = construct_strategy_from_solution(model, p_sa, mosek_access, user_strategy)
-    
-    if debug:
-        print('Constructed solution')
-        print(strategy)
-    
-        strategy_diff(user_strategy, strategy)
-    
-    if strategy_slack(strategy) > STRATEGY_SLACK:
-        print('max', max([1 - sum(strategy[s][a] for a in strategy[s]) for s in strategy]))
-        print(f'Discarded solution due to slack {strategy_slack(strategy)}')
-        assert(False)
-        return Result(problem.solver_stats.solve_time, -0.5, target_prob, strategy)
-    print("Found solution")
-    print()
-    return Result(problem.solver_stats.solve_time, d_inf.value + d_1.value + len(changeable_states), target_prob, strategy)
-
-def geometric_program(model : nx.DiGraph, target_prob : float, user_strategy : dict, timeout = 60*60, debug = False):
-    assert 'MOSEK'  in cp.installed_solvers()
-    
-    search_time = 0
-    
-    changeable_states = [s for s in user_strategy if len(user_strategy[s]) > 1]
-    # compute which values to increase
-    val, optimal_strat = minimum_reachability(model)
-    
-    # infeasible
-    r = geometric_program_bnb(model, target_prob, user_strategy, changeable_states, optimal_strat, timeout=timeout, debug=debug)
-    search_time += r.time
-    if r.value < 0:
-        return Result(search_time, -0.2, target_prob, {})
-    # trivial
-    r = geometric_program_bnb(model, target_prob, user_strategy, [], optimal_strat, timeout=timeout, debug=debug)
-    search_time += r.time
-    if r.value >= 0:
-        r.time = search_time
-        return r
-    
-    #lower = 0
-    #upper = len(changeable_states)
-    #while lower != upper:
-    for i in range(len(changeable_states)+1):
-        results = {}
-        for comb in itertools.combinations(changeable_states, i):
-            if search_time > timeout:
-                if results:
-                    best_solution = min(results.items(), key=lambda x: x[1].value)[1]
-                    best_solution.time = search_time
-                    return best_solution
-                else:
-                    return Result(search_time, -0.2, target_prob, {})
-            print("Called with changeable states", comb, "from", len(changeable_states), "variables - search time", search_time)
-            r = geometric_program_bnb(model, target_prob, user_strategy, comb, optimal_strat, timeout=timeout, debug=debug)
-            search_time += r.time
-            if r.value > 0:
-                results[comb] = r
-        if results:
-            best_solution = min(results.items(), key=lambda x: x[1].value)[1]
-            best_solution.time = search_time
-            return best_solution
-    return Result(search_time, -0.2, target_prob, {})
-    
-        
-    constraints = []
-    
-    p = {s : cp.Variable(pos=True, name=s) for s in model.nodes}
-    
-    # compute which values to increase
-    val, optimal_strat = minimum_reachability(model)
-    
-    negative_state = [s for s in model.nodes if "negative" in s]
-    assert len(negative_state) == 1
-    negative_state = negative_state[0]
-    unreaching = [s for s in model.nodes if not nx.has_path(model, s, negative_state)]
-
-    increasing_sa = {} # does not contain pos or negative state, and only controllable states
-    for s in optimal_strat:
-        increasing_sa[s] = {}
-        for a in optimal_strat[s]:
-            if user_strategy[s][a] < optimal_strat[s][a]:
-                increasing_sa[s][a] = True
-            else:
-                increasing_sa[s][a] = False
-    
-    # encode actions
-    p_sa = {}
-    for s in model.nodes:
-        if s in unreaching:
-            # can't have 0 constraint, have to replace variable with 0
-            # m.addConstr(p[s] == 0)
-            continue
-        if 'negative' in s:
-            constraints.append(p[s] == 1)
-            continue
-        enabled_actions = set([model.edges[e]['action'] for e in model.edges(s)])
-        if 'customer' not in s:
-            assert len(enabled_actions) <= 1, f'More than one action for non-user state {s} : {enabled_actions}' 
-        p_sa[s] = {a : cp.Variable(pos=True, name=s+'_'+a) for a in enabled_actions}
-        for a in enabled_actions:
-            assert not(s in increasing_sa) or a in increasing_sa[s], f'Action {a} not contained under state {s}'
-            if s in increasing_sa and increasing_sa[s][a]:
-                p_sa[s][a] = p_sa[s][a] + user_strategy[s][a]
-                if debug:
-                    print("increase", p_sa[s][a])
-            constraints.append(p_sa[s][a] <= 1)
-        constraints.append(sum(list(p_sa[s].values())) <= 1) # scheduler sums up to one
-        # dont allow slack in fixed variables
-        if len(p_sa[s]) == 1: # if only one decision, it must receive prob. 1
-            assert isinstance(list(p_sa[s].values())[0], type(list(p_sa[s][a].variables())[0])) 
-            constraints.append(list(p_sa[s].values())[0] == 1)
-            
-    # encode model
-    for s in p_sa:
-        enabled_actions = set([model.edges[e]['action'] for e in model.edges(s)])
-        assert len(enabled_actions) >= 1, f'State{s} has no enabled action'
-        assert not all([e[1] in unreaching for e in model.edges(s)]), f'{s} should NOT be contained'
-        # insert states leading to 0 as they are replaced by the 0
-        s_sum = sum([p_sa[s][model.edges[e]['action']] * float(model.edges[e]['prob_weight']) * p[e[1]] for e in model.edges(s) if e[1] not in unreaching])
-        constraints.append(p[s] >= s_sum)
-    
-    # encode reachability constraint
-    start_state = [s for s in model.nodes if 'q0: start' in s]
-    assert len(start_state) == 1, start_state
-    start_state = start_state[0]
-    constraints.append(p[start_state] <= target_prob)
-    
-    d_0 = cp.Variable(pos=True, name='d0')
-    d_1 = cp.Variable(pos=True, name='d1')
-    d_inf = cp.Variable(pos=True, name='d_inf')
-
-    def get_var(s, a):
-        assert s in p_sa, f'{s} not in p_sa'
-        assert a in p_sa[s], f'{a} not in p_sa[s] {p_sa[s]}'
-        assert len(set(p_sa[s][a].variables())) == 1, f'Found variables {set(p_sa[s][a].variables())}'
-        return list(p_sa[s][a].variables())[0]
-    
-    # strict proximal
-    for s in increasing_sa:
-        if s in unreaching: # does not have a variable
-            continue
-        increasing = [get_var(s,a) for a in p_sa[s] if increasing_sa[s][a]]
-        if increasing:
-            constraints.append(d_inf >= sum(increasing))
-    
-    # relaxed proximal
-    increasing = [get_var(s,a) for s in increasing_sa if s not in unreaching for a in increasing_sa[s] if increasing_sa[s][a]]
-    print("increasing", increasing)
-    constraints.append(d_1 >= sum(increasing) / len(user_strategy))
-    
-    # ensure well-formedness
-    for constraint in constraints:
-        assert constraint.is_dgp(), constraint
-        
-    print(sum([1/get_var(s,a) for s in p_sa if s in increasing_sa for a in p_sa[s]]))
-    problem = cp.Problem(cp.Minimize(sum([1/get_var(s,a) for s in p_sa if s in increasing_sa for a in p_sa[s]]) + d_inf + d_1), constraints)
-    # problem = cp.Problem(cp.Minimize(sum([1/get_var(s,a) for s in p_sa for a in p_sa[s]]) + d_inf + d_1), constraints)
-    
-    if debug:
-        print(problem)
-        print("Is this problem DGP?", problem.is_dgp())
-    assert problem.is_dgp(), "Problem is not DGP"
-
-    problem.solve(gp=True, solver="MOSEK", verbose = True)
-    
-    if problem.status != 'optimal':
-        return Result(problem.solver_stats.solve_time, -0.2, target_prob, {})
-    print("sol", problem.value, "in sec.", problem.solver_stats.solve_time)
-    
-    if debug:
-        for s in p_sa:
-            print(p[s].value)
-            for a in p_sa[s]:
-                print(f'state {s} action {a}', p_sa[s][a].value)
-            
-    print("Distances")
-    print("d_inf", d_inf.value)
-    print("d_1", d_1.value)
-    
-    strategy = construct_strategy_from_solution(model, p_sa, mosek_access, user_strategy)
-    
-    if debug:
-        print('Constructed solution')
-        print(strategy)
-    
-    strategy_diff(user_strategy, strategy)
-    
-    if strategy_slack(strategy) > STRATEGY_SLACK:
-        print(f'Discarded solution due to slack {strategy_slack(strategy)}')
-        return Result(problem.solver_stats.solve_time, -0.5, target_prob, strategy)
-    
-    return Result(problem.solver_stats.solve_time, d_inf.value + d_1.value, target_prob, strategy)     
         
 def construct_user_strategy(model : nx.DiGraph):
     user_strategy = {}
@@ -1069,7 +1239,7 @@ if __name__ == '__main__':
     parser.add_argument('-rs', '--rebuild_strategies', help = "Rebuild strategies", action = 'store_true')
     parser.add_argument('-mi', '--model_iterations', help = "Number of models to generate for each setting", type=int, default = 10)
     parser.add_argument('-as', '--all_spotify', help = "All spotify models in steps of 100 are generated", action = 'store_true')
-    parser.add_argument('-d', '--diversity_runs', help = "Number of diverse counterfactuals", type=int, default = 2)
+    parser.add_argument('-d', '--diversity_runs', help = "Number of diverse counterfactuals", type=int, default = 0)
     args = parser.parse_args()
     
     
