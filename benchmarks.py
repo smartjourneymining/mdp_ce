@@ -1214,3 +1214,4 @@ if __name__ == '__main__':
             df_results.to_csv("out/results_div.csv")
     # result = [run_experiment_diverse(e) for e in experiments]
     result = stored_results
+    print("Done")
