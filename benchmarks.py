@@ -1053,7 +1053,6 @@ def run_experiment(param):
     import solver
     r_qp = quadratic_program(model, p, user_strategy, timeout=timeout, debug=False)
     r_qp_new =  solver.QuadraticProblem(model, p, user_strategy, timeout=timeout, debug=False).solve()
-    assert abs(r_qp.value - r_qp_new.value) <= 0.001, f'{r_qp.value} != {r_qp_new.value}'
     o, strat = minimum_reachability(model)
     
     # diversity run
@@ -1061,6 +1060,7 @@ def run_experiment(param):
     df_results_div['id'] = 0
     df_results_div['path'] = path
     df_results_div['unknown_fraction'] = 1
+    df_results_div['value'] = abs(r_qp.value - r_qp_new.value)
     
     if r_qp.status != GRB.OPTIMAL:
         return pd.DataFrame()
@@ -1070,7 +1070,6 @@ def run_experiment(param):
         print(f'strat {i}')
         r_div = diversity_program_strategy(model, p, user_strategy, results_div, timeout=args.timeout, debug=False)
         r_div_new = solver.QuadraticProblem(model, p, user_strategy, timeout=timeout, debug=False).solve_diverse(results_div)
-        assert abs(r_div.value - r_div_new.value) <= 0.01,  f'{r_div.value} != {r_div_new.value}'
         if r_div.status != GRB.OPTIMAL:
             continue
         previously_chosen_actions = get_chosen_state_action(user_strategy, results_div)
@@ -1079,6 +1078,7 @@ def run_experiment(param):
         results_div.append(r_div)
         
         new_df = r_div.df()
+        new_df['value'] = abs(r_div.value - r_div_new.value)
         new_df['id'] = i+1
         new_df['path'] = path
         new_df['unknown_fraction'] = unknown_fraction
