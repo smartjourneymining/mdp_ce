@@ -59,6 +59,8 @@ pythonpath=True, # add root directory to the PYTHONPATH (helps with imports)
 cwd=True, # change current working directory to the root directory (helps with filepaths)
 )
 
+import solver 
+
 def construct_optimal_strategy_from_solution(model : nx.DiGraph, p : dict):
     strategy = {}
     for s in model.nodes:
@@ -680,7 +682,7 @@ def diversity_program_strategy(model : nx.DiGraph, target_prob : float, user_str
     
     # add small perturbation
     for i in range(len(list_of_strategies)):
-        d_1_visits[i,i] == random.uniform(0, 0.00001)
+        d_1_visits[i,i] == 0.00001 #random.uniform(0, 0.00001)
     
     m.setObjective(d_0 + d_1 + d_inf - det(d_1_visits), sense = GRB.MINIMIZE)
     m.optimize()
@@ -1078,10 +1080,10 @@ def run_experiment(param):
         results_div.append(r_div)
         
         new_df = r_div.df()
-        new_df['value'] = abs(r_div.value - r_div_new.value)
         new_df['id'] = i+1
         new_df['path'] = path
         new_df['unknown_fraction'] = unknown_fraction
+        new_df['value'] = abs(r_div.value - r_div_new.value)
         df_results_div = pd.concat([df_results_div, new_df])
 
     return df_results_div
@@ -1100,10 +1102,11 @@ def get_chosen_state_action(user_strategy : dict, results : list):
     return chosen_actions
 
 def manual_execution():
+    assert args
     # manual tests
-    with open('out/models/model_bpic12_model-it_4.pickle', 'rb') as handle: #open(f'out/models/model_{name}.pickle', 'rb') as handle:
+    with open('out/server_models/models/model_bpic17-before_model-it_7.pickle', 'rb') as handle: #open(f'out/models/model_{name}.pickle', 'rb') as handle:
         model = pickle.load(handle)
-    with open('out/user_strategies/model_bpic12_model-it_4_it_9.pickle', 'rb') as handle:
+    with open('out/server_models/user_strategies/model_bpic17-before_model-it_7_it_5.pickle', 'rb') as handle:
         user_strategy = pickle.load(handle)
         # user_strategy = pickle.load(handle)   
     # print("search_bounds", search_bounds(model, user_strategy))
@@ -1111,15 +1114,21 @@ def manual_execution():
     o, strat = minimum_reachability(model)
     print("optimal", o)
     # r_qp = z3_feasible(model, 0.35, user_strategy, 1, timeout=args.timeout, debug=False)
-    r_qp = quadratic_program(model, 0.35, user_strategy, timeout=args.timeout, debug=False)
+    r_qp = quadratic_program(model, 0.2091, user_strategy, timeout=args.timeout, debug=False)
+    r_qp_new =  solver.QuadraticProblem(model, 0.2091, user_strategy, timeout=args.timeout, debug=False).solve()
+    assert abs(r_qp.value - r_qp_new.value) <= 0.01
     results_div = [r_qp]
     df_results_div = r_qp.df()
     df_results_div['id'] = 0
     df_results_div['unknown_fraction'] = 1
+    df_results_div['value'] = abs(r_qp.value - r_qp_new.value)
     
     for i in range(5):
         print(f'strat {i}')
-        r_div = diversity_program_strategy(model, 0.35, user_strategy, results_div, timeout=args.timeout, debug=False)
+        r_div = diversity_program_strategy(model, 0.2091, user_strategy, results_div, timeout=args.timeout, debug=False)
+        r_div_new = solver.QuadraticProblem(model, 0.2091, user_strategy, timeout=args.timeout, debug=False).solve_diverse(results_div)
+        assert abs(r_div.value - r_div_new.value) <= 0.1, f'val is {abs(r_div.value - r_div_new.value)}'
+        
         previously_chosen_actions = get_chosen_state_action(user_strategy, results_div)
         chosen_actions = get_chosen_state_action(user_strategy, [r_div])
         print("previsouly chosen", previously_chosen_actions)
@@ -1131,8 +1140,9 @@ def manual_execution():
         new_df['id'] = i+1
         new_df['path'] = "path"
         new_df['unknown_fraction'] = unknown_fraction
+        new_df['value'] = abs(r_div.value - r_div_new.value)
         df_results_div = pd.concat([df_results_div, new_df])
-        df_results_div.to_csv("out/results_div.csv")
+        df_results_div.to_csv("out/results_div_1.csv")
     
     print()
     print("Opt")

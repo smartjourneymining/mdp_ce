@@ -210,7 +210,7 @@ class QuadraticProblem:
 
         # add small perturbation
         for i in range(len(list_of_strategies)):
-            d_1_visits[i,i] == random.uniform(0, 0.00001)
+            d_1_visits[i,i] == 0.00001#random.uniform(0, 0.00001)
         
         
         self.m.setObjective(self.d_0 + self.d_1 + self.d_inf - det(d_1_visits), sense = GRB.MINIMIZE)
