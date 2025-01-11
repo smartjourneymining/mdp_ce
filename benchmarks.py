@@ -1075,7 +1075,7 @@ def run_experiment(param):
             continue
         previously_chosen_actions = get_chosen_state_action(user_strategy, results_div)
         chosen_actions = get_chosen_state_action(user_strategy, [r_div])
-        unknown_fraction = len([a for a in chosen_actions if a not in previously_chosen_actions]) / len(chosen_actions)
+        unknown_fraction = (len([a for a in chosen_actions if a not in previously_chosen_actions]) / len(chosen_actions)) if len(chosen_actions) != 0 else 0
         results_div.append(r_div)
         
         new_df = r_div.df()
