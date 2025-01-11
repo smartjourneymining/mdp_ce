@@ -1060,7 +1060,7 @@ def run_experiment(param):
     df_results_div = r_qp.df()
     df_results_div['id'] = 0
     df_results_div['path'] = path
-    df_results_div['unknown_fraction'] = 1 if len(get_chosen_state_action(user_strategy, [r_qp])) != 0 else 0
+    df_results_div['unknown_fraction'] = 1 if r_qp.status == GRB.OPTIMAL else 0
     # df_results_div['value'] = abs(r_qp.value - r_qp_new.value)
     
     if r_qp.status != GRB.OPTIMAL:
