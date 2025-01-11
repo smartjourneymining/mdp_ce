@@ -682,7 +682,7 @@ def diversity_program_strategy(model : nx.DiGraph, target_prob : float, user_str
     
     # add small perturbation
     for i in range(len(list_of_strategies)):
-        d_1_visits[i,i] == 0.00001 #random.uniform(0, 0.00001)
+        d_1_visits[i,i] == random.uniform(0, 0.00001)
     
     m.setObjective(d_0 + d_1 + d_inf - det(d_1_visits), sense = GRB.MINIMIZE)
     m.optimize()
@@ -1052,9 +1052,8 @@ def run_experiment(param):
         user_strategy = pickle.load(handle)
     
     print(f'Call {model_path} with reachability probability {p} on strategy {path}')
-    import solver
-    r_qp = quadratic_program(model, p, user_strategy, timeout=timeout, debug=False)
-    r_qp_new =  solver.QuadraticProblem(model, p, user_strategy, timeout=timeout, debug=False).solve()
+    #r_qp = quadratic_program(model, p, user_strategy, timeout=timeout, debug=False)
+    r_qp =  solver.QuadraticProblem(model, p, user_strategy, timeout=timeout, debug=False).solve()
     o, strat = minimum_reachability(model)
     
     # diversity run
@@ -1062,7 +1061,7 @@ def run_experiment(param):
     df_results_div['id'] = 0
     df_results_div['path'] = path
     df_results_div['unknown_fraction'] = 1
-    df_results_div['value'] = abs(r_qp.value - r_qp_new.value)
+    # df_results_div['value'] = abs(r_qp.value - r_qp_new.value)
     
     if r_qp.status != GRB.OPTIMAL:
         return pd.DataFrame()
@@ -1070,8 +1069,8 @@ def run_experiment(param):
     results_div = [r_qp]
     for i in range(diversity_runs):
         print(f'strat {i}')
-        r_div = diversity_program_strategy(model, p, user_strategy, results_div, timeout=args.timeout, debug=False)
-        r_div_new = solver.QuadraticProblem(model, p, user_strategy, timeout=timeout, debug=False).solve_diverse(results_div)
+        #r_div = diversity_program_strategy(model, p, user_strategy, results_div, timeout=args.timeout, debug=False)
+        r_div = solver.QuadraticProblem(model, p, user_strategy, timeout=timeout, debug=False).solve_diverse(results_div)
         if r_div.status != GRB.OPTIMAL:
             continue
         previously_chosen_actions = get_chosen_state_action(user_strategy, results_div)
@@ -1083,7 +1082,7 @@ def run_experiment(param):
         new_df['id'] = i+1
         new_df['path'] = path
         new_df['unknown_fraction'] = unknown_fraction
-        new_df['value'] = abs(r_div.value - r_div_new.value)
+        # new_df['value'] = abs(r_div.value - r_div_new.value)
         df_results_div = pd.concat([df_results_div, new_df])
 
     return df_results_div
@@ -1208,7 +1207,7 @@ if __name__ == '__main__':
             model = pickle.load(handle)
         with open(e, 'rb') as handle:
             user_strategy = pickle.load(handle)
-        bounds = (0.1,0.5)#search_bounds(model, user_strategy)
+        bounds = (0, 1)#search_bounds(model, user_strategy)
         print(bounds)
         experiments.extend([(e, round(bounds[0] + (bounds[1] - bounds[0]) * 1/(args.steps) * s, 4), args.timeout) for s in range(args.steps+1)])
         #experiments.append((e, 1, args.timeout))
