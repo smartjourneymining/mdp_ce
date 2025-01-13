@@ -173,6 +173,9 @@ class QuadraticProblem:
             if A.shape == (2,2):
                 self.m.addConstr(v == A[0,0]*A[1,1]-A[1,0]*A[0,1])
                 return v
+            if A.shape == (3,3):
+                self.m.addGenConstrNL(v, A[0,0]*A[1,1]*A[2,2] + A[0,1]*A[1,2]*A[2,0] + A[0,2]*A[1,0]*A[2,1] - A[0,2]*A[1,1]*A[2,0] - A[0,1]*A[1,0]*A[2,2] - A[0,0]*A[1,2]*A[2,1])
+                return v
             expr = gp.QuadExpr()
             cofactor = 1
             for i in range(A.shape[1]):
