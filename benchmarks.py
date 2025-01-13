@@ -1064,7 +1064,7 @@ def run_experiment(param):
     # df_results_div['value'] = abs(r_qp.value - r_qp_new.value)
     
     if r_qp.status != GRB.OPTIMAL:
-        return pd.DataFrame()
+        return df_results_div
     
     results_div = [r_qp]
     for i in range(diversity_runs):
