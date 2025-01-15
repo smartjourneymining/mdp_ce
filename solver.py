@@ -126,7 +126,8 @@ class QuadraticProblem:
             if self.m.SolCount == 0:
                 return Result(self.m.Runtime, self.d_0.X + self.d_1.X + self.d_inf.X, self.target_prob, {}, self.timeout, self.m.MIPGap, self.m.status)
             else:
-                return Result(self.m.Runtime, self.d_0.X + self.d_1.X + self.d_inf.X, self.target_prob, {}, self.timeout, self.m.MIPGap, GRB.SUBOPTIMAL)
+                strategy = QuadraticProblem.construct_strategy_from_solution(self.model, self.p_sa)
+                return Result(self.m.Runtime, self.d_0.X + self.d_1.X + self.d_inf.X, self.target_prob, strategy, self.timeout, self.m.MIPGap, GRB.SUBOPTIMAL)
             
         strategy = QuadraticProblem.construct_strategy_from_solution(self.model, self.p_sa)
         return Result(self.m.Runtime, self.d_0.X + self.d_1.X + self.d_inf.X, self.target_prob, strategy, self.timeout, self.m.MIPGap, self.m.status)
