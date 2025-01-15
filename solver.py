@@ -216,7 +216,7 @@ class QuadraticProblem:
             d_1_visits[i,i] == random.uniform(0, 0.00001)
         
         
-        self.m.setObjective(self.d_0 + self.d_1 + self.d_inf - det(d_1_visits), sense = GRB.MINIMIZE)
+        self.m.setObjective(self.d_0 + self.d_1 + self.d_inf - len(solutions) * det(d_1_visits), sense = GRB.MINIMIZE)
         self.m.optimize()
         
         # process solution
