@@ -1071,7 +1071,7 @@ def run_experiment(param):
         print(f'strat {i}')
         #r_div = diversity_program_strategy(model, p, user_strategy, results_div, timeout=args.timeout, debug=False)
         r_div = solver.QuadraticProblem(model, p, user_strategy, timeout=timeout, debug=False).solve_diverse(results_div)
-        if r_div.status != GRB.OPTIMAL:
+        if r_div.status != GRB.OPTIMAL and r_div.status != GRB.SUBOPTIMAL:
             continue
         previously_chosen_actions = get_chosen_state_action(user_strategy, results_div)
         chosen_actions = get_chosen_state_action(user_strategy, [r_div])
