@@ -45,6 +45,16 @@ class QuadraticProblem:
         self.d_1 = self.m.addVar(name='d1', lb = 0, ub=1)
         self.d_inf = self.m.addVar(name='d_inf', lb = 0, ub=1)
         
+        start_state = [s for s in self.model.nodes if 'q0: start' in s]
+        assert len(start_state) == 1, start_state
+        self.start_state = start_state[0]
+        
+        target_state = [s for s in self.model.nodes if 'negative' in s]
+        assert len(target_state) == 1, target_state
+        self.target_state = target_state[0]
+                
+        self.reaching_states = [s for s in model.nodes if nx.has_path(model, s, self.target_state)]
+
         self.encode_actions()
         self.encode_model()
         self.reachability_constraint()
@@ -58,11 +68,14 @@ class QuadraticProblem:
     def encode_actions(self) -> dict:
         # encode actions
         for s in self.model.nodes:
+            # Encode pos and neg states as absorbing, i.e. without available actions. Thus, the can not be included in p_sa
             if 'positive' in s:
+                assert s not in self.reaching_states
                 self.m.addConstr(self.p[s] == 0)
                 continue
             if 'negative' in s:
                 self.m.addConstr(self.p[s] == 1)
+                assert self.target_state == s
                 continue
             enabled_actions = set([self.model.edges[e]['action'] for e in self.model.edges(s)])
             if 'customer' not in s:
@@ -77,14 +90,17 @@ class QuadraticProblem:
         for s in self.p_sa:
             enabled_actions = set([self.model.edges[e]['action'] for e in self.model.edges(s)])
             assert len(enabled_actions) >= 1, f'State{s} has no enabled action'
-            self.m.addConstr(self.p[s] == sum([self.p_sa[s][self.model.edges[e]['action']] * float(self.model.edges[e]['prob_weight']) * self.p[e[1]] for e in self.model.edges(s)]))
+            if s in self.reaching_states:
+                self.m.addConstr(self.p[s] == sum([self.p_sa[s][self.model.edges[e]['action']] * float(self.model.edges[e]['prob_weight']) * self.p[e[1]] for e in self.model.edges(s)]))
+            else:
+                # Not reachable states are still in strategy
+                if self.debug:
+                    print(f'Set {s} to 0')
+                self.m.addConstr(self.p[s] == 0)
 
     def reachability_constraint(self):
         # encode reachability constraint
-        start_state = [s for s in self.model.nodes if 'q0: start' in s]
-        assert len(start_state) == 1, start_state
-        start_state = start_state[0]
-        self.m.addConstr(self.p[start_state] <= self.target_prob)
+        self.m.addConstr(self.p[self.start_state] <= self.target_prob)
     
     def strict_proximal(self):
         # strict proximal
@@ -124,7 +140,7 @@ class QuadraticProblem:
         # compute result as in diverse target function include determinant
         if self.m.status == GRB.TIME_LIMIT:
             if self.m.SolCount == 0:
-                return Result(self.m.Runtime, self.d_0.X + self.d_1.X + self.d_inf.X, self.target_prob, {}, self.timeout, self.m.MIPGap, self.m.status)
+                return Result(self.m.Runtime, 0, self.target_prob, {}, self.timeout, self.m.MIPGap, self.m.status)
             else:
                 strategy = QuadraticProblem.construct_strategy_from_solution(self.model, self.p_sa)
                 return Result(self.m.Runtime, self.d_0.X + self.d_1.X + self.d_inf.X, self.target_prob, strategy, self.timeout, self.m.MIPGap, GRB.SUBOPTIMAL)
