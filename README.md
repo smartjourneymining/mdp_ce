@@ -89,3 +89,6 @@ To reproduce the general results for MSSD, run:
 ```
 python3 benchmarks.py --experiments spotify --steps 10 --iterations 10 --model_iterations 10 --timeout 1800 --diversity_runs 0 --all_spotify
 ```
+
+## Plots
+All presented plots can be reproduced by running the ```plots.ipynb``` notebook, the results file are contained in the repository.
