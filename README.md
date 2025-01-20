@@ -5,7 +5,6 @@ This repository contains all files to reproduce the results reported in the pape
 ## Artifact Structure
 
 ```
-.
 ├── requirements.txt # Requirements to re-run file
 ├── README.md
 ├── plots.ipynb # File to re-generate presented plots
