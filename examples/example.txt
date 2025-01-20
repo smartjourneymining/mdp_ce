@@ -1,0 +1,55 @@
+import cvxpy as cp
+
+def run_program():
+    places = [cp.Variable(pos=True, name='p%s' % i) for i in range(9)]
+
+    p5_action_Quit = cp.Variable(pos=True, name='p5_action_Quit')
+    p5_action_ReSubmit = cp.Variable(pos=True, name='p5_action_ReSubmit')
+    p2_action_Quit = cp.Variable(pos=True, name='p2_action_Quit')
+    p2_action_Application = cp.Variable(pos=True, name='p2_action_Application')
+    p1_action_Quit = cp.Variable(pos=True, name='p1_action_Quit')
+    p1_action_Application = cp.Variable(pos=True, name='p1_action_Application')
+    p0_action_Application = cp.Variable(pos=True, name='p0_action_Application')
+    p0_action_Consult = cp.Variable(pos=True, name='p0_action_Consult')
+
+    all_vars = [p5_action_Quit, p5_action_ReSubmit, p2_action_Quit, p2_action_Application, p1_action_Quit, p1_action_Application, p0_action_Consult, p0_action_Application]
+
+    constraints = []
+    
+    for v in all_vars:
+        constraints.append(v <= 1)
+        
+    # place constraints    
+    constraints.append(p5_action_Quit + p5_action_ReSubmit <= 1)
+    constraints.append(p2_action_Application + p2_action_Quit <= 1)
+    constraints.append(p1_action_Application + p1_action_Quit <= 1)
+    constraints.append(p0_action_Application + p0_action_Consult <= 1)
+
+    constraints.append(places[8] == 1) # unreachable end receives 0
+    #constraints.append(places[7] >= 0) # state itself receives 1
+    constraints.append(places[6] >= 0.8 * 0 + 0.2 * places[8]) # places[7] = 0
+    constraints.append(places[5] >= p5_action_Quit * places[8] + (0.3 + p5_action_ReSubmit) * places[6])
+    constraints.append(places[4] >= 0.1 * places[5] + 0.9 * 0) # places[7] = 0
+    constraints.append(places[3] >= 0.5 * places[5] + 0.5 * 0) # places[7] = 0
+    constraints.append(places[2] >= p2_action_Quit * places[8] + p2_action_Application * places[4])
+    constraints.append(places[1] >= p1_action_Quit * places[8] + p1_action_Application * places[2])
+    constraints.append(places[0] >= p0_action_Application * 0.95 * places[3] + p0_action_Application * 0.05 * places[1] + p0_action_Consult * places[2])
+    
+    constraints.append(0.25 >= places[0])
+        
+    problem = cp.Problem(cp.Minimize(sum([1/v for v in all_vars])), constraints)
+    print("Is this problem DGP?", problem.is_dgp())
+
+    problem.solve(gp=True, solver="MOSEK")
+    print("Value:", problem.value)
+
+    total_sum = 0
+    stoch_sum = 0
+    for v in all_vars:
+        print(v, v.value)
+        total_sum += 1/v.value
+        stoch_sum += v.value
+    print("Total stochastic mass:", stoch_sum)
+        
+if __name__ == '__main__':
+    run_program()
