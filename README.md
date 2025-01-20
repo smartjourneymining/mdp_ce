@@ -76,19 +76,16 @@ Before running any code, please make sure that all requirements from ```requirem
 To reproduce the results reported for GrepS, BPIC'12 and BPIC'17, run: 
 
 ``` 
-python3 benchmarks.py --experiments greps bpic12  bpic17-both  --steps 10 --iterations 10 --model_iterations 1
-     --timeout 1800 --diversity_runs 2 
+python3 benchmarks.py --experiments greps bpic12  bpic17-both  --steps 10 --iterations 10 --model_iterations 1 --timeout 1800 --diversity_runs 2 
 ```
 
 To reproduce the detailed results reported for ```MSSD10``` - ```MSSD30```, run: 
 
 ```
-python3 benchmarks.py --experiments spotify1000 spotify2000 spotify3000 --steps 12 --iterations 10 
-    --timeout 1800 --model_iterations 10 --diversity_runs 0  --bounds 0.1 0.5
+python3 benchmarks.py --experiments spotify1000 spotify2000 spotify3000 --steps 12 --iterations 10 --timeout 1800 --model_iterations 10 --diversity_runs 0  --bounds 0.1 0.5
 ```
 To reproduce the general results for MSSD, run:
 
 ```
-python3 benchmarks.py --experiments spotify --steps 10 --iterations 10 --model_iterations 10
-    --timeout 1800 --diversity_runs 0 --all_spotify
+python3 benchmarks.py --experiments spotify --steps 10 --iterations 10 --model_iterations 10 --timeout 1800 --diversity_runs 0 --all_spotify
 ```
