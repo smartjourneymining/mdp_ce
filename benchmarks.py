@@ -1178,7 +1178,7 @@ if __name__ == '__main__':
     parser.add_argument('-mi', '--model_iterations', help = "Number of models to generate for each setting", type=int, default = 10)
     parser.add_argument('-as', '--all_spotify', help = "All spotify models in steps of 100 are generated", action = 'store_true')
     parser.add_argument('-d', '--diversity_runs', help = "Number of diverse counterfactuals", type=int, default = 0)
-    parser.add_argument('-b', '--bounds', help="Bounds for gamma, evenly split by steps", nargs='+', type=float)
+    parser.add_argument('-b', '--bounds', help="Bounds for gamma, evenly split by steps", nargs='+', type=float, default=[0, 1])
     args = parser.parse_args()
     
     
