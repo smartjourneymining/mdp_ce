@@ -889,7 +889,7 @@ def textual_strategy(old_strategy : dict, new_strategy : dict):
         assert old_strategy[s].keys() == new_strategy[s].keys()
         printed = False
         for a in old_strategy[s]:
-            if round(old_strategy[s][a], 2) != round(new_strategy[s][a], 2) and new_strategy[s][a] != 0:
+            if round(old_strategy[s][a], 2) != round(new_strategy[s][a], 2):
                 if not printed:
                     print(f'In state `{s.replace("customer", "")}\' ')
                     printed = True
@@ -898,15 +898,13 @@ def textual_strategy(old_strategy : dict, new_strategy : dict):
                 else:
                     print(f'    decrease probability of action `{a}\' to {round(new_strategy[s][a], 2)}')
 
-def plot_changes(model : nx.DiGraph, name : str, user_strategy, counterfactual_strategy, layout = "sfdp"):
-    #def draw_dfg(g, name, names={}, layout = "sfdp", color_map = [], add_greps_cluster=True):
+def plot_changes(model : nx.DiGraph, name : str, user_strategy, counterfactual_strategies, layout = "sfdp"):
     """
     Helper function to draw Networkx graphs.
     """
     scaling = 10
     # build graph with variable thickness
     #scaling = 1/np.mean(list(nx.get_edge_attributes(g,'edge_weight').values()))
-
     A = to_agraph(model)
 
     edge_weights = nx.get_edge_attributes(model,'edge_weight')
@@ -918,12 +916,12 @@ def plot_changes(model : nx.DiGraph, name : str, user_strategy, counterfactual_s
         edge = A.get_edge(e[0], e[1])
         if 'controllable' in model[e[0]][e[1]]:
             if not model[e[0]][e[1]]['controllable']:
-                edge.attr["style"] = "dotted"
+                edge.attr["style"] = "solid"
                 #edge.attr["label"] =  str(g[e[0]][e[1]]["prob_weight"])
         #A.add_edge(e[0], e[1], penwidth = edge_weights[e]*scaling)
 
     for n in A.nodes():
-        n.attr['label'] = n.split(':')[0]
+        n.attr['label'] = n#.split(':')[1]
         # n.attr['fontsize'] = 120
         # n.attr['penwidth'] = 30
         # n.attr['height'] = 3
@@ -936,14 +934,26 @@ def plot_changes(model : nx.DiGraph, name : str, user_strategy, counterfactual_s
         e.attr["color"] = "black"
         
     for s in user_strategy:
-        for e in model.edges(s):
-            e_a = A.get_edge(e[0], e[1])
-            if any([round(user_strategy[s][a], 2) != round(counterfactual_strategy[s][a], 2) for a in user_strategy[s]]):
-                e_a.attr["color"] ="red"
-                n = A.get_node(s)
-                n.attr['color'] = 'red'
-
-      
+        for a in user_strategy[s]:
+            for i in range(len(counterfactual_strategies)):
+                counterfactual_strategy = counterfactual_strategies[i]
+                color = ['red', 'blue', 'green'][i]
+                if round(user_strategy[s][a], 2) != round(counterfactual_strategy[s][a], 2):
+                    affected_edges = [e for e in model.edges(s) if model.edges[e]['action'] == a]
+                    for e in affected_edges:
+                        e_a = A.get_edge(e[0], e[1])
+                        # e_a.attr["color"] = 'black'
+                        print("colored", e_a, color)
+                        if i == 0:
+                        # if e_a.attr['color'] == 'black':
+                            e_a.attr['color'] = 'blue' 
+                            n = A.get_node(s)
+                            n.attr['shape'] = 'box'
+                        else:
+                            e_a.attr['style'] = 'dashed' 
+                            # A.add_edge(e[0], e[1], color = color)
+                            n = A.get_node(s)
+                            n.attr['shape'] = 'box'     
     A.write(f'out/{name}.dot')
     A.layout(layout)
     A.draw(f'out/{name}.png')
@@ -1168,6 +1178,7 @@ if __name__ == '__main__':
     parser.add_argument('-mi', '--model_iterations', help = "Number of models to generate for each setting", type=int, default = 10)
     parser.add_argument('-as', '--all_spotify', help = "All spotify models in steps of 100 are generated", action = 'store_true')
     parser.add_argument('-d', '--diversity_runs', help = "Number of diverse counterfactuals", type=int, default = 0)
+    parser.add_argument('-b', '--bounds', help="Bounds for gamma, evenly split by steps", nargs='+', type=float)
     args = parser.parse_args()
     
     
@@ -1207,7 +1218,7 @@ if __name__ == '__main__':
             model = pickle.load(handle)
         with open(e, 'rb') as handle:
             user_strategy = pickle.load(handle)
-        bounds = (0, 1)#search_bounds(model, user_strategy)
+        bounds = tuple(args.bounds)
         print(bounds)
         experiments.extend([(e, round(bounds[0] + (bounds[1] - bounds[0]) * 1/(args.steps) * s, 4), args.timeout) for s in range(args.steps+1)])
         #experiments.append((e, 1, args.timeout))
