@@ -1,53 +1,22 @@
-from journepy.src.preprocessing.greps import preprocessed_log as preprocessed_log_greps
-from journepy.src.preprocessing.bpic12 import preprocessed_log as preprocessed_log_bpic_2012
-from journepy.src.alergia_utils import convert_utils
-# from journepy.src.mc_utils.prism_utils import PrismPrinter
-# from journepy.src.mc_utils.prism_utils import PrismQuery
-
-# import probabilistic_game_utils as pgu 
-
-from aalpy.learning_algs import run_Alergia
-from aalpy.utils import save_automaton_to_file
-from IPython.display import Image
-
-
 import pandas as pd
-
+import networkx as nx
 from networkx.drawing.nx_agraph import to_agraph
 
-import json
-
-import networkx as nx
-
-import subprocess 
+import pickle
+from pathlib import Path
+import argparse
 import multiprocessing
-
-import matplotlib.pyplot as plt
-
 import os
-
-import gurobipy as gp
-from gurobipy import GRB
-
-import cvxpy as cp
-
 import random
 random.seed(42)
 
-from Result import Result
-
-import argparse
-
-import pickle
-REGENERATE = False
-
-import LogParser
-
-import itertools
-from pathlib import Path
-
-import mosek
+import gurobipy as gp
+from gurobipy import GRB
 from z3 import *
+
+
+from Result import Result
+import solver 
 
 import pyrootutils
 path = pyrootutils.find_root(search_from=__file__, indicator=".project-root")
@@ -58,8 +27,6 @@ dotenv=True, # load environment variables from .env if exists in root directory
 pythonpath=True, # add root directory to the PYTHONPATH (helps with imports)
 cwd=True, # change current working directory to the root directory (helps with filepaths)
 )
-
-import solver 
 
 def construct_optimal_strategy_from_solution(model : nx.DiGraph, p : dict):
     strategy = {}
@@ -1168,12 +1135,12 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(
                     prog = 'benchmarks',
                     description = "File to trigger benchmarks for CE generation in MDP's")
-    parser.add_argument('-t', '--timeout', help = "Timeout for program solution", type=int, default = 60*60) 
+    parser.add_argument('-t', '--timeout', help = "Timeout for Gurobi", type=int, default = 60*60) 
     parser.add_argument('-s', '--steps', help = "Number of steps for each model", type=int, default = 1)
     parser.add_argument('-i', '--iterations', help = "Iterations for each step", type=int, default = 1)
     parser.add_argument('-c', '--cores', help = "Cores to use to parallelize experiments", type=int, default = 1)
-    parser.add_argument('-e', '--experiments', help = "Start profile to filter on", nargs='+', type=str, default = ['greps', 'bpic12', 'bpic17-before', 'bpic17-after', 'bpic17-both', 'spotify'])
-    parser.add_argument('-rm', '--rebuild_models', help = "Rebuild models, implies rebuilding models", action = 'store_true')
+    parser.add_argument('-e', '--experiments', help = "Name of experiments to run", nargs='+', type=str, default = ['greps', 'bpic12', 'bpic17-before', 'bpic17-after', 'bpic17-both', 'spotify'])
+    parser.add_argument('-rm', '--rebuild_models', help = "Rebuild models, implies rebuilding strategies", action = 'store_true')
     parser.add_argument('-rs', '--rebuild_strategies', help = "Rebuild strategies", action = 'store_true')
     parser.add_argument('-mi', '--model_iterations', help = "Number of models to generate for each setting", type=int, default = 10)
     parser.add_argument('-as', '--all_spotify', help = "All spotify models in steps of 100 are generated", action = 'store_true')
