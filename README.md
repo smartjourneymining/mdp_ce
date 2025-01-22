@@ -90,4 +90,4 @@ python3 benchmarks.py --experiments spotify --steps 10 --iterations 10 --model_i
 ```
 
 ## Plots
-All presented plots can be reproduced by running the ```plots.ipynb``` notebook, the results file are contained in the repository.
+All presented plots can be reproduced by running the [plots.ipynb](plots.ipynb) notebook, the results file are contained in the repository.
