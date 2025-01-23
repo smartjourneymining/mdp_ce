@@ -1,5 +1,4 @@
 aalpy==1.4.1
-cvxpy==1.5.3
 gurobipy==11.0.3
 ipython==8.9.0
 matplotlib==3.6.3
@@ -9,4 +8,3 @@ pandas==1.5.3
 pm4py==2.7.10.1
 pyrootutils==1.0.4
 scikit_learn==1.2.1
-z3_solver==4.13.0.0
