@@ -1,0 +1,2138 @@
+<?xml version='1.0' encoding='utf-8'?>
+<gexf xmlns="http://www.gexf.net/1.2draft" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.gexf.net/1.2draft http://www.gexf.net/1.2draft/gexf.xsd" version="1.2">
+  <meta lastmodifieddate="2023-07-21">
+    <creator>NetworkX 3.0</creator>
+  </meta>
+  <graph defaultedgetype="directed" mode="static" name="">
+    <attributes mode="static" class="edge">
+      <attribute id="0" title="controllable" type="boolean" />
+      <attribute id="1" title="action" type="string" />
+      <attribute id="2" title="cost" type="float" />
+      <attribute id="3" title="color" type="string" />
+    </attributes>
+    <nodes>
+      <node id="start" label="start" />
+      <node id="start - A_Create Application" label="start - A_Create Application" />
+      <node id="start - A_Create Application - A_Submitted" label="start - A_Create Application - A_Submitted" />
+      <node id="A_Create Application - A_Submitted - A_Concept" label="A_Create Application - A_Submitted - A_Concept" />
+      <node id="A_Submitted - A_Concept - A_Accepted" label="A_Submitted - A_Concept - A_Accepted" />
+      <node id="A_Concept - A_Accepted - O_Create Offer 0" label="A_Concept - A_Accepted - O_Create Offer 0" />
+      <node id="A_Accepted - O_Create Offer 0 - O_Sent (mail and online)" label="A_Accepted - O_Create Offer 0 - O_Sent (mail and online)" />
+      <node id="O_Create Offer 0 - O_Sent (mail and online) - W_Call after offers SHORT" label="O_Create Offer 0 - O_Sent (mail and online) - W_Call after offers SHORT" />
+      <node id="O_Sent (mail and online) - W_Call after offers SHORT - A_Validating" label="O_Sent (mail and online) - W_Call after offers SHORT - A_Validating" />
+      <node id="W_Call after offers SHORT - A_Validating - O_Returned" label="W_Call after offers SHORT - A_Validating - O_Returned" />
+      <node id="A_Validating - O_Returned - W_Call incomplete files SHORT" label="A_Validating - O_Returned - W_Call incomplete files SHORT" />
+      <node id="O_Returned - W_Call incomplete files SHORT - A_Validating" label="O_Returned - W_Call incomplete files SHORT - A_Validating" />
+      <node id="W_Call incomplete files SHORT - A_Validating - O_Accepted" label="W_Call incomplete files SHORT - A_Validating - O_Accepted" />
+      <node id="A_Validating - O_Accepted - A_Pending" label="A_Validating - O_Accepted - A_Pending" />
+      <node id="O_Accepted - A_Pending - positive" label="O_Accepted - A_Pending - positive" />
+      <node id="O_Create Offer 0 - O_Sent (mail and online) - A_Validating" label="O_Create Offer 0 - O_Sent (mail and online) - A_Validating" />
+      <node id="O_Sent (mail and online) - A_Validating - O_Returned" label="O_Sent (mail and online) - A_Validating - O_Returned" />
+      <node id="O_Create Offer 0 - O_Sent (mail and online) - W_Call after offers LONG" label="O_Create Offer 0 - O_Sent (mail and online) - W_Call after offers LONG" />
+      <node id="O_Sent (mail and online) - W_Call after offers LONG - A_Validating" label="O_Sent (mail and online) - W_Call after offers LONG - A_Validating" />
+      <node id="W_Call after offers LONG - A_Validating - O_Returned" label="W_Call after offers LONG - A_Validating - O_Returned" />
+      <node id="A_Validating - O_Returned - A_Validating" label="A_Validating - O_Returned - A_Validating" />
+      <node id="O_Returned - A_Validating - O_Accepted" label="O_Returned - A_Validating - O_Accepted" />
+      <node id="A_Validating - O_Returned - W_Call incomplete files LONG" label="A_Validating - O_Returned - W_Call incomplete files LONG" />
+      <node id="O_Returned - W_Call incomplete files LONG - A_Validating" label="O_Returned - W_Call incomplete files LONG - A_Validating" />
+      <node id="W_Call incomplete files LONG - A_Validating - O_Accepted" label="W_Call incomplete files LONG - A_Validating - O_Accepted" />
+      <node id="O_Sent (mail and online) - W_Call after offers SHORT - TIMEOUT" label="O_Sent (mail and online) - W_Call after offers SHORT - TIMEOUT" />
+      <node id="W_Call after offers SHORT - TIMEOUT - negative" label="W_Call after offers SHORT - TIMEOUT - negative" />
+      <node id="O_Sent (mail and online) - W_Call after offers LONG - TIMEOUT" label="O_Sent (mail and online) - W_Call after offers LONG - TIMEOUT" />
+      <node id="W_Call after offers LONG - TIMEOUT - negative" label="W_Call after offers LONG - TIMEOUT - negative" />
+      <node id="O_Sent (mail and online) - W_Call after offers SHORT - A_Cancelled CUSTOMER" label="O_Sent (mail and online) - W_Call after offers SHORT - A_Cancelled CUSTOMER" />
+      <node id="W_Call after offers SHORT - A_Cancelled CUSTOMER - negative" label="W_Call after offers SHORT - A_Cancelled CUSTOMER - negative" />
+      <node id="O_Create Offer 0 - O_Sent (mail and online) - A_Cancelled CUSTOMER" label="O_Create Offer 0 - O_Sent (mail and online) - A_Cancelled CUSTOMER" />
+      <node id="O_Sent (mail and online) - A_Cancelled CUSTOMER - negative" label="O_Sent (mail and online) - A_Cancelled CUSTOMER - negative" />
+      <node id="O_Create Offer 0 - O_Sent (mail and online) - TIMEOUT" label="O_Create Offer 0 - O_Sent (mail and online) - TIMEOUT" />
+      <node id="O_Sent (mail and online) - TIMEOUT - negative" label="O_Sent (mail and online) - TIMEOUT - negative" />
+      <node id="O_Sent (mail and online) - W_Call after offers LONG - A_Cancelled CUSTOMER" label="O_Sent (mail and online) - W_Call after offers LONG - A_Cancelled CUSTOMER" />
+      <node id="W_Call after offers LONG - A_Cancelled CUSTOMER - negative" label="W_Call after offers LONG - A_Cancelled CUSTOMER - negative" />
+      <node id="O_Sent (mail and online) - W_Call after offers SHORT - O_Create Offer 1" label="O_Sent (mail and online) - W_Call after offers SHORT - O_Create Offer 1" />
+      <node id="W_Call after offers SHORT - O_Create Offer 1 - O_Sent (mail and online)" label="W_Call after offers SHORT - O_Create Offer 1 - O_Sent (mail and online)" />
+      <node id="O_Create Offer 1 - O_Sent (mail and online) - TIMEOUT" label="O_Create Offer 1 - O_Sent (mail and online) - TIMEOUT" />
+      <node id="O_Create Offer 1 - O_Sent (mail and online) - A_Cancelled CUSTOMER" label="O_Create Offer 1 - O_Sent (mail and online) - A_Cancelled CUSTOMER" />
+      <node id="O_Create Offer 0 - O_Sent (mail and online) - O_Create Offer 1" label="O_Create Offer 0 - O_Sent (mail and online) - O_Create Offer 1" />
+      <node id="O_Sent (mail and online) - O_Create Offer 1 - O_Sent (mail and online)" label="O_Sent (mail and online) - O_Create Offer 1 - O_Sent (mail and online)" />
+      <node id="O_Returned - W_Call incomplete files SHORT - O_Accepted" label="O_Returned - W_Call incomplete files SHORT - O_Accepted" />
+      <node id="W_Call incomplete files SHORT - O_Accepted - A_Pending" label="W_Call incomplete files SHORT - O_Accepted - A_Pending" />
+      <node id="O_Returned - W_Call incomplete files LONG - O_Accepted" label="O_Returned - W_Call incomplete files LONG - O_Accepted" />
+      <node id="W_Call incomplete files LONG - O_Accepted - A_Pending" label="W_Call incomplete files LONG - O_Accepted - A_Pending" />
+      <node id="A_Accepted - O_Create Offer 0 - O_Create Offer 1" label="A_Accepted - O_Create Offer 0 - O_Create Offer 1" />
+      <node id="O_Create Offer 0 - O_Create Offer 1 - O_Sent (mail and online)" label="O_Create Offer 0 - O_Create Offer 1 - O_Sent (mail and online)" />
+      <node id="O_Create Offer 1 - O_Sent (mail and online) - O_Sent (mail and online)" label="O_Create Offer 1 - O_Sent (mail and online) - O_Sent (mail and online)" />
+      <node id="O_Sent (mail and online) - O_Sent (mail and online) - W_Call after offers SHORT" label="O_Sent (mail and online) - O_Sent (mail and online) - W_Call after offers SHORT" />
+      <node id="O_Sent (mail and online) - W_Call after offers SHORT - O_Create Offer 2" label="O_Sent (mail and online) - W_Call after offers SHORT - O_Create Offer 2" />
+      <node id="W_Call after offers SHORT - O_Create Offer 2 - O_Sent (mail and online)" label="W_Call after offers SHORT - O_Create Offer 2 - O_Sent (mail and online)" />
+      <node id="O_Create Offer 2 - O_Sent (mail and online) - TIMEOUT" label="O_Create Offer 2 - O_Sent (mail and online) - TIMEOUT" />
+      <node id="O_Create Offer 2 - O_Sent (mail and online) - A_Cancelled CUSTOMER" label="O_Create Offer 2 - O_Sent (mail and online) - A_Cancelled CUSTOMER" />
+      <node id="A_Validating - O_Returned - O_Accepted" label="A_Validating - O_Returned - O_Accepted" />
+      <node id="O_Returned - O_Accepted - A_Pending" label="O_Returned - O_Accepted - A_Pending" />
+      <node id="O_Sent (mail and online) - W_Call after offers LONG - O_Create Offer 1" label="O_Sent (mail and online) - W_Call after offers LONG - O_Create Offer 1" />
+      <node id="W_Call after offers LONG - O_Create Offer 1 - O_Sent (mail and online)" label="W_Call after offers LONG - O_Create Offer 1 - O_Sent (mail and online)" />
+      <node id="start - A_Create Application - A_Concept" label="start - A_Create Application - A_Concept" />
+      <node id="A_Create Application - A_Concept - A_Accepted" label="A_Create Application - A_Concept - A_Accepted" />
+      <node id="O_Create Offer 0 - O_Sent (mail and online) - W_Call after offers SUPER LONG" label="O_Create Offer 0 - O_Sent (mail and online) - W_Call after offers SUPER LONG" />
+      <node id="O_Sent (mail and online) - W_Call after offers SUPER LONG - TIMEOUT" label="O_Sent (mail and online) - W_Call after offers SUPER LONG - TIMEOUT" />
+      <node id="W_Call after offers SUPER LONG - TIMEOUT - negative" label="W_Call after offers SUPER LONG - TIMEOUT - negative" />
+      <node id="O_Sent (mail and online) - O_Sent (mail and online) - TIMEOUT" label="O_Sent (mail and online) - O_Sent (mail and online) - TIMEOUT" />
+      <node id="O_Create Offer 1 - O_Sent (mail and online) - O_Create Offer 2" label="O_Create Offer 1 - O_Sent (mail and online) - O_Create Offer 2" />
+      <node id="O_Sent (mail and online) - O_Create Offer 2 - O_Sent (mail and online)" label="O_Sent (mail and online) - O_Create Offer 2 - O_Sent (mail and online)" />
+      <node id="O_Sent (mail and online) - O_Sent (mail and online) - A_Validating" label="O_Sent (mail and online) - O_Sent (mail and online) - A_Validating" />
+      <node id="O_Sent (mail and online) - O_Sent (mail and online) - W_Call after offers LONG" label="O_Sent (mail and online) - O_Sent (mail and online) - W_Call after offers LONG" />
+      <node id="W_Call incomplete files SHORT - A_Validating - W_Call incomplete files SHORT" label="W_Call incomplete files SHORT - A_Validating - W_Call incomplete files SHORT" />
+      <node id="A_Validating - W_Call incomplete files SHORT - A_Validating" label="A_Validating - W_Call incomplete files SHORT - A_Validating" />
+      <node id="W_Call incomplete files LONG - A_Validating - W_Call incomplete files SHORT" label="W_Call incomplete files LONG - A_Validating - W_Call incomplete files SHORT" />
+      <node id="O_Create Offer 1 - O_Sent (mail and online) - O_Cancelled" label="O_Create Offer 1 - O_Sent (mail and online) - O_Cancelled" />
+      <node id="O_Sent (mail and online) - O_Cancelled - W_Call after offers SHORT" label="O_Sent (mail and online) - O_Cancelled - W_Call after offers SHORT" />
+      <node id="O_Cancelled - W_Call after offers SHORT - TIMEOUT" label="O_Cancelled - W_Call after offers SHORT - TIMEOUT" />
+      <node id="O_Sent (mail and online) - O_Cancelled - TIMEOUT" label="O_Sent (mail and online) - O_Cancelled - TIMEOUT" />
+      <node id="O_Cancelled - TIMEOUT - negative" label="O_Cancelled - TIMEOUT - negative" />
+      <node id="A_Accepted - O_Create Offer 0 - O_Cancelled" label="A_Accepted - O_Create Offer 0 - O_Cancelled" />
+      <node id="O_Create Offer 0 - O_Cancelled - O_Create Offer 1" label="O_Create Offer 0 - O_Cancelled - O_Create Offer 1" />
+      <node id="O_Cancelled - O_Create Offer 1 - O_Sent (mail and online)" label="O_Cancelled - O_Create Offer 1 - O_Sent (mail and online)" />
+      <node id="O_Create Offer 1 - O_Sent (mail and online) - W_Call after offers SHORT" label="O_Create Offer 1 - O_Sent (mail and online) - W_Call after offers SHORT" />
+      <node id="O_Sent (mail and online) - O_Sent (mail and online) - A_Cancelled CUSTOMER" label="O_Sent (mail and online) - O_Sent (mail and online) - A_Cancelled CUSTOMER" />
+      <node id="O_Create Offer 1 - O_Sent (mail and online) - A_Validating" label="O_Create Offer 1 - O_Sent (mail and online) - A_Validating" />
+      <node id="O_Create Offer 2 - O_Sent (mail and online) - O_Create Offer 3" label="O_Create Offer 2 - O_Sent (mail and online) - O_Create Offer 3" />
+      <node id="O_Sent (mail and online) - O_Create Offer 3 - O_Sent (mail and online)" label="O_Sent (mail and online) - O_Create Offer 3 - O_Sent (mail and online)" />
+      <node id="O_Create Offer 3 - O_Sent (mail and online) - TIMEOUT" label="O_Create Offer 3 - O_Sent (mail and online) - TIMEOUT" />
+      <node id="O_Sent (mail and online) - W_Call after offers SUPER LONG - A_Validating" label="O_Sent (mail and online) - W_Call after offers SUPER LONG - A_Validating" />
+      <node id="W_Call after offers SUPER LONG - A_Validating - O_Returned" label="W_Call after offers SUPER LONG - A_Validating - O_Returned" />
+      <node id="A_Validating - W_Call incomplete files SHORT - O_Accepted" label="A_Validating - W_Call incomplete files SHORT - O_Accepted" />
+      <node id="W_Call incomplete files SHORT - A_Validating - W_Call incomplete files LONG" label="W_Call incomplete files SHORT - A_Validating - W_Call incomplete files LONG" />
+      <node id="A_Validating - W_Call incomplete files LONG - O_Accepted" label="A_Validating - W_Call incomplete files LONG - O_Accepted" />
+      <node id="O_Sent (mail and online) - W_Call after offers SUPER LONG - A_Cancelled CUSTOMER" label="O_Sent (mail and online) - W_Call after offers SUPER LONG - A_Cancelled CUSTOMER" />
+      <node id="W_Call after offers SUPER LONG - A_Cancelled CUSTOMER - negative" label="W_Call after offers SUPER LONG - A_Cancelled CUSTOMER - negative" />
+      <node id="A_Accepted - O_Create Offer 0 - O_Sent (online only)" label="A_Accepted - O_Create Offer 0 - O_Sent (online only)" />
+      <node id="O_Create Offer 0 - O_Sent (online only) - W_Call after offers LONG" label="O_Create Offer 0 - O_Sent (online only) - W_Call after offers LONG" />
+      <node id="O_Sent (online only) - W_Call after offers LONG - TIMEOUT" label="O_Sent (online only) - W_Call after offers LONG - TIMEOUT" />
+      <node id="O_Create Offer 0 - O_Sent (online only) - W_Call after offers SHORT" label="O_Create Offer 0 - O_Sent (online only) - W_Call after offers SHORT" />
+      <node id="O_Sent (online only) - W_Call after offers SHORT - TIMEOUT" label="O_Sent (online only) - W_Call after offers SHORT - TIMEOUT" />
+      <node id="O_Sent (online only) - W_Call after offers SHORT - A_Cancelled CUSTOMER" label="O_Sent (online only) - W_Call after offers SHORT - A_Cancelled CUSTOMER" />
+      <node id="O_Returned - W_Call incomplete files SHORT - A_Cancelled CUSTOMER" label="O_Returned - W_Call incomplete files SHORT - A_Cancelled CUSTOMER" />
+      <node id="W_Call incomplete files SHORT - A_Cancelled CUSTOMER - negative" label="W_Call incomplete files SHORT - A_Cancelled CUSTOMER - negative" />
+      <node id="O_Returned - W_Call incomplete files LONG - A_Cancelled CUSTOMER" label="O_Returned - W_Call incomplete files LONG - A_Cancelled CUSTOMER" />
+      <node id="W_Call incomplete files LONG - A_Cancelled CUSTOMER - negative" label="W_Call incomplete files LONG - A_Cancelled CUSTOMER - negative" />
+      <node id="O_Sent (mail and online) - W_Call after offers LONG - O_Create Offer 2" label="O_Sent (mail and online) - W_Call after offers LONG - O_Create Offer 2" />
+      <node id="W_Call after offers LONG - O_Create Offer 2 - O_Sent (mail and online)" label="W_Call after offers LONG - O_Create Offer 2 - O_Sent (mail and online)" />
+      <node id="O_Sent (mail and online) - O_Sent (mail and online) - O_Create Offer 2" label="O_Sent (mail and online) - O_Sent (mail and online) - O_Create Offer 2" />
+      <node id="O_Create Offer 0 - O_Create Offer 1 - O_Create Offer 2" label="O_Create Offer 0 - O_Create Offer 1 - O_Create Offer 2" />
+      <node id="O_Create Offer 1 - O_Create Offer 2 - O_Sent (mail and online)" label="O_Create Offer 1 - O_Create Offer 2 - O_Sent (mail and online)" />
+      <node id="O_Create Offer 2 - O_Sent (mail and online) - O_Sent (mail and online)" label="O_Create Offer 2 - O_Sent (mail and online) - O_Sent (mail and online)" />
+      <node id="O_Sent (mail and online) - O_Sent (mail and online) - O_Sent (mail and online)" label="O_Sent (mail and online) - O_Sent (mail and online) - O_Sent (mail and online)" />
+      <node id="A_Accepted - O_Create Offer 0 - A_Cancelled CUSTOMER" label="A_Accepted - O_Create Offer 0 - A_Cancelled CUSTOMER" />
+      <node id="O_Create Offer 0 - A_Cancelled CUSTOMER - negative" label="O_Create Offer 0 - A_Cancelled CUSTOMER - negative" />
+      <node id="O_Create Offer 3 - O_Sent (mail and online) - A_Cancelled CUSTOMER" label="O_Create Offer 3 - O_Sent (mail and online) - A_Cancelled CUSTOMER" />
+      <node id="O_Sent (mail and online) - O_Create Offer 2 - O_Create Offer 3" label="O_Sent (mail and online) - O_Create Offer 2 - O_Create Offer 3" />
+      <node id="O_Create Offer 2 - O_Create Offer 3 - O_Sent (mail and online)" label="O_Create Offer 2 - O_Create Offer 3 - O_Sent (mail and online)" />
+      <node id="O_Create Offer 3 - O_Sent (mail and online) - O_Sent (mail and online)" label="O_Create Offer 3 - O_Sent (mail and online) - O_Sent (mail and online)" />
+      <node id="W_Call after offers SHORT - O_Create Offer 2 - O_Create Offer 3" label="W_Call after offers SHORT - O_Create Offer 2 - O_Create Offer 3" />
+      <node id="O_Sent (mail and online) - W_Call after offers SHORT - O_Cancelled" label="O_Sent (mail and online) - W_Call after offers SHORT - O_Cancelled" />
+      <node id="W_Call after offers SHORT - O_Cancelled - A_Cancelled CUSTOMER" label="W_Call after offers SHORT - O_Cancelled - A_Cancelled CUSTOMER" />
+      <node id="O_Cancelled - A_Cancelled CUSTOMER - negative" label="O_Cancelled - A_Cancelled CUSTOMER - negative" />
+      <node id="O_Create Offer 2 - O_Sent (mail and online) - A_Validating" label="O_Create Offer 2 - O_Sent (mail and online) - A_Validating" />
+      <node id="O_Sent (online only) - W_Call after offers LONG - A_Cancelled CUSTOMER" label="O_Sent (online only) - W_Call after offers LONG - A_Cancelled CUSTOMER" />
+      <node id="O_Create Offer 0 - O_Create Offer 1 - O_Cancelled" label="O_Create Offer 0 - O_Create Offer 1 - O_Cancelled" />
+      <node id="O_Create Offer 1 - O_Cancelled - O_Sent (mail and online)" label="O_Create Offer 1 - O_Cancelled - O_Sent (mail and online)" />
+      <node id="O_Cancelled - O_Sent (mail and online) - W_Call after offers SHORT" label="O_Cancelled - O_Sent (mail and online) - W_Call after offers SHORT" />
+      <node id="O_Cancelled - O_Sent (mail and online) - TIMEOUT" label="O_Cancelled - O_Sent (mail and online) - TIMEOUT" />
+      <node id="A_Validating - O_Returned - A_Cancelled CUSTOMER" label="A_Validating - O_Returned - A_Cancelled CUSTOMER" />
+      <node id="O_Returned - A_Cancelled CUSTOMER - negative" label="O_Returned - A_Cancelled CUSTOMER - negative" />
+      <node id="O_Returned - A_Validating - W_Call incomplete files SHORT" label="O_Returned - A_Validating - W_Call incomplete files SHORT" />
+      <node id="A_Validating - W_Call incomplete files LONG - A_Validating" label="A_Validating - W_Call incomplete files LONG - A_Validating" />
+      <node id="W_Call after offers LONG - O_Create Offer 1 - O_Sent (online only)" label="W_Call after offers LONG - O_Create Offer 1 - O_Sent (online only)" />
+      <node id="O_Create Offer 1 - O_Sent (online only) - TIMEOUT" label="O_Create Offer 1 - O_Sent (online only) - TIMEOUT" />
+      <node id="O_Sent (online only) - TIMEOUT - negative" label="O_Sent (online only) - TIMEOUT - negative" />
+      <node id="W_Call after offers SHORT - O_Create Offer 1 - O_Sent (online only)" label="W_Call after offers SHORT - O_Create Offer 1 - O_Sent (online only)" />
+      <node id="O_Create Offer 1 - O_Cancelled - O_Cancelled" label="O_Create Offer 1 - O_Cancelled - O_Cancelled" />
+      <node id="O_Cancelled - O_Cancelled - O_Create Offer 2" label="O_Cancelled - O_Cancelled - O_Create Offer 2" />
+      <node id="O_Cancelled - O_Create Offer 2 - O_Create Offer 3" label="O_Cancelled - O_Create Offer 2 - O_Create Offer 3" />
+      <node id="O_Create Offer 1 - O_Sent (online only) - A_Validating" label="O_Create Offer 1 - O_Sent (online only) - A_Validating" />
+      <node id="O_Sent (online only) - A_Validating - O_Returned" label="O_Sent (online only) - A_Validating - O_Returned" />
+      <node id="O_Sent (mail and online) - O_Create Offer 1 - O_Sent (online only)" label="O_Sent (mail and online) - O_Create Offer 1 - O_Sent (online only)" />
+      <node id="O_Create Offer 1 - O_Sent (mail and online) - W_Call after offers LONG" label="O_Create Offer 1 - O_Sent (mail and online) - W_Call after offers LONG" />
+      <node id="W_Call after offers SHORT - O_Cancelled - O_Create Offer 1" label="W_Call after offers SHORT - O_Cancelled - O_Create Offer 1" />
+      <node id="O_Sent (mail and online) - W_Call after offers LONG - O_Cancelled" label="O_Sent (mail and online) - W_Call after offers LONG - O_Cancelled" />
+      <node id="W_Call after offers LONG - O_Cancelled - O_Create Offer 1" label="W_Call after offers LONG - O_Cancelled - O_Create Offer 1" />
+      <node id="W_Call after offers SHORT - O_Cancelled - TIMEOUT" label="W_Call after offers SHORT - O_Cancelled - TIMEOUT" />
+      <node id="W_Call after offers SHORT - O_Cancelled - O_Cancelled" label="W_Call after offers SHORT - O_Cancelled - O_Cancelled" />
+      <node id="O_Cancelled - O_Cancelled - A_Cancelled CUSTOMER" label="O_Cancelled - O_Cancelled - A_Cancelled CUSTOMER" />
+      <node id="W_Call after offers LONG - O_Cancelled - O_Cancelled" label="W_Call after offers LONG - O_Cancelled - O_Cancelled" />
+      <node id="O_Create Offer 0 - O_Sent (online only) - A_Validating" label="O_Create Offer 0 - O_Sent (online only) - A_Validating" />
+      <node id="A_Validating - O_Returned - W_Call incomplete files SUPER LONG" label="A_Validating - O_Returned - W_Call incomplete files SUPER LONG" />
+      <node id="O_Returned - W_Call incomplete files SUPER LONG - A_Validating" label="O_Returned - W_Call incomplete files SUPER LONG - A_Validating" />
+      <node id="W_Call incomplete files SUPER LONG - A_Validating - O_Accepted" label="W_Call incomplete files SUPER LONG - A_Validating - O_Accepted" />
+    </nodes>
+    <edges>
+      <edge source="start" target="start - A_Create Application" id="0" label="-4.24">
+        <attvalues>
+          <attvalue for="0" value="true" />
+          <attvalue for="1" value="A_Create Application" />
+          <attvalue for="2" value="-4.24" />
+          <attvalue for="3" value="red" />
+        </attvalues>
+      </edge>
+      <edge source="start - A_Create Application" target="start - A_Create Application - A_Submitted" id="1" label="-4.67">
+        <attvalues>
+          <attvalue for="0" value="false" />
+          <attvalue for="1" value="A_Submitted" />
+          <attvalue for="2" value="-4.67" />
+          <attvalue for="3" value="red" />
+        </attvalues>
+      </edge>
+      <edge source="start - A_Create Application" target="start - A_Create Application - A_Concept" id="2" label="-3.78">
+        <attvalues>
+          <attvalue for="0" value="true" />
+          <attvalue for="1" value="A_Concept" />
+          <attvalue for="2" value="-3.78" />
+          <attvalue for="3" value="gray" />
+        </attvalues>
+      </edge>
+      <edge source="start - A_Create Application - A_Submitted" target="A_Create Application - A_Submitted - A_Concept" id="3" label="-4.67">
+        <attvalues>
+          <attvalue for="0" value="true" />
+          <attvalue for="1" value="A_Concept" />
+          <attvalue for="2" value="-4.67" />
+          <attvalue for="3" value="red" />
+        </attvalues>
+      </edge>
+      <edge source="A_Create Application - A_Submitted - A_Concept" target="A_Submitted - A_Concept - A_Accepted" id="4" label="-4.67">
+        <attvalues>
+          <attvalue for="0" value="true" />
+          <attvalue for="1" value="A_Accepted" />
+          <attvalue for="2" value="-4.67" />
+          <attvalue for="3" value="red" />
+        </attvalues>
+      </edge>
+      <edge source="A_Submitted - A_Concept - A_Accepted" target="A_Concept - A_Accepted - O_Create Offer 0" id="5" label="-4.67">
+        <attvalues>
+          <attvalue for="0" value="true" />
+          <attvalue for="1" value="O_Create Offer 0" />
+          <attvalue for="2" value="-4.67" />
+          <attvalue for="3" value="red" />
+        </attvalues>
+      </edge>
+      <edge source="A_Concept - A_Accepted - O_Create Offer 0" target="A_Accepted - O_Create Offer 0 - O_Sent (mail and online)" id="6" label="-4.2">
+        <attvalues>
+          <attvalue for="0" value="true" />
+          <attvalue for="1" value="O_Sent (mail and online)" />
+          <attvalue for="2" value="-4.2" />
+          <attvalue for="3" value="red" />
+        </attvalues>
+      </edge>
+      <edge source="A_Concept - A_Accepted - O_Create Offer 0" target="A_Accepted - O_Create Offer 0 - O_Create Offer 1" id="7" label="-7.31">
+        <attvalues>
+          <attvalue for="0" value="true" />
+          <attvalue for="1" value="O_Create Offer 1" />
+          <attvalue for="2" value="-7.31" />
+          <attvalue for="3" value="red" />
+        </attvalues>
+      </edge>
+      <edge source="A_Concept - A_Accepted - O_Create Offer 0" target="A_Accepted - O_Create Offer 0 - O_Cancelled" id="8" label="-24.2">
+        <attvalues>
+          <attvalue for="0" value="false" />
+          <attvalue for="1" value="O_Cancelled" />
+          <attvalue for="2" value="-24.2" />
+          <attvalue for="3" value="red" />
+        </attvalues>
+      </edge>
+      <edge source="A_Concept - A_Accepted - O_Create Offer 0" target="A_Accepted - O_Create Offer 0 - O_Sent (online only)" id="9" label="-9.49">
+        <attvalues>
+          <attvalue for="0" value="true" />
+          <attvalue for="1" value="O_Sent (online only)" />
+          <attvalue for="2" value="-9.49" />
+          <attvalue for="3" value="red" />
+        </attvalues>
+      </edge>
+      <edge source="A_Concept - A_Accepted - O_Create Offer 0" target="A_Accepted - O_Create Offer 0 - A_Cancelled CUSTOMER" id="10" label="-24.2">
+        <attvalues>
+          <attvalue for="0" value="false" />
+          <attvalue for="1" value="A_Cancelled CUSTOMER" />
+          <attvalue for="2" value="-24.2" />
+          <attvalue for="3" value="red" />
+        </attvalues>
+      </edge>
+      <edge source="A_Accepted - O_Create Offer 0 - O_Sent (mail and online)" target="O_Create Offer 0 - O_Sent (mail and online) - W_Call after offers SHORT" id="11" label="-4.2">
+        <attvalues>
+          <attvalue for="0" value="false" />
+          <attvalue for="1" value="W_Call after offers SHORT" />
+          <attvalue for="2" value="-4.2" />
+          <attvalue for="3" value="red" />
+        </attvalues>
+      </edge>
+      <edge source="A_Accepted - O_Create Offer 0 - O_Sent (mail and online)" target="O_Create Offer 0 - O_Sent (mail and online) - A_Validating" id="12" label="14.43">
+        <attvalues>
+          <attvalue for="0" value="true" />
+          <attvalue for="1" value="A_Validating" />
+          <attvalue for="2" value="14.43" />
+          <attvalue for="3" value="green" />
+        </attvalues>
+      </edge>
+      <edge source="A_Accepted - O_Create Offer 0 - O_Sent (mail and online)" target="O_Create Offer 0 - O_Sent (mail and online) - W_Call after offers LONG" id="13" label="-4.22">
+        <attvalues>
+          <attvalue for="0" value="false" />
+          <attvalue for="1" value="W_Call after offers LONG" />
+          <attvalue for="2" value="-4.22" />
+          <attvalue for="3" value="red" />
+        </attvalues>
+      </edge>
+      <edge source="A_Accepted - O_Create Offer 0 - O_Sent (mail and online)" target="O_Create Offer 0 - O_Sent (mail and online) - A_Cancelled CUSTOMER" id="14" label="-24.2">
+        <attvalues>
+          <attvalue for="0" value="false" />
+          <attvalue for="1" value="A_Cancelled CUSTOMER" />
+          <attvalue for="2" value="-24.2" />
+          <attvalue for="3" value="red" />
+        </attvalues>
+      </edge>
+      <edge source="A_Accepted - O_Create Offer 0 - O_Sent (mail and online)" target="O_Create Offer 0 - O_Sent (mail and online) - TIMEOUT" id="15" label="-24.2">
+        <attvalues>
+          <attvalue for="0" value="false" />
+          <attvalue for="1" value="TIMEOUT" />
+          <attvalue for="2" value="-24.2" />
+          <attvalue for="3" value="red" />
+        </attvalues>
+      </edge>
+      <edge source="A_Accepted - O_Create Offer 0 - O_Sent (mail and online)" target="O_Create Offer 0 - O_Sent (mail and online) - O_Create Offer 1" id="16" label="-9.61">
+        <attvalues>
+          <attvalue for="0" value="true" />
+          <attvalue for="1" value="O_Create Offer 1" />
+          <attvalue for="2" value="-9.61" />
+          <attvalue for="3" value="red" />
+        </attvalues>
+      </edge>
+      <edge source="A_Accepted - O_Create Offer 0 - O_Sent (mail and online)" target="O_Create Offer 0 - O_Sent (mail and online) - W_Call after offers SUPER LONG" id="17" label="-6.15">
+        <attvalues>
+          <attvalue for="0" value="false" />
+          <attvalue for="1" value="W_Call after offers SUPER LONG" />
+          <attvalue for="2" value="-6.15" />
+          <attvalue for="3" value="red" />
+        </attvalues>
+      </edge>
+      <edge source="O_Create Offer 0 - O_Sent (mail and online) - W_Call after offers SHORT" target="O_Sent (mail and online) - W_Call after offers SHORT - A_Validating" id="18" label="14.19">
+        <attvalues>
+          <attvalue for="0" value="true" />
+          <attvalue for="1" value="A_Validating" />
+          <attvalue for="2" value="14.19" />
+          <attvalue for="3" value="green" />
+        </attvalues>
+      </edge>
+      <edge source="O_Create Offer 0 - O_Sent (mail and online) - W_Call after offers SHORT" target="O_Sent (mail and online) - W_Call after offers SHORT - TIMEOUT" id="19" label="-24.2">
+        <attvalues>
+          <attvalue for="0" value="false" />
+          <attvalue for="1" value="TIMEOUT" />
+          <attvalue for="2" value="-24.2" />
+          <attvalue for="3" value="red" />
+        </attvalues>
+      </edge>
+      <edge source="O_Create Offer 0 - O_Sent (mail and online) - W_Call after offers SHORT" target="O_Sent (mail and online) - W_Call after offers SHORT - A_Cancelled CUSTOMER" id="20" label="-24.2">
+        <attvalues>
+          <attvalue for="0" value="false" />
+          <attvalue for="1" value="A_Cancelled CUSTOMER" />
+          <attvalue for="2" value="-24.2" />
+          <attvalue for="3" value="red" />
+        </attvalues>
+      </edge>
+      <edge source="O_Create Offer 0 - O_Sent (mail and online) - W_Call after offers SHORT" target="O_Sent (mail and online) - W_Call after offers SHORT - O_Create Offer 1" id="21" label="-9.56">
+        <attvalues>
+          <attvalue for="0" value="true" />
+          <attvalue for="1" value="O_Create Offer 1" />
+          <attvalue for="2" value="-9.56" />
+          <attvalue for="3" value="red" />
+        </attvalues>
+      </edge>
+      <edge source="O_Create Offer 0 - O_Sent (mail and online) - W_Call after offers SHORT" target="O_Sent (mail and online) - W_Call after offers SHORT - O_Cancelled" id="22" label="-24.2">
+        <attvalues>
+          <attvalue for="0" value="false" />
+          <attvalue for="1" value="O_Cancelled" />
+          <attvalue for="2" value="-24.2" />
+          <attvalue for="3" value="red" />
+        </attvalues>
+      </edge>
+      <edge source="O_Sent (mail and online) - W_Call after offers SHORT - A_Validating" target="W_Call after offers SHORT - A_Validating - O_Returned" id="23" label="14.24">
+        <attvalues>
+          <attvalue for="0" value="true" />
+          <attvalue for="1" value="O_Returned" />
+          <attvalue for="2" value="14.24" />
+          <attvalue for="3" value="green" />
+        </attvalues>
+      </edge>
+      <edge source="W_Call after offers SHORT - A_Validating - O_Returned" target="A_Validating - O_Returned - W_Call incomplete files SHORT" id="24" label="13.35">
+        <attvalues>
+          <attvalue for="0" value="false" />
+          <attvalue for="1" value="W_Call incomplete files SHORT" />
+          <attvalue for="2" value="13.35" />
+          <attvalue for="3" value="green" />
+        </attvalues>
+      </edge>
+      <edge source="W_Call after offers SHORT - A_Validating - O_Returned" target="A_Validating - O_Returned - A_Validating" id="25" label="15.8">
+        <attvalues>
+          <attvalue for="0" value="true" />
+          <attvalue for="1" value="A_Validating" />
+          <attvalue for="2" value="15.8" />
+          <attvalue for="3" value="green" />
+        </attvalues>
+      </edge>
+      <edge source="W_Call after offers SHORT - A_Validating - O_Returned" target="A_Validating - O_Returned - W_Call incomplete files LONG" id="26" label="12.81">
+        <attvalues>
+          <attvalue for="0" value="false" />
+          <attvalue for="1" value="W_Call incomplete files LONG" />
+          <attvalue for="2" value="12.81" />
+          <attvalue for="3" value="green" />
+        </attvalues>
+      </edge>
+      <edge source="W_Call after offers SHORT - A_Validating - O_Returned" target="A_Validating - O_Returned - O_Accepted" id="27" label="15.8">
+        <attvalues>
+          <attvalue for="0" value="true" />
+          <attvalue for="1" value="O_Accepted" />
+          <attvalue for="2" value="15.8" />
+          <attvalue for="3" value="green" />
+        </attvalues>
+      </edge>
+      <edge source="W_Call after offers SHORT - A_Validating - O_Returned" target="A_Validating - O_Returned - A_Cancelled CUSTOMER" id="28" label="-24.2">
+        <attvalues>
+          <attvalue for="0" value="false" />
+          <attvalue for="1" value="A_Cancelled CUSTOMER" />
+          <attvalue for="2" value="-24.2" />
+          <attvalue for="3" value="red" />
+        </attvalues>
+      </edge>
+      <edge source="W_Call after offers SHORT - A_Validating - O_Returned" target="A_Validating - O_Returned - W_Call incomplete files SUPER LONG" id="29" label="15.8">
+        <attvalues>
+          <attvalue for="0" value="false" />
+          <attvalue for="1" value="W_Call incomplete files SUPER LONG" />
+          <attvalue for="2" value="15.8" />
+          <attvalue for="3" value="green" />
+        </attvalues>
+      </edge>
+      <edge source="A_Validating - O_Returned - W_Call incomplete files SHORT" target="O_Returned - W_Call incomplete files SHORT - A_Validating" id="30" label="15.8">
+        <attvalues>
+          <attvalue for="0" value="true" />
+          <attvalue for="1" value="A_Validating" />
+          <attvalue for="2" value="15.8" />
+          <attvalue for="3" value="green" />
+        </attvalues>
+      </edge>
+      <edge source="A_Validating - O_Returned - W_Call incomplete files SHORT" target="O_Returned - W_Call incomplete files SHORT - O_Accepted" id="31" label="15.8">
+        <attvalues>
+          <attvalue for="0" value="true" />
+          <attvalue for="1" value="O_Accepted" />
+          <attvalue for="2" value="15.8" />
+          <attvalue for="3" value="green" />
+        </attvalues>
+      </edge>
+      <edge source="A_Validating - O_Returned - W_Call incomplete files SHORT" target="O_Returned - W_Call incomplete files SHORT - A_Cancelled CUSTOMER" id="32" label="-24.2">
+        <attvalues>
+          <attvalue for="0" value="false" />
+          <attvalue for="1" value="A_Cancelled CUSTOMER" />
+          <attvalue for="2" value="-24.2" />
+          <attvalue for="3" value="red" />
+        </attvalues>
+      </edge>
+      <edge source="O_Returned - W_Call incomplete files SHORT - A_Validating" target="W_Call incomplete files SHORT - A_Validating - O_Accepted" id="33" label="15.8">
+        <attvalues>
+          <attvalue for="0" value="true" />
+          <attvalue for="1" value="O_Accepted" />
+          <attvalue for="2" value="15.8" />
+          <attvalue for="3" value="green" />
+        </attvalues>
+      </edge>
+      <edge source="O_Returned - W_Call incomplete files SHORT - A_Validating" target="W_Call incomplete files SHORT - A_Validating - W_Call incomplete files SHORT" id="34" label="15.8">
+        <attvalues>
+          <attvalue for="0" value="false" />
+          <attvalue for="1" value="W_Call incomplete files SHORT" />
+          <attvalue for="2" value="15.8" />
+          <attvalue for="3" value="green" />
+        </attvalues>
+      </edge>
+      <edge source="O_Returned - W_Call incomplete files SHORT - A_Validating" target="W_Call incomplete files SHORT - A_Validating - W_Call incomplete files LONG" id="35" label="15.8">
+        <attvalues>
+          <attvalue for="0" value="false" />
+          <attvalue for="1" value="W_Call incomplete files LONG" />
+          <attvalue for="2" value="15.8" />
+          <attvalue for="3" value="green" />
+        </attvalues>
+      </edge>
+      <edge source="W_Call incomplete files SHORT - A_Validating - O_Accepted" target="A_Validating - O_Accepted - A_Pending" id="36" label="15.8">
+        <attvalues>
+          <attvalue for="0" value="true" />
+          <attvalue for="1" value="A_Pending" />
+          <attvalue for="2" value="15.8" />
+          <attvalue for="3" value="green" />
+        </attvalues>
+      </edge>
+      <edge source="A_Validating - O_Accepted - A_Pending" target="O_Accepted - A_Pending - positive" id="37" label="15.8">
+        <attvalues>
+          <attvalue for="0" value="true" />
+          <attvalue for="1" value="positive" />
+          <attvalue for="2" value="15.8" />
+          <attvalue for="3" value="green" />
+        </attvalues>
+      </edge>
+      <edge source="O_Create Offer 0 - O_Sent (mail and online) - A_Validating" target="O_Sent (mail and online) - A_Validating - O_Returned" id="38" label="14.43">
+        <attvalues>
+          <attvalue for="0" value="true" />
+          <attvalue for="1" value="O_Returned" />
+          <attvalue for="2" value="14.43" />
+          <attvalue for="3" value="green" />
+        </attvalues>
+      </edge>
+      <edge source="O_Sent (mail and online) - A_Validating - O_Returned" target="A_Validating - O_Returned - W_Call incomplete files SHORT" id="39" label="13.13">
+        <attvalues>
+          <attvalue for="0" value="false" />
+          <attvalue for="1" value="W_Call incomplete files SHORT" />
+          <attvalue for="2" value="13.13" />
+          <attvalue for="3" value="green" />
+        </attvalues>
+      </edge>
+      <edge source="O_Sent (mail and online) - A_Validating - O_Returned" target="A_Validating - O_Returned - O_Accepted" id="40" label="15.8">
+        <attvalues>
+          <attvalue for="0" value="true" />
+          <attvalue for="1" value="O_Accepted" />
+          <attvalue for="2" value="15.8" />
+          <attvalue for="3" value="green" />
+        </attvalues>
+      </edge>
+      <edge source="O_Sent (mail and online) - A_Validating - O_Returned" target="A_Validating - O_Returned - W_Call incomplete files LONG" id="41" label="15.8">
+        <attvalues>
+          <attvalue for="0" value="false" />
+          <attvalue for="1" value="W_Call incomplete files LONG" />
+          <attvalue for="2" value="15.8" />
+          <attvalue for="3" value="green" />
+        </attvalues>
+      </edge>
+      <edge source="O_Sent (mail and online) - A_Validating - O_Returned" target="A_Validating - O_Returned - A_Validating" id="42" label="15.8">
+        <attvalues>
+          <attvalue for="0" value="true" />
+          <attvalue for="1" value="A_Validating" />
+          <attvalue for="2" value="15.8" />
+          <attvalue for="3" value="green" />
+        </attvalues>
+      </edge>
+      <edge source="O_Create Offer 0 - O_Sent (mail and online) - W_Call after offers LONG" target="O_Sent (mail and online) - W_Call after offers LONG - A_Validating" id="43" label="12.66">
+        <attvalues>
+          <attvalue for="0" value="true" />
+          <attvalue for="1" value="A_Validating" />
+          <attvalue for="2" value="12.66" />
+          <attvalue for="3" value="green" />
+        </attvalues>
+      </edge>
+      <edge source="O_Create Offer 0 - O_Sent (mail and online) - W_Call after offers LONG" target="O_Sent (mail and online) - W_Call after offers LONG - TIMEOUT" id="44" label="-24.2">
+        <attvalues>
+          <attvalue for="0" value="false" />
+          <attvalue for="1" value="TIMEOUT" />
+          <attvalue for="2" value="-24.2" />
+          <attvalue for="3" value="red" />
+        </attvalues>
+      </edge>
+      <edge source="O_Create Offer 0 - O_Sent (mail and online) - W_Call after offers LONG" target="O_Sent (mail and online) - W_Call after offers LONG - A_Cancelled CUSTOMER" id="45" label="-24.2">
+        <attvalues>
+          <attvalue for="0" value="false" />
+          <attvalue for="1" value="A_Cancelled CUSTOMER" />
+          <attvalue for="2" value="-24.2" />
+          <attvalue for="3" value="red" />
+        </attvalues>
+      </edge>
+      <edge source="O_Create Offer 0 - O_Sent (mail and online) - W_Call after offers LONG" target="O_Sent (mail and online) - W_Call after offers LONG - O_Create Offer 1" id="46" label="-13.88">
+        <attvalues>
+          <attvalue for="0" value="true" />
+          <attvalue for="1" value="O_Create Offer 1" />
+          <attvalue for="2" value="-13.88" />
+          <attvalue for="3" value="red" />
+        </attvalues>
+      </edge>
+      <edge source="O_Create Offer 0 - O_Sent (mail and online) - W_Call after offers LONG" target="O_Sent (mail and online) - W_Call after offers LONG - O_Cancelled" id="47" label="-24.2">
+        <attvalues>
+          <attvalue for="0" value="false" />
+          <attvalue for="1" value="O_Cancelled" />
+          <attvalue for="2" value="-24.2" />
+          <attvalue for="3" value="red" />
+        </attvalues>
+      </edge>
+      <edge source="O_Sent (mail and online) - W_Call after offers LONG - A_Validating" target="W_Call after offers LONG - A_Validating - O_Returned" id="48" label="12.77">
+        <attvalues>
+          <attvalue for="0" value="true" />
+          <attvalue for="1" value="O_Returned" />
+          <attvalue for="2" value="12.77" />
+          <attvalue for="3" value="green" />
+        </attvalues>
+      </edge>
+      <edge source="W_Call after offers LONG - A_Validating - O_Returned" target="A_Validating - O_Returned - W_Call incomplete files SHORT" id="49" label="10.4">
+        <attvalues>
+          <attvalue for="0" value="false" />
+          <attvalue for="1" value="W_Call incomplete files SHORT" />
+          <attvalue for="2" value="10.4" />
+          <attvalue for="3" value="green" />
+        </attvalues>
+      </edge>
+      <edge source="W_Call after offers LONG - A_Validating - O_Returned" target="A_Validating - O_Returned - W_Call incomplete files LONG" id="50" label="7.01">
+        <attvalues>
+          <attvalue for="0" value="false" />
+          <attvalue for="1" value="W_Call incomplete files LONG" />
+          <attvalue for="2" value="7.01" />
+          <attvalue for="3" value="green" />
+        </attvalues>
+      </edge>
+      <edge source="W_Call after offers LONG - A_Validating - O_Returned" target="A_Validating - O_Returned - O_Accepted" id="51" label="15.8">
+        <attvalues>
+          <attvalue for="0" value="true" />
+          <attvalue for="1" value="O_Accepted" />
+          <attvalue for="2" value="15.8" />
+          <attvalue for="3" value="green" />
+        </attvalues>
+      </edge>
+      <edge source="W_Call after offers LONG - A_Validating - O_Returned" target="A_Validating - O_Returned - A_Validating" id="52" label="15.8">
+        <attvalues>
+          <attvalue for="0" value="true" />
+          <attvalue for="1" value="A_Validating" />
+          <attvalue for="2" value="15.8" />
+          <attvalue for="3" value="green" />
+        </attvalues>
+      </edge>
+      <edge source="A_Validating - O_Returned - A_Validating" target="O_Returned - A_Validating - O_Accepted" id="53" label="15.8">
+        <attvalues>
+          <attvalue for="0" value="true" />
+          <attvalue for="1" value="O_Accepted" />
+          <attvalue for="2" value="15.8" />
+          <attvalue for="3" value="green" />
+        </attvalues>
+      </edge>
+      <edge source="A_Validating - O_Returned - A_Validating" target="O_Returned - A_Validating - W_Call incomplete files SHORT" id="54" label="15.8">
+        <attvalues>
+          <attvalue for="0" value="false" />
+          <attvalue for="1" value="W_Call incomplete files SHORT" />
+          <attvalue for="2" value="15.8" />
+          <attvalue for="3" value="green" />
+        </attvalues>
+      </edge>
+      <edge source="O_Returned - A_Validating - O_Accepted" target="A_Validating - O_Accepted - A_Pending" id="55" label="15.8">
+        <attvalues>
+          <attvalue for="0" value="true" />
+          <attvalue for="1" value="A_Pending" />
+          <attvalue for="2" value="15.8" />
+          <attvalue for="3" value="green" />
+        </attvalues>
+      </edge>
+      <edge source="A_Validating - O_Returned - W_Call incomplete files LONG" target="O_Returned - W_Call incomplete files LONG - A_Validating" id="56" label="15.8">
+        <attvalues>
+          <attvalue for="0" value="true" />
+          <attvalue for="1" value="A_Validating" />
+          <attvalue for="2" value="15.8" />
+          <attvalue for="3" value="green" />
+        </attvalues>
+      </edge>
+      <edge source="A_Validating - O_Returned - W_Call incomplete files LONG" target="O_Returned - W_Call incomplete files LONG - O_Accepted" id="57" label="15.8">
+        <attvalues>
+          <attvalue for="0" value="true" />
+          <attvalue for="1" value="O_Accepted" />
+          <attvalue for="2" value="15.8" />
+          <attvalue for="3" value="green" />
+        </attvalues>
+      </edge>
+      <edge source="A_Validating - O_Returned - W_Call incomplete files LONG" target="O_Returned - W_Call incomplete files LONG - A_Cancelled CUSTOMER" id="58" label="-24.2">
+        <attvalues>
+          <attvalue for="0" value="false" />
+          <attvalue for="1" value="A_Cancelled CUSTOMER" />
+          <attvalue for="2" value="-24.2" />
+          <attvalue for="3" value="red" />
+        </attvalues>
+      </edge>
+      <edge source="O_Returned - W_Call incomplete files LONG - A_Validating" target="W_Call incomplete files LONG - A_Validating - O_Accepted" id="59" label="15.8">
+        <attvalues>
+          <attvalue for="0" value="true" />
+          <attvalue for="1" value="O_Accepted" />
+          <attvalue for="2" value="15.8" />
+          <attvalue for="3" value="green" />
+        </attvalues>
+      </edge>
+      <edge source="O_Returned - W_Call incomplete files LONG - A_Validating" target="W_Call incomplete files LONG - A_Validating - W_Call incomplete files SHORT" id="60" label="15.8">
+        <attvalues>
+          <attvalue for="0" value="false" />
+          <attvalue for="1" value="W_Call incomplete files SHORT" />
+          <attvalue for="2" value="15.8" />
+          <attvalue for="3" value="green" />
+        </attvalues>
+      </edge>
+      <edge source="W_Call incomplete files LONG - A_Validating - O_Accepted" target="A_Validating - O_Accepted - A_Pending" id="61" label="15.8">
+        <attvalues>
+          <attvalue for="0" value="true" />
+          <attvalue for="1" value="A_Pending" />
+          <attvalue for="2" value="15.8" />
+          <attvalue for="3" value="green" />
+        </attvalues>
+      </edge>
+      <edge source="O_Sent (mail and online) - W_Call after offers SHORT - TIMEOUT" target="W_Call after offers SHORT - TIMEOUT - negative" id="62" label="-24.2">
+        <attvalues>
+          <attvalue for="0" value="true" />
+          <attvalue for="1" value="negative" />
+          <attvalue for="2" value="-24.2" />
+          <attvalue for="3" value="red" />
+        </attvalues>
+      </edge>
+      <edge source="O_Sent (mail and online) - W_Call after offers LONG - TIMEOUT" target="W_Call after offers LONG - TIMEOUT - negative" id="63" label="-24.2">
+        <attvalues>
+          <attvalue for="0" value="true" />
+          <attvalue for="1" value="negative" />
+          <attvalue for="2" value="-24.2" />
+          <attvalue for="3" value="red" />
+        </attvalues>
+      </edge>
+      <edge source="O_Sent (mail and online) - W_Call after offers SHORT - A_Cancelled CUSTOMER" target="W_Call after offers SHORT - A_Cancelled CUSTOMER - negative" id="64" label="-24.2">
+        <attvalues>
+          <attvalue for="0" value="true" />
+          <attvalue for="1" value="negative" />
+          <attvalue for="2" value="-24.2" />
+          <attvalue for="3" value="red" />
+        </attvalues>
+      </edge>
+      <edge source="O_Create Offer 0 - O_Sent (mail and online) - A_Cancelled CUSTOMER" target="O_Sent (mail and online) - A_Cancelled CUSTOMER - negative" id="65" label="-24.2">
+        <attvalues>
+          <attvalue for="0" value="true" />
+          <attvalue for="1" value="negative" />
+          <attvalue for="2" value="-24.2" />
+          <attvalue for="3" value="red" />
+        </attvalues>
+      </edge>
+      <edge source="O_Create Offer 0 - O_Sent (mail and online) - TIMEOUT" target="O_Sent (mail and online) - TIMEOUT - negative" id="66" label="-24.2">
+        <attvalues>
+          <attvalue for="0" value="true" />
+          <attvalue for="1" value="negative" />
+          <attvalue for="2" value="-24.2" />
+          <attvalue for="3" value="red" />
+        </attvalues>
+      </edge>
+      <edge source="O_Sent (mail and online) - W_Call after offers LONG - A_Cancelled CUSTOMER" target="W_Call after offers LONG - A_Cancelled CUSTOMER - negative" id="67" label="-24.2">
+        <attvalues>
+          <attvalue for="0" value="true" />
+          <attvalue for="1" value="negative" />
+          <attvalue for="2" value="-24.2" />
+          <attvalue for="3" value="red" />
+        </attvalues>
+      </edge>
+      <edge source="O_Sent (mail and online) - W_Call after offers SHORT - O_Create Offer 1" target="W_Call after offers SHORT - O_Create Offer 1 - O_Sent (mail and online)" id="68" label="-9.65">
+        <attvalues>
+          <attvalue for="0" value="true" />
+          <attvalue for="1" value="O_Sent (mail and online)" />
+          <attvalue for="2" value="-9.65" />
+          <attvalue for="3" value="red" />
+        </attvalues>
+      </edge>
+      <edge source="O_Sent (mail and online) - W_Call after offers SHORT - O_Create Offer 1" target="W_Call after offers SHORT - O_Create Offer 1 - O_Sent (online only)" id="69" label="-4.2">
+        <attvalues>
+          <attvalue for="0" value="true" />
+          <attvalue for="1" value="O_Sent (online only)" />
+          <attvalue for="2" value="-4.2" />
+          <attvalue for="3" value="red" />
+        </attvalues>
+      </edge>
+      <edge source="W_Call after offers SHORT - O_Create Offer 1 - O_Sent (mail and online)" target="O_Create Offer 1 - O_Sent (mail and online) - TIMEOUT" id="70" label="-24.2">
+        <attvalues>
+          <attvalue for="0" value="false" />
+          <attvalue for="1" value="TIMEOUT" />
+          <attvalue for="2" value="-24.2" />
+          <attvalue for="3" value="red" />
+        </attvalues>
+      </edge>
+      <edge source="W_Call after offers SHORT - O_Create Offer 1 - O_Sent (mail and online)" target="O_Create Offer 1 - O_Sent (mail and online) - A_Cancelled CUSTOMER" id="71" label="-24.2">
+        <attvalues>
+          <attvalue for="0" value="false" />
+          <attvalue for="1" value="A_Cancelled CUSTOMER" />
+          <attvalue for="2" value="-24.2" />
+          <attvalue for="3" value="red" />
+        </attvalues>
+      </edge>
+      <edge source="W_Call after offers SHORT - O_Create Offer 1 - O_Sent (mail and online)" target="O_Create Offer 1 - O_Sent (mail and online) - O_Create Offer 2" id="72" label="-8.46">
+        <attvalues>
+          <attvalue for="0" value="true" />
+          <attvalue for="1" value="O_Create Offer 2" />
+          <attvalue for="2" value="-8.46" />
+          <attvalue for="3" value="red" />
+        </attvalues>
+      </edge>
+      <edge source="W_Call after offers SHORT - O_Create Offer 1 - O_Sent (mail and online)" target="O_Create Offer 1 - O_Sent (mail and online) - O_Cancelled" id="73" label="-24.2">
+        <attvalues>
+          <attvalue for="0" value="false" />
+          <attvalue for="1" value="O_Cancelled" />
+          <attvalue for="2" value="-24.2" />
+          <attvalue for="3" value="red" />
+        </attvalues>
+      </edge>
+      <edge source="W_Call after offers SHORT - O_Create Offer 1 - O_Sent (mail and online)" target="O_Create Offer 1 - O_Sent (mail and online) - A_Validating" id="74" label="15.8">
+        <attvalues>
+          <attvalue for="0" value="true" />
+          <attvalue for="1" value="A_Validating" />
+          <attvalue for="2" value="15.8" />
+          <attvalue for="3" value="green" />
+        </attvalues>
+      </edge>
+      <edge source="W_Call after offers SHORT - O_Create Offer 1 - O_Sent (mail and online)" target="O_Create Offer 1 - O_Sent (mail and online) - W_Call after offers SHORT" id="75" label="-7.97">
+        <attvalues>
+          <attvalue for="0" value="false" />
+          <attvalue for="1" value="W_Call after offers SHORT" />
+          <attvalue for="2" value="-7.97" />
+          <attvalue for="3" value="red" />
+        </attvalues>
+      </edge>
+      <edge source="W_Call after offers SHORT - O_Create Offer 1 - O_Sent (mail and online)" target="O_Create Offer 1 - O_Sent (mail and online) - W_Call after offers LONG" id="76" label="-24.2">
+        <attvalues>
+          <attvalue for="0" value="false" />
+          <attvalue for="1" value="W_Call after offers LONG" />
+          <attvalue for="2" value="-24.2" />
+          <attvalue for="3" value="red" />
+        </attvalues>
+      </edge>
+      <edge source="O_Create Offer 1 - O_Sent (mail and online) - TIMEOUT" target="O_Sent (mail and online) - TIMEOUT - negative" id="77" label="-24.2">
+        <attvalues>
+          <attvalue for="0" value="true" />
+          <attvalue for="1" value="negative" />
+          <attvalue for="2" value="-24.2" />
+          <attvalue for="3" value="red" />
+        </attvalues>
+      </edge>
+      <edge source="O_Create Offer 1 - O_Sent (mail and online) - A_Cancelled CUSTOMER" target="O_Sent (mail and online) - A_Cancelled CUSTOMER - negative" id="78" label="-24.2">
+        <attvalues>
+          <attvalue for="0" value="true" />
+          <attvalue for="1" value="negative" />
+          <attvalue for="2" value="-24.2" />
+          <attvalue for="3" value="red" />
+        </attvalues>
+      </edge>
+      <edge source="O_Create Offer 0 - O_Sent (mail and online) - O_Create Offer 1" target="O_Sent (mail and online) - O_Create Offer 1 - O_Sent (mail and online)" id="79" label="-10.23">
+        <attvalues>
+          <attvalue for="0" value="true" />
+          <attvalue for="1" value="O_Sent (mail and online)" />
+          <attvalue for="2" value="-10.23" />
+          <attvalue for="3" value="red" />
+        </attvalues>
+      </edge>
+      <edge source="O_Create Offer 0 - O_Sent (mail and online) - O_Create Offer 1" target="O_Sent (mail and online) - O_Create Offer 1 - O_Sent (online only)" id="80" label="15.8">
+        <attvalues>
+          <attvalue for="0" value="true" />
+          <attvalue for="1" value="O_Sent (online only)" />
+          <attvalue for="2" value="15.8" />
+          <attvalue for="3" value="green" />
+        </attvalues>
+      </edge>
+      <edge source="O_Sent (mail and online) - O_Create Offer 1 - O_Sent (mail and online)" target="O_Create Offer 1 - O_Sent (mail and online) - TIMEOUT" id="81" label="-24.2">
+        <attvalues>
+          <attvalue for="0" value="false" />
+          <attvalue for="1" value="TIMEOUT" />
+          <attvalue for="2" value="-24.2" />
+          <attvalue for="3" value="red" />
+        </attvalues>
+      </edge>
+      <edge source="O_Sent (mail and online) - O_Create Offer 1 - O_Sent (mail and online)" target="O_Create Offer 1 - O_Sent (mail and online) - A_Cancelled CUSTOMER" id="82" label="-24.2">
+        <attvalues>
+          <attvalue for="0" value="false" />
+          <attvalue for="1" value="A_Cancelled CUSTOMER" />
+          <attvalue for="2" value="-24.2" />
+          <attvalue for="3" value="red" />
+        </attvalues>
+      </edge>
+      <edge source="O_Sent (mail and online) - O_Create Offer 1 - O_Sent (mail and online)" target="O_Create Offer 1 - O_Sent (mail and online) - A_Validating" id="83" label="15.8">
+        <attvalues>
+          <attvalue for="0" value="true" />
+          <attvalue for="1" value="A_Validating" />
+          <attvalue for="2" value="15.8" />
+          <attvalue for="3" value="green" />
+        </attvalues>
+      </edge>
+      <edge source="O_Sent (mail and online) - O_Create Offer 1 - O_Sent (mail and online)" target="O_Create Offer 1 - O_Sent (mail and online) - W_Call after offers SHORT" id="84" label="-4.2">
+        <attvalues>
+          <attvalue for="0" value="false" />
+          <attvalue for="1" value="W_Call after offers SHORT" />
+          <attvalue for="2" value="-4.2" />
+          <attvalue for="3" value="red" />
+        </attvalues>
+      </edge>
+      <edge source="O_Sent (mail and online) - O_Create Offer 1 - O_Sent (mail and online)" target="O_Create Offer 1 - O_Sent (mail and online) - O_Create Offer 2" id="85" label="-24.2">
+        <attvalues>
+          <attvalue for="0" value="true" />
+          <attvalue for="1" value="O_Create Offer 2" />
+          <attvalue for="2" value="-24.2" />
+          <attvalue for="3" value="red" />
+        </attvalues>
+      </edge>
+      <edge source="O_Returned - W_Call incomplete files SHORT - O_Accepted" target="W_Call incomplete files SHORT - O_Accepted - A_Pending" id="86" label="15.8">
+        <attvalues>
+          <attvalue for="0" value="true" />
+          <attvalue for="1" value="A_Pending" />
+          <attvalue for="2" value="15.8" />
+          <attvalue for="3" value="green" />
+        </attvalues>
+      </edge>
+      <edge source="W_Call incomplete files SHORT - O_Accepted - A_Pending" target="O_Accepted - A_Pending - positive" id="87" label="15.8">
+        <attvalues>
+          <attvalue for="0" value="true" />
+          <attvalue for="1" value="positive" />
+          <attvalue for="2" value="15.8" />
+          <attvalue for="3" value="green" />
+        </attvalues>
+      </edge>
+      <edge source="O_Returned - W_Call incomplete files LONG - O_Accepted" target="W_Call incomplete files LONG - O_Accepted - A_Pending" id="88" label="15.8">
+        <attvalues>
+          <attvalue for="0" value="true" />
+          <attvalue for="1" value="A_Pending" />
+          <attvalue for="2" value="15.8" />
+          <attvalue for="3" value="green" />
+        </attvalues>
+      </edge>
+      <edge source="W_Call incomplete files LONG - O_Accepted - A_Pending" target="O_Accepted - A_Pending - positive" id="89" label="15.8">
+        <attvalues>
+          <attvalue for="0" value="true" />
+          <attvalue for="1" value="positive" />
+          <attvalue for="2" value="15.8" />
+          <attvalue for="3" value="green" />
+        </attvalues>
+      </edge>
+      <edge source="A_Accepted - O_Create Offer 0 - O_Create Offer 1" target="O_Create Offer 0 - O_Create Offer 1 - O_Sent (mail and online)" id="90" label="-6.88">
+        <attvalues>
+          <attvalue for="0" value="true" />
+          <attvalue for="1" value="O_Sent (mail and online)" />
+          <attvalue for="2" value="-6.88" />
+          <attvalue for="3" value="red" />
+        </attvalues>
+      </edge>
+      <edge source="A_Accepted - O_Create Offer 0 - O_Create Offer 1" target="O_Create Offer 0 - O_Create Offer 1 - O_Create Offer 2" id="91" label="-24.2">
+        <attvalues>
+          <attvalue for="0" value="true" />
+          <attvalue for="1" value="O_Create Offer 2" />
+          <attvalue for="2" value="-24.2" />
+          <attvalue for="3" value="red" />
+        </attvalues>
+      </edge>
+      <edge source="A_Accepted - O_Create Offer 0 - O_Create Offer 1" target="O_Create Offer 0 - O_Create Offer 1 - O_Cancelled" id="92" label="-24.2">
+        <attvalues>
+          <attvalue for="0" value="false" />
+          <attvalue for="1" value="O_Cancelled" />
+          <attvalue for="2" value="-24.2" />
+          <attvalue for="3" value="red" />
+        </attvalues>
+      </edge>
+      <edge source="O_Create Offer 0 - O_Create Offer 1 - O_Sent (mail and online)" target="O_Create Offer 1 - O_Sent (mail and online) - O_Sent (mail and online)" id="93" label="-7.08">
+        <attvalues>
+          <attvalue for="0" value="true" />
+          <attvalue for="1" value="O_Sent (mail and online)" />
+          <attvalue for="2" value="-7.08" />
+          <attvalue for="3" value="red" />
+        </attvalues>
+      </edge>
+      <edge source="O_Create Offer 0 - O_Create Offer 1 - O_Sent (mail and online)" target="O_Create Offer 1 - O_Sent (mail and online) - W_Call after offers SHORT" id="94" label="-6.57">
+        <attvalues>
+          <attvalue for="0" value="false" />
+          <attvalue for="1" value="W_Call after offers SHORT" />
+          <attvalue for="2" value="-6.57" />
+          <attvalue for="3" value="red" />
+        </attvalues>
+      </edge>
+      <edge source="O_Create Offer 0 - O_Create Offer 1 - O_Sent (mail and online)" target="O_Create Offer 1 - O_Sent (mail and online) - O_Create Offer 2" id="95" label="15.8">
+        <attvalues>
+          <attvalue for="0" value="true" />
+          <attvalue for="1" value="O_Create Offer 2" />
+          <attvalue for="2" value="15.8" />
+          <attvalue for="3" value="green" />
+        </attvalues>
+      </edge>
+      <edge source="O_Create Offer 0 - O_Create Offer 1 - O_Sent (mail and online)" target="O_Create Offer 1 - O_Sent (mail and online) - TIMEOUT" id="96" label="-24.2">
+        <attvalues>
+          <attvalue for="0" value="false" />
+          <attvalue for="1" value="TIMEOUT" />
+          <attvalue for="2" value="-24.2" />
+          <attvalue for="3" value="red" />
+        </attvalues>
+      </edge>
+      <edge source="O_Create Offer 0 - O_Create Offer 1 - O_Sent (mail and online)" target="O_Create Offer 1 - O_Sent (mail and online) - A_Validating" id="97" label="15.8">
+        <attvalues>
+          <attvalue for="0" value="true" />
+          <attvalue for="1" value="A_Validating" />
+          <attvalue for="2" value="15.8" />
+          <attvalue for="3" value="green" />
+        </attvalues>
+      </edge>
+      <edge source="O_Create Offer 1 - O_Sent (mail and online) - O_Sent (mail and online)" target="O_Sent (mail and online) - O_Sent (mail and online) - W_Call after offers SHORT" id="98" label="-7.29">
+        <attvalues>
+          <attvalue for="0" value="false" />
+          <attvalue for="1" value="W_Call after offers SHORT" />
+          <attvalue for="2" value="-7.29" />
+          <attvalue for="3" value="red" />
+        </attvalues>
+      </edge>
+      <edge source="O_Create Offer 1 - O_Sent (mail and online) - O_Sent (mail and online)" target="O_Sent (mail and online) - O_Sent (mail and online) - TIMEOUT" id="99" label="-24.2">
+        <attvalues>
+          <attvalue for="0" value="false" />
+          <attvalue for="1" value="TIMEOUT" />
+          <attvalue for="2" value="-24.2" />
+          <attvalue for="3" value="red" />
+        </attvalues>
+      </edge>
+      <edge source="O_Create Offer 1 - O_Sent (mail and online) - O_Sent (mail and online)" target="O_Sent (mail and online) - O_Sent (mail and online) - A_Validating" id="100" label="15.8">
+        <attvalues>
+          <attvalue for="0" value="true" />
+          <attvalue for="1" value="A_Validating" />
+          <attvalue for="2" value="15.8" />
+          <attvalue for="3" value="green" />
+        </attvalues>
+      </edge>
+      <edge source="O_Create Offer 1 - O_Sent (mail and online) - O_Sent (mail and online)" target="O_Sent (mail and online) - O_Sent (mail and online) - W_Call after offers LONG" id="101" label="-6.11">
+        <attvalues>
+          <attvalue for="0" value="false" />
+          <attvalue for="1" value="W_Call after offers LONG" />
+          <attvalue for="2" value="-6.11" />
+          <attvalue for="3" value="red" />
+        </attvalues>
+      </edge>
+      <edge source="O_Create Offer 1 - O_Sent (mail and online) - O_Sent (mail and online)" target="O_Sent (mail and online) - O_Sent (mail and online) - A_Cancelled CUSTOMER" id="102" label="-24.2">
+        <attvalues>
+          <attvalue for="0" value="false" />
+          <attvalue for="1" value="A_Cancelled CUSTOMER" />
+          <attvalue for="2" value="-24.2" />
+          <attvalue for="3" value="red" />
+        </attvalues>
+      </edge>
+      <edge source="O_Create Offer 1 - O_Sent (mail and online) - O_Sent (mail and online)" target="O_Sent (mail and online) - O_Sent (mail and online) - O_Create Offer 2" id="103" label="-9.76">
+        <attvalues>
+          <attvalue for="0" value="true" />
+          <attvalue for="1" value="O_Create Offer 2" />
+          <attvalue for="2" value="-9.76" />
+          <attvalue for="3" value="red" />
+        </attvalues>
+      </edge>
+      <edge source="O_Sent (mail and online) - O_Sent (mail and online) - W_Call after offers SHORT" target="O_Sent (mail and online) - W_Call after offers SHORT - O_Create Offer 2" id="104" label="-20.61">
+        <attvalues>
+          <attvalue for="0" value="true" />
+          <attvalue for="1" value="O_Create Offer 2" />
+          <attvalue for="2" value="-20.61" />
+          <attvalue for="3" value="red" />
+        </attvalues>
+      </edge>
+      <edge source="O_Sent (mail and online) - O_Sent (mail and online) - W_Call after offers SHORT" target="O_Sent (mail and online) - W_Call after offers SHORT - TIMEOUT" id="105" label="-24.2">
+        <attvalues>
+          <attvalue for="0" value="false" />
+          <attvalue for="1" value="TIMEOUT" />
+          <attvalue for="2" value="-24.2" />
+          <attvalue for="3" value="red" />
+        </attvalues>
+      </edge>
+      <edge source="O_Sent (mail and online) - O_Sent (mail and online) - W_Call after offers SHORT" target="O_Sent (mail and online) - W_Call after offers SHORT - A_Cancelled CUSTOMER" id="106" label="-24.2">
+        <attvalues>
+          <attvalue for="0" value="false" />
+          <attvalue for="1" value="A_Cancelled CUSTOMER" />
+          <attvalue for="2" value="-24.2" />
+          <attvalue for="3" value="red" />
+        </attvalues>
+      </edge>
+      <edge source="O_Sent (mail and online) - O_Sent (mail and online) - W_Call after offers SHORT" target="O_Sent (mail and online) - W_Call after offers SHORT - A_Validating" id="107" label="15.8">
+        <attvalues>
+          <attvalue for="0" value="true" />
+          <attvalue for="1" value="A_Validating" />
+          <attvalue for="2" value="15.8" />
+          <attvalue for="3" value="green" />
+        </attvalues>
+      </edge>
+      <edge source="O_Sent (mail and online) - O_Sent (mail and online) - W_Call after offers SHORT" target="O_Sent (mail and online) - W_Call after offers SHORT - O_Cancelled" id="108" label="-24.2">
+        <attvalues>
+          <attvalue for="0" value="false" />
+          <attvalue for="1" value="O_Cancelled" />
+          <attvalue for="2" value="-24.2" />
+          <attvalue for="3" value="red" />
+        </attvalues>
+      </edge>
+      <edge source="O_Sent (mail and online) - W_Call after offers SHORT - O_Create Offer 2" target="W_Call after offers SHORT - O_Create Offer 2 - O_Sent (mail and online)" id="109" label="-17.88">
+        <attvalues>
+          <attvalue for="0" value="true" />
+          <attvalue for="1" value="O_Sent (mail and online)" />
+          <attvalue for="2" value="-17.88" />
+          <attvalue for="3" value="red" />
+        </attvalues>
+      </edge>
+      <edge source="O_Sent (mail and online) - W_Call after offers SHORT - O_Create Offer 2" target="W_Call after offers SHORT - O_Create Offer 2 - O_Create Offer 3" id="110" label="-24.2">
+        <attvalues>
+          <attvalue for="0" value="true" />
+          <attvalue for="1" value="O_Create Offer 3" />
+          <attvalue for="2" value="-24.2" />
+          <attvalue for="3" value="red" />
+        </attvalues>
+      </edge>
+      <edge source="W_Call after offers SHORT - O_Create Offer 2 - O_Sent (mail and online)" target="O_Create Offer 2 - O_Sent (mail and online) - TIMEOUT" id="111" label="-24.2">
+        <attvalues>
+          <attvalue for="0" value="false" />
+          <attvalue for="1" value="TIMEOUT" />
+          <attvalue for="2" value="-24.2" />
+          <attvalue for="3" value="red" />
+        </attvalues>
+      </edge>
+      <edge source="W_Call after offers SHORT - O_Create Offer 2 - O_Sent (mail and online)" target="O_Create Offer 2 - O_Sent (mail and online) - A_Cancelled CUSTOMER" id="112" label="-24.2">
+        <attvalues>
+          <attvalue for="0" value="false" />
+          <attvalue for="1" value="A_Cancelled CUSTOMER" />
+          <attvalue for="2" value="-24.2" />
+          <attvalue for="3" value="red" />
+        </attvalues>
+      </edge>
+      <edge source="W_Call after offers SHORT - O_Create Offer 2 - O_Sent (mail and online)" target="O_Create Offer 2 - O_Sent (mail and online) - A_Validating" id="113" label="15.8">
+        <attvalues>
+          <attvalue for="0" value="true" />
+          <attvalue for="1" value="A_Validating" />
+          <attvalue for="2" value="15.8" />
+          <attvalue for="3" value="green" />
+        </attvalues>
+      </edge>
+      <edge source="O_Create Offer 2 - O_Sent (mail and online) - TIMEOUT" target="O_Sent (mail and online) - TIMEOUT - negative" id="114" label="-24.2">
+        <attvalues>
+          <attvalue for="0" value="true" />
+          <attvalue for="1" value="negative" />
+          <attvalue for="2" value="-24.2" />
+          <attvalue for="3" value="red" />
+        </attvalues>
+      </edge>
+      <edge source="O_Create Offer 2 - O_Sent (mail and online) - A_Cancelled CUSTOMER" target="O_Sent (mail and online) - A_Cancelled CUSTOMER - negative" id="115" label="-24.2">
+        <attvalues>
+          <attvalue for="0" value="true" />
+          <attvalue for="1" value="negative" />
+          <attvalue for="2" value="-24.2" />
+          <attvalue for="3" value="red" />
+        </attvalues>
+      </edge>
+      <edge source="A_Validating - O_Returned - O_Accepted" target="O_Returned - O_Accepted - A_Pending" id="116" label="15.8">
+        <attvalues>
+          <attvalue for="0" value="true" />
+          <attvalue for="1" value="A_Pending" />
+          <attvalue for="2" value="15.8" />
+          <attvalue for="3" value="green" />
+        </attvalues>
+      </edge>
+      <edge source="O_Returned - O_Accepted - A_Pending" target="O_Accepted - A_Pending - positive" id="117" label="15.8">
+        <attvalues>
+          <attvalue for="0" value="true" />
+          <attvalue for="1" value="positive" />
+          <attvalue for="2" value="15.8" />
+          <attvalue for="3" value="green" />
+        </attvalues>
+      </edge>
+      <edge source="O_Sent (mail and online) - W_Call after offers LONG - O_Create Offer 1" target="W_Call after offers LONG - O_Create Offer 1 - O_Sent (mail and online)" id="118" label="-13.61">
+        <attvalues>
+          <attvalue for="0" value="true" />
+          <attvalue for="1" value="O_Sent (mail and online)" />
+          <attvalue for="2" value="-13.61" />
+          <attvalue for="3" value="red" />
+        </attvalues>
+      </edge>
+      <edge source="O_Sent (mail and online) - W_Call after offers LONG - O_Create Offer 1" target="W_Call after offers LONG - O_Create Offer 1 - O_Sent (online only)" id="119" label="-24.2">
+        <attvalues>
+          <attvalue for="0" value="true" />
+          <attvalue for="1" value="O_Sent (online only)" />
+          <attvalue for="2" value="-24.2" />
+          <attvalue for="3" value="red" />
+        </attvalues>
+      </edge>
+      <edge source="W_Call after offers LONG - O_Create Offer 1 - O_Sent (mail and online)" target="O_Create Offer 1 - O_Sent (mail and online) - TIMEOUT" id="120" label="-24.2">
+        <attvalues>
+          <attvalue for="0" value="false" />
+          <attvalue for="1" value="TIMEOUT" />
+          <attvalue for="2" value="-24.2" />
+          <attvalue for="3" value="red" />
+        </attvalues>
+      </edge>
+      <edge source="W_Call after offers LONG - O_Create Offer 1 - O_Sent (mail and online)" target="O_Create Offer 1 - O_Sent (mail and online) - A_Validating" id="121" label="15.8">
+        <attvalues>
+          <attvalue for="0" value="true" />
+          <attvalue for="1" value="A_Validating" />
+          <attvalue for="2" value="15.8" />
+          <attvalue for="3" value="green" />
+        </attvalues>
+      </edge>
+      <edge source="W_Call after offers LONG - O_Create Offer 1 - O_Sent (mail and online)" target="O_Create Offer 1 - O_Sent (mail and online) - O_Cancelled" id="122" label="-24.2">
+        <attvalues>
+          <attvalue for="0" value="false" />
+          <attvalue for="1" value="O_Cancelled" />
+          <attvalue for="2" value="-24.2" />
+          <attvalue for="3" value="red" />
+        </attvalues>
+      </edge>
+      <edge source="start - A_Create Application - A_Concept" target="A_Create Application - A_Concept - A_Accepted" id="123" label="-3.78">
+        <attvalues>
+          <attvalue for="0" value="true" />
+          <attvalue for="1" value="A_Accepted" />
+          <attvalue for="2" value="-3.78" />
+          <attvalue for="3" value="gray" />
+        </attvalues>
+      </edge>
+      <edge source="A_Create Application - A_Concept - A_Accepted" target="A_Concept - A_Accepted - O_Create Offer 0" id="124" label="-3.78">
+        <attvalues>
+          <attvalue for="0" value="true" />
+          <attvalue for="1" value="O_Create Offer 0" />
+          <attvalue for="2" value="-3.78" />
+          <attvalue for="3" value="gray" />
+        </attvalues>
+      </edge>
+      <edge source="O_Create Offer 0 - O_Sent (mail and online) - W_Call after offers SUPER LONG" target="O_Sent (mail and online) - W_Call after offers SUPER LONG - TIMEOUT" id="125" label="-24.2">
+        <attvalues>
+          <attvalue for="0" value="false" />
+          <attvalue for="1" value="TIMEOUT" />
+          <attvalue for="2" value="-24.2" />
+          <attvalue for="3" value="red" />
+        </attvalues>
+      </edge>
+      <edge source="O_Create Offer 0 - O_Sent (mail and online) - W_Call after offers SUPER LONG" target="O_Sent (mail and online) - W_Call after offers SUPER LONG - A_Validating" id="126" label="15.8">
+        <attvalues>
+          <attvalue for="0" value="true" />
+          <attvalue for="1" value="A_Validating" />
+          <attvalue for="2" value="15.8" />
+          <attvalue for="3" value="green" />
+        </attvalues>
+      </edge>
+      <edge source="O_Create Offer 0 - O_Sent (mail and online) - W_Call after offers SUPER LONG" target="O_Sent (mail and online) - W_Call after offers SUPER LONG - A_Cancelled CUSTOMER" id="127" label="-24.2">
+        <attvalues>
+          <attvalue for="0" value="false" />
+          <attvalue for="1" value="A_Cancelled CUSTOMER" />
+          <attvalue for="2" value="-24.2" />
+          <attvalue for="3" value="red" />
+        </attvalues>
+      </edge>
+      <edge source="O_Sent (mail and online) - W_Call after offers SUPER LONG - TIMEOUT" target="W_Call after offers SUPER LONG - TIMEOUT - negative" id="128" label="-24.2">
+        <attvalues>
+          <attvalue for="0" value="true" />
+          <attvalue for="1" value="negative" />
+          <attvalue for="2" value="-24.2" />
+          <attvalue for="3" value="red" />
+        </attvalues>
+      </edge>
+      <edge source="O_Sent (mail and online) - O_Sent (mail and online) - TIMEOUT" target="O_Sent (mail and online) - TIMEOUT - negative" id="129" label="-24.2">
+        <attvalues>
+          <attvalue for="0" value="true" />
+          <attvalue for="1" value="negative" />
+          <attvalue for="2" value="-24.2" />
+          <attvalue for="3" value="red" />
+        </attvalues>
+      </edge>
+      <edge source="O_Create Offer 1 - O_Sent (mail and online) - O_Create Offer 2" target="O_Sent (mail and online) - O_Create Offer 2 - O_Sent (mail and online)" id="130" label="-7.15">
+        <attvalues>
+          <attvalue for="0" value="true" />
+          <attvalue for="1" value="O_Sent (mail and online)" />
+          <attvalue for="2" value="-7.15" />
+          <attvalue for="3" value="red" />
+        </attvalues>
+      </edge>
+      <edge source="O_Create Offer 1 - O_Sent (mail and online) - O_Create Offer 2" target="O_Sent (mail and online) - O_Create Offer 2 - O_Create Offer 3" id="131" label="-24.2">
+        <attvalues>
+          <attvalue for="0" value="true" />
+          <attvalue for="1" value="O_Create Offer 3" />
+          <attvalue for="2" value="-24.2" />
+          <attvalue for="3" value="red" />
+        </attvalues>
+      </edge>
+      <edge source="O_Sent (mail and online) - O_Create Offer 2 - O_Sent (mail and online)" target="O_Create Offer 2 - O_Sent (mail and online) - A_Cancelled CUSTOMER" id="132" label="-24.2">
+        <attvalues>
+          <attvalue for="0" value="false" />
+          <attvalue for="1" value="A_Cancelled CUSTOMER" />
+          <attvalue for="2" value="-24.2" />
+          <attvalue for="3" value="red" />
+        </attvalues>
+      </edge>
+      <edge source="O_Sent (mail and online) - O_Create Offer 2 - O_Sent (mail and online)" target="O_Create Offer 2 - O_Sent (mail and online) - TIMEOUT" id="133" label="-24.2">
+        <attvalues>
+          <attvalue for="0" value="false" />
+          <attvalue for="1" value="TIMEOUT" />
+          <attvalue for="2" value="-24.2" />
+          <attvalue for="3" value="red" />
+        </attvalues>
+      </edge>
+      <edge source="O_Sent (mail and online) - O_Create Offer 2 - O_Sent (mail and online)" target="O_Create Offer 2 - O_Sent (mail and online) - O_Create Offer 3" id="134" label="-24.2">
+        <attvalues>
+          <attvalue for="0" value="true" />
+          <attvalue for="1" value="O_Create Offer 3" />
+          <attvalue for="2" value="-24.2" />
+          <attvalue for="3" value="red" />
+        </attvalues>
+      </edge>
+      <edge source="O_Sent (mail and online) - O_Create Offer 2 - O_Sent (mail and online)" target="O_Create Offer 2 - O_Sent (mail and online) - A_Validating" id="135" label="15.8">
+        <attvalues>
+          <attvalue for="0" value="true" />
+          <attvalue for="1" value="A_Validating" />
+          <attvalue for="2" value="15.8" />
+          <attvalue for="3" value="green" />
+        </attvalues>
+      </edge>
+      <edge source="O_Sent (mail and online) - O_Sent (mail and online) - A_Validating" target="O_Sent (mail and online) - A_Validating - O_Returned" id="136" label="15.8">
+        <attvalues>
+          <attvalue for="0" value="true" />
+          <attvalue for="1" value="O_Returned" />
+          <attvalue for="2" value="15.8" />
+          <attvalue for="3" value="green" />
+        </attvalues>
+      </edge>
+      <edge source="O_Sent (mail and online) - O_Sent (mail and online) - W_Call after offers LONG" target="O_Sent (mail and online) - W_Call after offers LONG - TIMEOUT" id="137" label="-24.2">
+        <attvalues>
+          <attvalue for="0" value="false" />
+          <attvalue for="1" value="TIMEOUT" />
+          <attvalue for="2" value="-24.2" />
+          <attvalue for="3" value="red" />
+        </attvalues>
+      </edge>
+      <edge source="O_Sent (mail and online) - O_Sent (mail and online) - W_Call after offers LONG" target="O_Sent (mail and online) - W_Call after offers LONG - A_Cancelled CUSTOMER" id="138" label="-24.2">
+        <attvalues>
+          <attvalue for="0" value="false" />
+          <attvalue for="1" value="A_Cancelled CUSTOMER" />
+          <attvalue for="2" value="-24.2" />
+          <attvalue for="3" value="red" />
+        </attvalues>
+      </edge>
+      <edge source="O_Sent (mail and online) - O_Sent (mail and online) - W_Call after offers LONG" target="O_Sent (mail and online) - W_Call after offers LONG - A_Validating" id="139" label="15.8">
+        <attvalues>
+          <attvalue for="0" value="true" />
+          <attvalue for="1" value="A_Validating" />
+          <attvalue for="2" value="15.8" />
+          <attvalue for="3" value="green" />
+        </attvalues>
+      </edge>
+      <edge source="O_Sent (mail and online) - O_Sent (mail and online) - W_Call after offers LONG" target="O_Sent (mail and online) - W_Call after offers LONG - O_Create Offer 2" id="140" label="-24.2">
+        <attvalues>
+          <attvalue for="0" value="true" />
+          <attvalue for="1" value="O_Create Offer 2" />
+          <attvalue for="2" value="-24.2" />
+          <attvalue for="3" value="red" />
+        </attvalues>
+      </edge>
+      <edge source="O_Sent (mail and online) - O_Sent (mail and online) - W_Call after offers LONG" target="O_Sent (mail and online) - W_Call after offers LONG - O_Cancelled" id="141" label="-24.2">
+        <attvalues>
+          <attvalue for="0" value="false" />
+          <attvalue for="1" value="O_Cancelled" />
+          <attvalue for="2" value="-24.2" />
+          <attvalue for="3" value="red" />
+        </attvalues>
+      </edge>
+      <edge source="W_Call incomplete files SHORT - A_Validating - W_Call incomplete files SHORT" target="A_Validating - W_Call incomplete files SHORT - A_Validating" id="142" label="15.8">
+        <attvalues>
+          <attvalue for="0" value="true" />
+          <attvalue for="1" value="A_Validating" />
+          <attvalue for="2" value="15.8" />
+          <attvalue for="3" value="green" />
+        </attvalues>
+      </edge>
+      <edge source="W_Call incomplete files SHORT - A_Validating - W_Call incomplete files SHORT" target="A_Validating - W_Call incomplete files SHORT - O_Accepted" id="143" label="15.8">
+        <attvalues>
+          <attvalue for="0" value="true" />
+          <attvalue for="1" value="O_Accepted" />
+          <attvalue for="2" value="15.8" />
+          <attvalue for="3" value="green" />
+        </attvalues>
+      </edge>
+      <edge source="A_Validating - W_Call incomplete files SHORT - A_Validating" target="W_Call incomplete files SHORT - A_Validating - O_Accepted" id="144" label="15.8">
+        <attvalues>
+          <attvalue for="0" value="true" />
+          <attvalue for="1" value="O_Accepted" />
+          <attvalue for="2" value="15.8" />
+          <attvalue for="3" value="green" />
+        </attvalues>
+      </edge>
+      <edge source="A_Validating - W_Call incomplete files SHORT - A_Validating" target="W_Call incomplete files SHORT - A_Validating - W_Call incomplete files LONG" id="145" label="15.8">
+        <attvalues>
+          <attvalue for="0" value="false" />
+          <attvalue for="1" value="W_Call incomplete files LONG" />
+          <attvalue for="2" value="15.8" />
+          <attvalue for="3" value="green" />
+        </attvalues>
+      </edge>
+      <edge source="W_Call incomplete files LONG - A_Validating - W_Call incomplete files SHORT" target="A_Validating - W_Call incomplete files SHORT - A_Validating" id="146" label="15.8">
+        <attvalues>
+          <attvalue for="0" value="true" />
+          <attvalue for="1" value="A_Validating" />
+          <attvalue for="2" value="15.8" />
+          <attvalue for="3" value="green" />
+        </attvalues>
+      </edge>
+      <edge source="W_Call incomplete files LONG - A_Validating - W_Call incomplete files SHORT" target="A_Validating - W_Call incomplete files SHORT - O_Accepted" id="147" label="15.8">
+        <attvalues>
+          <attvalue for="0" value="true" />
+          <attvalue for="1" value="O_Accepted" />
+          <attvalue for="2" value="15.8" />
+          <attvalue for="3" value="green" />
+        </attvalues>
+      </edge>
+      <edge source="O_Create Offer 1 - O_Sent (mail and online) - O_Cancelled" target="O_Sent (mail and online) - O_Cancelled - W_Call after offers SHORT" id="148" label="-24.2">
+        <attvalues>
+          <attvalue for="0" value="false" />
+          <attvalue for="1" value="W_Call after offers SHORT" />
+          <attvalue for="2" value="-24.2" />
+          <attvalue for="3" value="red" />
+        </attvalues>
+      </edge>
+      <edge source="O_Create Offer 1 - O_Sent (mail and online) - O_Cancelled" target="O_Sent (mail and online) - O_Cancelled - TIMEOUT" id="149" label="-24.2">
+        <attvalues>
+          <attvalue for="0" value="false" />
+          <attvalue for="1" value="TIMEOUT" />
+          <attvalue for="2" value="-24.2" />
+          <attvalue for="3" value="red" />
+        </attvalues>
+      </edge>
+      <edge source="O_Sent (mail and online) - O_Cancelled - W_Call after offers SHORT" target="O_Cancelled - W_Call after offers SHORT - TIMEOUT" id="150" label="-24.2">
+        <attvalues>
+          <attvalue for="0" value="false" />
+          <attvalue for="1" value="TIMEOUT" />
+          <attvalue for="2" value="-24.2" />
+          <attvalue for="3" value="red" />
+        </attvalues>
+      </edge>
+      <edge source="O_Cancelled - W_Call after offers SHORT - TIMEOUT" target="W_Call after offers SHORT - TIMEOUT - negative" id="151" label="-24.2">
+        <attvalues>
+          <attvalue for="0" value="true" />
+          <attvalue for="1" value="negative" />
+          <attvalue for="2" value="-24.2" />
+          <attvalue for="3" value="red" />
+        </attvalues>
+      </edge>
+      <edge source="O_Sent (mail and online) - O_Cancelled - TIMEOUT" target="O_Cancelled - TIMEOUT - negative" id="152" label="-24.2">
+        <attvalues>
+          <attvalue for="0" value="true" />
+          <attvalue for="1" value="negative" />
+          <attvalue for="2" value="-24.2" />
+          <attvalue for="3" value="red" />
+        </attvalues>
+      </edge>
+      <edge source="A_Accepted - O_Create Offer 0 - O_Cancelled" target="O_Create Offer 0 - O_Cancelled - O_Create Offer 1" id="153" label="-24.2">
+        <attvalues>
+          <attvalue for="0" value="true" />
+          <attvalue for="1" value="O_Create Offer 1" />
+          <attvalue for="2" value="-24.2" />
+          <attvalue for="3" value="red" />
+        </attvalues>
+      </edge>
+      <edge source="O_Create Offer 0 - O_Cancelled - O_Create Offer 1" target="O_Cancelled - O_Create Offer 1 - O_Sent (mail and online)" id="154" label="-24.2">
+        <attvalues>
+          <attvalue for="0" value="true" />
+          <attvalue for="1" value="O_Sent (mail and online)" />
+          <attvalue for="2" value="-24.2" />
+          <attvalue for="3" value="red" />
+        </attvalues>
+      </edge>
+      <edge source="O_Cancelled - O_Create Offer 1 - O_Sent (mail and online)" target="O_Create Offer 1 - O_Sent (mail and online) - W_Call after offers SHORT" id="155" label="-24.2">
+        <attvalues>
+          <attvalue for="0" value="false" />
+          <attvalue for="1" value="W_Call after offers SHORT" />
+          <attvalue for="2" value="-24.2" />
+          <attvalue for="3" value="red" />
+        </attvalues>
+      </edge>
+      <edge source="O_Cancelled - O_Create Offer 1 - O_Sent (mail and online)" target="O_Create Offer 1 - O_Sent (mail and online) - TIMEOUT" id="156" label="-24.2">
+        <attvalues>
+          <attvalue for="0" value="false" />
+          <attvalue for="1" value="TIMEOUT" />
+          <attvalue for="2" value="-24.2" />
+          <attvalue for="3" value="red" />
+        </attvalues>
+      </edge>
+      <edge source="O_Create Offer 1 - O_Sent (mail and online) - W_Call after offers SHORT" target="O_Sent (mail and online) - W_Call after offers SHORT - TIMEOUT" id="157" label="-24.2">
+        <attvalues>
+          <attvalue for="0" value="false" />
+          <attvalue for="1" value="TIMEOUT" />
+          <attvalue for="2" value="-24.2" />
+          <attvalue for="3" value="red" />
+        </attvalues>
+      </edge>
+      <edge source="O_Create Offer 1 - O_Sent (mail and online) - W_Call after offers SHORT" target="O_Sent (mail and online) - W_Call after offers SHORT - A_Cancelled CUSTOMER" id="158" label="-24.2">
+        <attvalues>
+          <attvalue for="0" value="false" />
+          <attvalue for="1" value="A_Cancelled CUSTOMER" />
+          <attvalue for="2" value="-24.2" />
+          <attvalue for="3" value="red" />
+        </attvalues>
+      </edge>
+      <edge source="O_Create Offer 1 - O_Sent (mail and online) - W_Call after offers SHORT" target="O_Sent (mail and online) - W_Call after offers SHORT - A_Validating" id="159" label="15.8">
+        <attvalues>
+          <attvalue for="0" value="true" />
+          <attvalue for="1" value="A_Validating" />
+          <attvalue for="2" value="15.8" />
+          <attvalue for="3" value="green" />
+        </attvalues>
+      </edge>
+      <edge source="O_Create Offer 1 - O_Sent (mail and online) - W_Call after offers SHORT" target="O_Sent (mail and online) - W_Call after offers SHORT - O_Create Offer 2" id="160" label="15.8">
+        <attvalues>
+          <attvalue for="0" value="true" />
+          <attvalue for="1" value="O_Create Offer 2" />
+          <attvalue for="2" value="15.8" />
+          <attvalue for="3" value="green" />
+        </attvalues>
+      </edge>
+      <edge source="O_Create Offer 1 - O_Sent (mail and online) - W_Call after offers SHORT" target="O_Sent (mail and online) - W_Call after offers SHORT - O_Cancelled" id="161" label="-24.2">
+        <attvalues>
+          <attvalue for="0" value="false" />
+          <attvalue for="1" value="O_Cancelled" />
+          <attvalue for="2" value="-24.2" />
+          <attvalue for="3" value="red" />
+        </attvalues>
+      </edge>
+      <edge source="O_Sent (mail and online) - O_Sent (mail and online) - A_Cancelled CUSTOMER" target="O_Sent (mail and online) - A_Cancelled CUSTOMER - negative" id="162" label="-24.2">
+        <attvalues>
+          <attvalue for="0" value="true" />
+          <attvalue for="1" value="negative" />
+          <attvalue for="2" value="-24.2" />
+          <attvalue for="3" value="red" />
+        </attvalues>
+      </edge>
+      <edge source="O_Create Offer 1 - O_Sent (mail and online) - A_Validating" target="O_Sent (mail and online) - A_Validating - O_Returned" id="163" label="15.8">
+        <attvalues>
+          <attvalue for="0" value="true" />
+          <attvalue for="1" value="O_Returned" />
+          <attvalue for="2" value="15.8" />
+          <attvalue for="3" value="green" />
+        </attvalues>
+      </edge>
+      <edge source="O_Create Offer 2 - O_Sent (mail and online) - O_Create Offer 3" target="O_Sent (mail and online) - O_Create Offer 3 - O_Sent (mail and online)" id="164" label="-24.2">
+        <attvalues>
+          <attvalue for="0" value="true" />
+          <attvalue for="1" value="O_Sent (mail and online)" />
+          <attvalue for="2" value="-24.2" />
+          <attvalue for="3" value="red" />
+        </attvalues>
+      </edge>
+      <edge source="O_Sent (mail and online) - O_Create Offer 3 - O_Sent (mail and online)" target="O_Create Offer 3 - O_Sent (mail and online) - TIMEOUT" id="165" label="-24.2">
+        <attvalues>
+          <attvalue for="0" value="false" />
+          <attvalue for="1" value="TIMEOUT" />
+          <attvalue for="2" value="-24.2" />
+          <attvalue for="3" value="red" />
+        </attvalues>
+      </edge>
+      <edge source="O_Sent (mail and online) - O_Create Offer 3 - O_Sent (mail and online)" target="O_Create Offer 3 - O_Sent (mail and online) - A_Cancelled CUSTOMER" id="166" label="-24.2">
+        <attvalues>
+          <attvalue for="0" value="false" />
+          <attvalue for="1" value="A_Cancelled CUSTOMER" />
+          <attvalue for="2" value="-24.2" />
+          <attvalue for="3" value="red" />
+        </attvalues>
+      </edge>
+      <edge source="O_Create Offer 3 - O_Sent (mail and online) - TIMEOUT" target="O_Sent (mail and online) - TIMEOUT - negative" id="167" label="-24.2">
+        <attvalues>
+          <attvalue for="0" value="true" />
+          <attvalue for="1" value="negative" />
+          <attvalue for="2" value="-24.2" />
+          <attvalue for="3" value="red" />
+        </attvalues>
+      </edge>
+      <edge source="O_Sent (mail and online) - W_Call after offers SUPER LONG - A_Validating" target="W_Call after offers SUPER LONG - A_Validating - O_Returned" id="168" label="15.8">
+        <attvalues>
+          <attvalue for="0" value="true" />
+          <attvalue for="1" value="O_Returned" />
+          <attvalue for="2" value="15.8" />
+          <attvalue for="3" value="green" />
+        </attvalues>
+      </edge>
+      <edge source="W_Call after offers SUPER LONG - A_Validating - O_Returned" target="A_Validating - O_Returned - O_Accepted" id="169" label="15.8">
+        <attvalues>
+          <attvalue for="0" value="true" />
+          <attvalue for="1" value="O_Accepted" />
+          <attvalue for="2" value="15.8" />
+          <attvalue for="3" value="green" />
+        </attvalues>
+      </edge>
+      <edge source="W_Call after offers SUPER LONG - A_Validating - O_Returned" target="A_Validating - O_Returned - W_Call incomplete files SHORT" id="170" label="15.8">
+        <attvalues>
+          <attvalue for="0" value="false" />
+          <attvalue for="1" value="W_Call incomplete files SHORT" />
+          <attvalue for="2" value="15.8" />
+          <attvalue for="3" value="green" />
+        </attvalues>
+      </edge>
+      <edge source="A_Validating - W_Call incomplete files SHORT - O_Accepted" target="W_Call incomplete files SHORT - O_Accepted - A_Pending" id="171" label="15.8">
+        <attvalues>
+          <attvalue for="0" value="true" />
+          <attvalue for="1" value="A_Pending" />
+          <attvalue for="2" value="15.8" />
+          <attvalue for="3" value="green" />
+        </attvalues>
+      </edge>
+      <edge source="W_Call incomplete files SHORT - A_Validating - W_Call incomplete files LONG" target="A_Validating - W_Call incomplete files LONG - O_Accepted" id="172" label="15.8">
+        <attvalues>
+          <attvalue for="0" value="true" />
+          <attvalue for="1" value="O_Accepted" />
+          <attvalue for="2" value="15.8" />
+          <attvalue for="3" value="green" />
+        </attvalues>
+      </edge>
+      <edge source="W_Call incomplete files SHORT - A_Validating - W_Call incomplete files LONG" target="A_Validating - W_Call incomplete files LONG - A_Validating" id="173" label="15.8">
+        <attvalues>
+          <attvalue for="0" value="true" />
+          <attvalue for="1" value="A_Validating" />
+          <attvalue for="2" value="15.8" />
+          <attvalue for="3" value="green" />
+        </attvalues>
+      </edge>
+      <edge source="A_Validating - W_Call incomplete files LONG - O_Accepted" target="W_Call incomplete files LONG - O_Accepted - A_Pending" id="174" label="15.8">
+        <attvalues>
+          <attvalue for="0" value="true" />
+          <attvalue for="1" value="A_Pending" />
+          <attvalue for="2" value="15.8" />
+          <attvalue for="3" value="green" />
+        </attvalues>
+      </edge>
+      <edge source="O_Sent (mail and online) - W_Call after offers SUPER LONG - A_Cancelled CUSTOMER" target="W_Call after offers SUPER LONG - A_Cancelled CUSTOMER - negative" id="175" label="-24.2">
+        <attvalues>
+          <attvalue for="0" value="true" />
+          <attvalue for="1" value="negative" />
+          <attvalue for="2" value="-24.2" />
+          <attvalue for="3" value="red" />
+        </attvalues>
+      </edge>
+      <edge source="A_Accepted - O_Create Offer 0 - O_Sent (online only)" target="O_Create Offer 0 - O_Sent (online only) - W_Call after offers LONG" id="176" label="-24.2">
+        <attvalues>
+          <attvalue for="0" value="false" />
+          <attvalue for="1" value="W_Call after offers LONG" />
+          <attvalue for="2" value="-24.2" />
+          <attvalue for="3" value="red" />
+        </attvalues>
+      </edge>
+      <edge source="A_Accepted - O_Create Offer 0 - O_Sent (online only)" target="O_Create Offer 0 - O_Sent (online only) - W_Call after offers SHORT" id="177" label="-24.2">
+        <attvalues>
+          <attvalue for="0" value="false" />
+          <attvalue for="1" value="W_Call after offers SHORT" />
+          <attvalue for="2" value="-24.2" />
+          <attvalue for="3" value="red" />
+        </attvalues>
+      </edge>
+      <edge source="A_Accepted - O_Create Offer 0 - O_Sent (online only)" target="O_Create Offer 0 - O_Sent (online only) - A_Validating" id="178" label="15.8">
+        <attvalues>
+          <attvalue for="0" value="true" />
+          <attvalue for="1" value="A_Validating" />
+          <attvalue for="2" value="15.8" />
+          <attvalue for="3" value="green" />
+        </attvalues>
+      </edge>
+      <edge source="O_Create Offer 0 - O_Sent (online only) - W_Call after offers LONG" target="O_Sent (online only) - W_Call after offers LONG - TIMEOUT" id="179" label="-24.2">
+        <attvalues>
+          <attvalue for="0" value="false" />
+          <attvalue for="1" value="TIMEOUT" />
+          <attvalue for="2" value="-24.2" />
+          <attvalue for="3" value="red" />
+        </attvalues>
+      </edge>
+      <edge source="O_Create Offer 0 - O_Sent (online only) - W_Call after offers LONG" target="O_Sent (online only) - W_Call after offers LONG - A_Cancelled CUSTOMER" id="180" label="-24.2">
+        <attvalues>
+          <attvalue for="0" value="false" />
+          <attvalue for="1" value="A_Cancelled CUSTOMER" />
+          <attvalue for="2" value="-24.2" />
+          <attvalue for="3" value="red" />
+        </attvalues>
+      </edge>
+      <edge source="O_Sent (online only) - W_Call after offers LONG - TIMEOUT" target="W_Call after offers LONG - TIMEOUT - negative" id="181" label="-24.2">
+        <attvalues>
+          <attvalue for="0" value="true" />
+          <attvalue for="1" value="negative" />
+          <attvalue for="2" value="-24.2" />
+          <attvalue for="3" value="red" />
+        </attvalues>
+      </edge>
+      <edge source="O_Create Offer 0 - O_Sent (online only) - W_Call after offers SHORT" target="O_Sent (online only) - W_Call after offers SHORT - TIMEOUT" id="182" label="-24.2">
+        <attvalues>
+          <attvalue for="0" value="false" />
+          <attvalue for="1" value="TIMEOUT" />
+          <attvalue for="2" value="-24.2" />
+          <attvalue for="3" value="red" />
+        </attvalues>
+      </edge>
+      <edge source="O_Create Offer 0 - O_Sent (online only) - W_Call after offers SHORT" target="O_Sent (online only) - W_Call after offers SHORT - A_Cancelled CUSTOMER" id="183" label="-24.2">
+        <attvalues>
+          <attvalue for="0" value="false" />
+          <attvalue for="1" value="A_Cancelled CUSTOMER" />
+          <attvalue for="2" value="-24.2" />
+          <attvalue for="3" value="red" />
+        </attvalues>
+      </edge>
+      <edge source="O_Sent (online only) - W_Call after offers SHORT - TIMEOUT" target="W_Call after offers SHORT - TIMEOUT - negative" id="184" label="-24.2">
+        <attvalues>
+          <attvalue for="0" value="true" />
+          <attvalue for="1" value="negative" />
+          <attvalue for="2" value="-24.2" />
+          <attvalue for="3" value="red" />
+        </attvalues>
+      </edge>
+      <edge source="O_Sent (online only) - W_Call after offers SHORT - A_Cancelled CUSTOMER" target="W_Call after offers SHORT - A_Cancelled CUSTOMER - negative" id="185" label="-24.2">
+        <attvalues>
+          <attvalue for="0" value="true" />
+          <attvalue for="1" value="negative" />
+          <attvalue for="2" value="-24.2" />
+          <attvalue for="3" value="red" />
+        </attvalues>
+      </edge>
+      <edge source="O_Returned - W_Call incomplete files SHORT - A_Cancelled CUSTOMER" target="W_Call incomplete files SHORT - A_Cancelled CUSTOMER - negative" id="186" label="-24.2">
+        <attvalues>
+          <attvalue for="0" value="true" />
+          <attvalue for="1" value="negative" />
+          <attvalue for="2" value="-24.2" />
+          <attvalue for="3" value="red" />
+        </attvalues>
+      </edge>
+      <edge source="O_Returned - W_Call incomplete files LONG - A_Cancelled CUSTOMER" target="W_Call incomplete files LONG - A_Cancelled CUSTOMER - negative" id="187" label="-24.2">
+        <attvalues>
+          <attvalue for="0" value="true" />
+          <attvalue for="1" value="negative" />
+          <attvalue for="2" value="-24.2" />
+          <attvalue for="3" value="red" />
+        </attvalues>
+      </edge>
+      <edge source="O_Sent (mail and online) - W_Call after offers LONG - O_Create Offer 2" target="W_Call after offers LONG - O_Create Offer 2 - O_Sent (mail and online)" id="188" label="-24.2">
+        <attvalues>
+          <attvalue for="0" value="true" />
+          <attvalue for="1" value="O_Sent (mail and online)" />
+          <attvalue for="2" value="-24.2" />
+          <attvalue for="3" value="red" />
+        </attvalues>
+      </edge>
+      <edge source="W_Call after offers LONG - O_Create Offer 2 - O_Sent (mail and online)" target="O_Create Offer 2 - O_Sent (mail and online) - TIMEOUT" id="189" label="-24.2">
+        <attvalues>
+          <attvalue for="0" value="false" />
+          <attvalue for="1" value="TIMEOUT" />
+          <attvalue for="2" value="-24.2" />
+          <attvalue for="3" value="red" />
+        </attvalues>
+      </edge>
+      <edge source="O_Sent (mail and online) - O_Sent (mail and online) - O_Create Offer 2" target="O_Sent (mail and online) - O_Create Offer 2 - O_Sent (mail and online)" id="190" label="-7.97">
+        <attvalues>
+          <attvalue for="0" value="true" />
+          <attvalue for="1" value="O_Sent (mail and online)" />
+          <attvalue for="2" value="-7.97" />
+          <attvalue for="3" value="red" />
+        </attvalues>
+      </edge>
+      <edge source="O_Sent (mail and online) - O_Sent (mail and online) - O_Create Offer 2" target="O_Sent (mail and online) - O_Create Offer 2 - O_Create Offer 3" id="191" label="-24.2">
+        <attvalues>
+          <attvalue for="0" value="true" />
+          <attvalue for="1" value="O_Create Offer 3" />
+          <attvalue for="2" value="-24.2" />
+          <attvalue for="3" value="red" />
+        </attvalues>
+      </edge>
+      <edge source="O_Create Offer 0 - O_Create Offer 1 - O_Create Offer 2" target="O_Create Offer 1 - O_Create Offer 2 - O_Sent (mail and online)" id="192" label="-24.2">
+        <attvalues>
+          <attvalue for="0" value="true" />
+          <attvalue for="1" value="O_Sent (mail and online)" />
+          <attvalue for="2" value="-24.2" />
+          <attvalue for="3" value="red" />
+        </attvalues>
+      </edge>
+      <edge source="O_Create Offer 1 - O_Create Offer 2 - O_Sent (mail and online)" target="O_Create Offer 2 - O_Sent (mail and online) - O_Sent (mail and online)" id="193" label="-24.2">
+        <attvalues>
+          <attvalue for="0" value="true" />
+          <attvalue for="1" value="O_Sent (mail and online)" />
+          <attvalue for="2" value="-24.2" />
+          <attvalue for="3" value="red" />
+        </attvalues>
+      </edge>
+      <edge source="O_Create Offer 2 - O_Sent (mail and online) - O_Sent (mail and online)" target="O_Sent (mail and online) - O_Sent (mail and online) - O_Sent (mail and online)" id="194" label="-24.2">
+        <attvalues>
+          <attvalue for="0" value="true" />
+          <attvalue for="1" value="O_Sent (mail and online)" />
+          <attvalue for="2" value="-24.2" />
+          <attvalue for="3" value="red" />
+        </attvalues>
+      </edge>
+      <edge source="O_Sent (mail and online) - O_Sent (mail and online) - O_Sent (mail and online)" target="O_Sent (mail and online) - O_Sent (mail and online) - W_Call after offers SHORT" id="195" label="-24.2">
+        <attvalues>
+          <attvalue for="0" value="false" />
+          <attvalue for="1" value="W_Call after offers SHORT" />
+          <attvalue for="2" value="-24.2" />
+          <attvalue for="3" value="red" />
+        </attvalues>
+      </edge>
+      <edge source="O_Sent (mail and online) - O_Sent (mail and online) - O_Sent (mail and online)" target="O_Sent (mail and online) - O_Sent (mail and online) - W_Call after offers LONG" id="196" label="-24.2">
+        <attvalues>
+          <attvalue for="0" value="false" />
+          <attvalue for="1" value="W_Call after offers LONG" />
+          <attvalue for="2" value="-24.2" />
+          <attvalue for="3" value="red" />
+        </attvalues>
+      </edge>
+      <edge source="A_Accepted - O_Create Offer 0 - A_Cancelled CUSTOMER" target="O_Create Offer 0 - A_Cancelled CUSTOMER - negative" id="197" label="-24.2">
+        <attvalues>
+          <attvalue for="0" value="true" />
+          <attvalue for="1" value="negative" />
+          <attvalue for="2" value="-24.2" />
+          <attvalue for="3" value="red" />
+        </attvalues>
+      </edge>
+      <edge source="O_Create Offer 3 - O_Sent (mail and online) - A_Cancelled CUSTOMER" target="O_Sent (mail and online) - A_Cancelled CUSTOMER - negative" id="198" label="-24.2">
+        <attvalues>
+          <attvalue for="0" value="true" />
+          <attvalue for="1" value="negative" />
+          <attvalue for="2" value="-24.2" />
+          <attvalue for="3" value="red" />
+        </attvalues>
+      </edge>
+      <edge source="O_Sent (mail and online) - O_Create Offer 2 - O_Create Offer 3" target="O_Create Offer 2 - O_Create Offer 3 - O_Sent (mail and online)" id="199" label="-24.2">
+        <attvalues>
+          <attvalue for="0" value="true" />
+          <attvalue for="1" value="O_Sent (mail and online)" />
+          <attvalue for="2" value="-24.2" />
+          <attvalue for="3" value="red" />
+        </attvalues>
+      </edge>
+      <edge source="O_Create Offer 2 - O_Create Offer 3 - O_Sent (mail and online)" target="O_Create Offer 3 - O_Sent (mail and online) - O_Sent (mail and online)" id="200" label="-24.2">
+        <attvalues>
+          <attvalue for="0" value="true" />
+          <attvalue for="1" value="O_Sent (mail and online)" />
+          <attvalue for="2" value="-24.2" />
+          <attvalue for="3" value="red" />
+        </attvalues>
+      </edge>
+      <edge source="O_Create Offer 3 - O_Sent (mail and online) - O_Sent (mail and online)" target="O_Sent (mail and online) - O_Sent (mail and online) - TIMEOUT" id="201" label="-24.2">
+        <attvalues>
+          <attvalue for="0" value="false" />
+          <attvalue for="1" value="TIMEOUT" />
+          <attvalue for="2" value="-24.2" />
+          <attvalue for="3" value="red" />
+        </attvalues>
+      </edge>
+      <edge source="O_Create Offer 3 - O_Sent (mail and online) - O_Sent (mail and online)" target="O_Sent (mail and online) - O_Sent (mail and online) - A_Cancelled CUSTOMER" id="202" label="-24.2">
+        <attvalues>
+          <attvalue for="0" value="false" />
+          <attvalue for="1" value="A_Cancelled CUSTOMER" />
+          <attvalue for="2" value="-24.2" />
+          <attvalue for="3" value="red" />
+        </attvalues>
+      </edge>
+      <edge source="O_Create Offer 3 - O_Sent (mail and online) - O_Sent (mail and online)" target="O_Sent (mail and online) - O_Sent (mail and online) - W_Call after offers SHORT" id="203" label="-24.2">
+        <attvalues>
+          <attvalue for="0" value="false" />
+          <attvalue for="1" value="W_Call after offers SHORT" />
+          <attvalue for="2" value="-24.2" />
+          <attvalue for="3" value="red" />
+        </attvalues>
+      </edge>
+      <edge source="O_Create Offer 3 - O_Sent (mail and online) - O_Sent (mail and online)" target="O_Sent (mail and online) - O_Sent (mail and online) - W_Call after offers LONG" id="204" label="-24.2">
+        <attvalues>
+          <attvalue for="0" value="false" />
+          <attvalue for="1" value="W_Call after offers LONG" />
+          <attvalue for="2" value="-24.2" />
+          <attvalue for="3" value="red" />
+        </attvalues>
+      </edge>
+      <edge source="W_Call after offers SHORT - O_Create Offer 2 - O_Create Offer 3" target="O_Create Offer 2 - O_Create Offer 3 - O_Sent (mail and online)" id="205" label="-24.2">
+        <attvalues>
+          <attvalue for="0" value="true" />
+          <attvalue for="1" value="O_Sent (mail and online)" />
+          <attvalue for="2" value="-24.2" />
+          <attvalue for="3" value="red" />
+        </attvalues>
+      </edge>
+      <edge source="O_Sent (mail and online) - W_Call after offers SHORT - O_Cancelled" target="W_Call after offers SHORT - O_Cancelled - A_Cancelled CUSTOMER" id="206" label="-24.2">
+        <attvalues>
+          <attvalue for="0" value="false" />
+          <attvalue for="1" value="A_Cancelled CUSTOMER" />
+          <attvalue for="2" value="-24.2" />
+          <attvalue for="3" value="red" />
+        </attvalues>
+      </edge>
+      <edge source="O_Sent (mail and online) - W_Call after offers SHORT - O_Cancelled" target="W_Call after offers SHORT - O_Cancelled - O_Create Offer 1" id="207" label="-24.2">
+        <attvalues>
+          <attvalue for="0" value="true" />
+          <attvalue for="1" value="O_Create Offer 1" />
+          <attvalue for="2" value="-24.2" />
+          <attvalue for="3" value="red" />
+        </attvalues>
+      </edge>
+      <edge source="O_Sent (mail and online) - W_Call after offers SHORT - O_Cancelled" target="W_Call after offers SHORT - O_Cancelled - TIMEOUT" id="208" label="-24.2">
+        <attvalues>
+          <attvalue for="0" value="false" />
+          <attvalue for="1" value="TIMEOUT" />
+          <attvalue for="2" value="-24.2" />
+          <attvalue for="3" value="red" />
+        </attvalues>
+      </edge>
+      <edge source="O_Sent (mail and online) - W_Call after offers SHORT - O_Cancelled" target="W_Call after offers SHORT - O_Cancelled - O_Cancelled" id="209" label="-24.2">
+        <attvalues>
+          <attvalue for="0" value="false" />
+          <attvalue for="1" value="O_Cancelled" />
+          <attvalue for="2" value="-24.2" />
+          <attvalue for="3" value="red" />
+        </attvalues>
+      </edge>
+      <edge source="W_Call after offers SHORT - O_Cancelled - A_Cancelled CUSTOMER" target="O_Cancelled - A_Cancelled CUSTOMER - negative" id="210" label="-24.2">
+        <attvalues>
+          <attvalue for="0" value="true" />
+          <attvalue for="1" value="negative" />
+          <attvalue for="2" value="-24.2" />
+          <attvalue for="3" value="red" />
+        </attvalues>
+      </edge>
+      <edge source="O_Create Offer 2 - O_Sent (mail and online) - A_Validating" target="O_Sent (mail and online) - A_Validating - O_Returned" id="211" label="15.8">
+        <attvalues>
+          <attvalue for="0" value="true" />
+          <attvalue for="1" value="O_Returned" />
+          <attvalue for="2" value="15.8" />
+          <attvalue for="3" value="green" />
+        </attvalues>
+      </edge>
+      <edge source="O_Sent (online only) - W_Call after offers LONG - A_Cancelled CUSTOMER" target="W_Call after offers LONG - A_Cancelled CUSTOMER - negative" id="212" label="-24.2">
+        <attvalues>
+          <attvalue for="0" value="true" />
+          <attvalue for="1" value="negative" />
+          <attvalue for="2" value="-24.2" />
+          <attvalue for="3" value="red" />
+        </attvalues>
+      </edge>
+      <edge source="O_Create Offer 0 - O_Create Offer 1 - O_Cancelled" target="O_Create Offer 1 - O_Cancelled - O_Sent (mail and online)" id="213" label="-24.2">
+        <attvalues>
+          <attvalue for="0" value="true" />
+          <attvalue for="1" value="O_Sent (mail and online)" />
+          <attvalue for="2" value="-24.2" />
+          <attvalue for="3" value="red" />
+        </attvalues>
+      </edge>
+      <edge source="O_Create Offer 0 - O_Create Offer 1 - O_Cancelled" target="O_Create Offer 1 - O_Cancelled - O_Cancelled" id="214" label="-24.2">
+        <attvalues>
+          <attvalue for="0" value="false" />
+          <attvalue for="1" value="O_Cancelled" />
+          <attvalue for="2" value="-24.2" />
+          <attvalue for="3" value="red" />
+        </attvalues>
+      </edge>
+      <edge source="O_Create Offer 1 - O_Cancelled - O_Sent (mail and online)" target="O_Cancelled - O_Sent (mail and online) - W_Call after offers SHORT" id="215" label="-24.2">
+        <attvalues>
+          <attvalue for="0" value="false" />
+          <attvalue for="1" value="W_Call after offers SHORT" />
+          <attvalue for="2" value="-24.2" />
+          <attvalue for="3" value="red" />
+        </attvalues>
+      </edge>
+      <edge source="O_Create Offer 1 - O_Cancelled - O_Sent (mail and online)" target="O_Cancelled - O_Sent (mail and online) - TIMEOUT" id="216" label="-24.2">
+        <attvalues>
+          <attvalue for="0" value="false" />
+          <attvalue for="1" value="TIMEOUT" />
+          <attvalue for="2" value="-24.2" />
+          <attvalue for="3" value="red" />
+        </attvalues>
+      </edge>
+      <edge source="O_Cancelled - O_Sent (mail and online) - W_Call after offers SHORT" target="O_Sent (mail and online) - W_Call after offers SHORT - TIMEOUT" id="217" label="-24.2">
+        <attvalues>
+          <attvalue for="0" value="false" />
+          <attvalue for="1" value="TIMEOUT" />
+          <attvalue for="2" value="-24.2" />
+          <attvalue for="3" value="red" />
+        </attvalues>
+      </edge>
+      <edge source="O_Cancelled - O_Sent (mail and online) - TIMEOUT" target="O_Sent (mail and online) - TIMEOUT - negative" id="218" label="-24.2">
+        <attvalues>
+          <attvalue for="0" value="true" />
+          <attvalue for="1" value="negative" />
+          <attvalue for="2" value="-24.2" />
+          <attvalue for="3" value="red" />
+        </attvalues>
+      </edge>
+      <edge source="A_Validating - O_Returned - A_Cancelled CUSTOMER" target="O_Returned - A_Cancelled CUSTOMER - negative" id="219" label="-24.2">
+        <attvalues>
+          <attvalue for="0" value="true" />
+          <attvalue for="1" value="negative" />
+          <attvalue for="2" value="-24.2" />
+          <attvalue for="3" value="red" />
+        </attvalues>
+      </edge>
+      <edge source="O_Returned - A_Validating - W_Call incomplete files SHORT" target="A_Validating - W_Call incomplete files SHORT - A_Validating" id="220" label="15.8">
+        <attvalues>
+          <attvalue for="0" value="true" />
+          <attvalue for="1" value="A_Validating" />
+          <attvalue for="2" value="15.8" />
+          <attvalue for="3" value="green" />
+        </attvalues>
+      </edge>
+      <edge source="A_Validating - W_Call incomplete files LONG - A_Validating" target="W_Call incomplete files LONG - A_Validating - O_Accepted" id="221" label="15.8">
+        <attvalues>
+          <attvalue for="0" value="true" />
+          <attvalue for="1" value="O_Accepted" />
+          <attvalue for="2" value="15.8" />
+          <attvalue for="3" value="green" />
+        </attvalues>
+      </edge>
+      <edge source="A_Validating - W_Call incomplete files LONG - A_Validating" target="W_Call incomplete files LONG - A_Validating - W_Call incomplete files SHORT" id="222" label="15.8">
+        <attvalues>
+          <attvalue for="0" value="false" />
+          <attvalue for="1" value="W_Call incomplete files SHORT" />
+          <attvalue for="2" value="15.8" />
+          <attvalue for="3" value="green" />
+        </attvalues>
+      </edge>
+      <edge source="W_Call after offers LONG - O_Create Offer 1 - O_Sent (online only)" target="O_Create Offer 1 - O_Sent (online only) - TIMEOUT" id="223" label="-24.2">
+        <attvalues>
+          <attvalue for="0" value="false" />
+          <attvalue for="1" value="TIMEOUT" />
+          <attvalue for="2" value="-24.2" />
+          <attvalue for="3" value="red" />
+        </attvalues>
+      </edge>
+      <edge source="O_Create Offer 1 - O_Sent (online only) - TIMEOUT" target="O_Sent (online only) - TIMEOUT - negative" id="224" label="-24.2">
+        <attvalues>
+          <attvalue for="0" value="true" />
+          <attvalue for="1" value="negative" />
+          <attvalue for="2" value="-24.2" />
+          <attvalue for="3" value="red" />
+        </attvalues>
+      </edge>
+      <edge source="W_Call after offers SHORT - O_Create Offer 1 - O_Sent (online only)" target="O_Create Offer 1 - O_Sent (online only) - TIMEOUT" id="225" label="-24.2">
+        <attvalues>
+          <attvalue for="0" value="false" />
+          <attvalue for="1" value="TIMEOUT" />
+          <attvalue for="2" value="-24.2" />
+          <attvalue for="3" value="red" />
+        </attvalues>
+      </edge>
+      <edge source="W_Call after offers SHORT - O_Create Offer 1 - O_Sent (online only)" target="O_Create Offer 1 - O_Sent (online only) - A_Validating" id="226" label="15.8">
+        <attvalues>
+          <attvalue for="0" value="true" />
+          <attvalue for="1" value="A_Validating" />
+          <attvalue for="2" value="15.8" />
+          <attvalue for="3" value="green" />
+        </attvalues>
+      </edge>
+      <edge source="O_Create Offer 1 - O_Cancelled - O_Cancelled" target="O_Cancelled - O_Cancelled - O_Create Offer 2" id="227" label="-24.2">
+        <attvalues>
+          <attvalue for="0" value="true" />
+          <attvalue for="1" value="O_Create Offer 2" />
+          <attvalue for="2" value="-24.2" />
+          <attvalue for="3" value="red" />
+        </attvalues>
+      </edge>
+      <edge source="O_Cancelled - O_Cancelled - O_Create Offer 2" target="O_Cancelled - O_Create Offer 2 - O_Create Offer 3" id="228" label="-24.2">
+        <attvalues>
+          <attvalue for="0" value="true" />
+          <attvalue for="1" value="O_Create Offer 3" />
+          <attvalue for="2" value="-24.2" />
+          <attvalue for="3" value="red" />
+        </attvalues>
+      </edge>
+      <edge source="O_Cancelled - O_Create Offer 2 - O_Create Offer 3" target="O_Create Offer 2 - O_Create Offer 3 - O_Sent (mail and online)" id="229" label="-24.2">
+        <attvalues>
+          <attvalue for="0" value="true" />
+          <attvalue for="1" value="O_Sent (mail and online)" />
+          <attvalue for="2" value="-24.2" />
+          <attvalue for="3" value="red" />
+        </attvalues>
+      </edge>
+      <edge source="O_Create Offer 1 - O_Sent (online only) - A_Validating" target="O_Sent (online only) - A_Validating - O_Returned" id="230" label="15.8">
+        <attvalues>
+          <attvalue for="0" value="true" />
+          <attvalue for="1" value="O_Returned" />
+          <attvalue for="2" value="15.8" />
+          <attvalue for="3" value="green" />
+        </attvalues>
+      </edge>
+      <edge source="O_Sent (online only) - A_Validating - O_Returned" target="A_Validating - O_Returned - O_Accepted" id="231" label="15.8">
+        <attvalues>
+          <attvalue for="0" value="true" />
+          <attvalue for="1" value="O_Accepted" />
+          <attvalue for="2" value="15.8" />
+          <attvalue for="3" value="green" />
+        </attvalues>
+      </edge>
+      <edge source="O_Sent (mail and online) - O_Create Offer 1 - O_Sent (online only)" target="O_Create Offer 1 - O_Sent (online only) - A_Validating" id="232" label="15.8">
+        <attvalues>
+          <attvalue for="0" value="true" />
+          <attvalue for="1" value="A_Validating" />
+          <attvalue for="2" value="15.8" />
+          <attvalue for="3" value="green" />
+        </attvalues>
+      </edge>
+      <edge source="O_Create Offer 1 - O_Sent (mail and online) - W_Call after offers LONG" target="O_Sent (mail and online) - W_Call after offers LONG - TIMEOUT" id="233" label="-24.2">
+        <attvalues>
+          <attvalue for="0" value="false" />
+          <attvalue for="1" value="TIMEOUT" />
+          <attvalue for="2" value="-24.2" />
+          <attvalue for="3" value="red" />
+        </attvalues>
+      </edge>
+      <edge source="W_Call after offers SHORT - O_Cancelled - O_Create Offer 1" target="O_Cancelled - O_Create Offer 1 - O_Sent (mail and online)" id="234" label="-24.2">
+        <attvalues>
+          <attvalue for="0" value="true" />
+          <attvalue for="1" value="O_Sent (mail and online)" />
+          <attvalue for="2" value="-24.2" />
+          <attvalue for="3" value="red" />
+        </attvalues>
+      </edge>
+      <edge source="O_Sent (mail and online) - W_Call after offers LONG - O_Cancelled" target="W_Call after offers LONG - O_Cancelled - O_Create Offer 1" id="235" label="-24.2">
+        <attvalues>
+          <attvalue for="0" value="true" />
+          <attvalue for="1" value="O_Create Offer 1" />
+          <attvalue for="2" value="-24.2" />
+          <attvalue for="3" value="red" />
+        </attvalues>
+      </edge>
+      <edge source="O_Sent (mail and online) - W_Call after offers LONG - O_Cancelled" target="W_Call after offers LONG - O_Cancelled - O_Cancelled" id="236" label="-24.2">
+        <attvalues>
+          <attvalue for="0" value="false" />
+          <attvalue for="1" value="O_Cancelled" />
+          <attvalue for="2" value="-24.2" />
+          <attvalue for="3" value="red" />
+        </attvalues>
+      </edge>
+      <edge source="W_Call after offers LONG - O_Cancelled - O_Create Offer 1" target="O_Cancelled - O_Create Offer 1 - O_Sent (mail and online)" id="237" label="-24.2">
+        <attvalues>
+          <attvalue for="0" value="true" />
+          <attvalue for="1" value="O_Sent (mail and online)" />
+          <attvalue for="2" value="-24.2" />
+          <attvalue for="3" value="red" />
+        </attvalues>
+      </edge>
+      <edge source="W_Call after offers SHORT - O_Cancelled - TIMEOUT" target="O_Cancelled - TIMEOUT - negative" id="238" label="-24.2">
+        <attvalues>
+          <attvalue for="0" value="true" />
+          <attvalue for="1" value="negative" />
+          <attvalue for="2" value="-24.2" />
+          <attvalue for="3" value="red" />
+        </attvalues>
+      </edge>
+      <edge source="W_Call after offers SHORT - O_Cancelled - O_Cancelled" target="O_Cancelled - O_Cancelled - A_Cancelled CUSTOMER" id="239" label="-24.2">
+        <attvalues>
+          <attvalue for="0" value="false" />
+          <attvalue for="1" value="A_Cancelled CUSTOMER" />
+          <attvalue for="2" value="-24.2" />
+          <attvalue for="3" value="red" />
+        </attvalues>
+      </edge>
+      <edge source="O_Cancelled - O_Cancelled - A_Cancelled CUSTOMER" target="O_Cancelled - A_Cancelled CUSTOMER - negative" id="240" label="-24.2">
+        <attvalues>
+          <attvalue for="0" value="true" />
+          <attvalue for="1" value="negative" />
+          <attvalue for="2" value="-24.2" />
+          <attvalue for="3" value="red" />
+        </attvalues>
+      </edge>
+      <edge source="W_Call after offers LONG - O_Cancelled - O_Cancelled" target="O_Cancelled - O_Cancelled - A_Cancelled CUSTOMER" id="241" label="-24.2">
+        <attvalues>
+          <attvalue for="0" value="false" />
+          <attvalue for="1" value="A_Cancelled CUSTOMER" />
+          <attvalue for="2" value="-24.2" />
+          <attvalue for="3" value="red" />
+        </attvalues>
+      </edge>
+      <edge source="O_Create Offer 0 - O_Sent (online only) - A_Validating" target="O_Sent (online only) - A_Validating - O_Returned" id="242" label="15.8">
+        <attvalues>
+          <attvalue for="0" value="true" />
+          <attvalue for="1" value="O_Returned" />
+          <attvalue for="2" value="15.8" />
+          <attvalue for="3" value="green" />
+        </attvalues>
+      </edge>
+      <edge source="A_Validating - O_Returned - W_Call incomplete files SUPER LONG" target="O_Returned - W_Call incomplete files SUPER LONG - A_Validating" id="243" label="15.8">
+        <attvalues>
+          <attvalue for="0" value="true" />
+          <attvalue for="1" value="A_Validating" />
+          <attvalue for="2" value="15.8" />
+          <attvalue for="3" value="green" />
+        </attvalues>
+      </edge>
+      <edge source="O_Returned - W_Call incomplete files SUPER LONG - A_Validating" target="W_Call incomplete files SUPER LONG - A_Validating - O_Accepted" id="244" label="15.8">
+        <attvalues>
+          <attvalue for="0" value="true" />
+          <attvalue for="1" value="O_Accepted" />
+          <attvalue for="2" value="15.8" />
+          <attvalue for="3" value="green" />
+        </attvalues>
+      </edge>
+      <edge source="W_Call incomplete files SUPER LONG - A_Validating - O_Accepted" target="A_Validating - O_Accepted - A_Pending" id="245" label="15.8">
+        <attvalues>
+          <attvalue for="0" value="true" />
+          <attvalue for="1" value="A_Pending" />
+          <attvalue for="2" value="15.8" />
+          <attvalue for="3" value="green" />
+        </attvalues>
+      </edge>
+    </edges>
+  </graph>
+</gexf>
