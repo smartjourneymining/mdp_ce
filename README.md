@@ -2,6 +2,8 @@
 
 This repository contains all files to reproduce the results reported in the paper `Counterfactual Strategies for Markov Decision Processes' submitted to IJCAI 2025.
 
+This repository was moved [here](https://github.com/explainableMDPs/mdp_ce).
+
 ## Artifact Structure
 
 ```
